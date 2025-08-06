@@ -1,0 +1,229 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  width: 250px;
+  height: 100vh;
+  background-color: $dark-color;
+  color: $text-light;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .ltr & {
+    left: 0;
+    right: auto;
+  }
+  
+  .rtl & {
+    right: 0;
+    left: auto;
+  }
+
+  @include respond-to(sm-down) {
+    .ltr & {
+      transform: translateX(-100%);
+      
+      &.open {
+        transform: translateX(0);
+      }
+    }
+    
+    .rtl & {
+      transform: translateX(100%);
+      
+      &.open {
+        transform: translateX(0);
+      }
+    }
+  }
+
+  // Sidebar Container
+  &-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  // Sidebar Header
+  &-header {
+    padding: $spacing-medium;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+
+      .logo {
+        height: 32px;
+        width: auto;
+      }
+
+      .logo-text {
+        margin-left: $spacing-small;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: white;
+      }
+    }
+  }
+
+  // Sidebar Navigation
+  &-nav {
+    flex: 1;
+    padding: $spacing-medium 0;
+    overflow-y: auto;
+
+    .nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-item {
+      margin-bottom: 2px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: $spacing-small $spacing-medium;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      border-radius: 4px;
+      margin: 0 $spacing-small;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+
+      &.active {
+        background-color: $primary-color;
+        color: white;
+      }
+
+      .nav-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-right: $spacing-small;
+        font-size: 1.25rem;
+      }
+
+      .nav-text {
+        font-weight: 500;
+        font-size: 0.875rem;
+      }
+    }
+
+    // Admin Section
+    .admin-section {
+      margin-top: $spacing-large;
+      padding-top: $spacing-medium;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+      .section-title {
+        padding: 0 $spacing-medium;
+        margin-bottom: $spacing-small;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+    }
+  }
+
+  // Sidebar Footer
+  &-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: $spacing-small;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.2);
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: $spacing-small;
+
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+      }
+
+      .user-info {
+        width: max-content;
+        .user-name {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: white;
+          margin: 0;
+        }
+
+        .user-role {
+          font-size: 0.75rem;
+          color: rgba(255, 255, 255, 0.6);
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+// Main Content Adjustments
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: margin 0.3s ease;
+  
+  .ltr & {
+    margin-left: 250px;
+    margin-right: 0;
+    
+    @include respond-to(sm-down) {
+      margin-left: 0;
+    }
+  }
+  
+  .rtl & {
+    margin-right: 250px;
+    margin-left: 0;
+    
+    @include respond-to(sm-down) {
+      margin-right: 0;
+    }
+  }
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: $background-color;
+}

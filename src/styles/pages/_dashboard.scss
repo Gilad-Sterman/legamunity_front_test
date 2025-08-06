@@ -1,0 +1,257 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.dashboard-page {
+  padding: $spacing-medium;
+  background-color: $background-color;
+  
+  .dashboard-header {
+    margin-bottom: $spacing-large;
+    
+    h1 {
+      @include heading-2;
+      color: $text-dark;
+      margin-bottom: 0;
+    }
+  }
+  
+  .dashboard-content {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-large;
+    
+    // Stats Cards
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: $spacing-medium;
+      
+      @include respond-to(sm) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      @include respond-to(md) {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      @include respond-to(lg) {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      
+      .stat-card {
+        background-color: white;
+        border-radius: $border-radius;
+        padding: $spacing-medium;
+        box-shadow: $box-shadow-sm;
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+        
+        &:hover {
+          transform: translateY(-3px);
+          box-shadow: $box-shadow-md;
+        }
+        
+        .stat-icon {
+          position: absolute;
+          top: $spacing-small;
+          right: $spacing-small;
+          font-size: 1.5rem;
+          opacity: 0.8;
+          
+          &.primary { color: $primary-color; }
+          &.success { color: $success-color; }
+          &.warning { color: $warning-color; }
+          &.info { color: $info-color; }
+          &.secondary { color: $secondary-color; }
+        }
+        
+        // RTL support for stat cards
+        &.rtl {
+          .stat-icon {
+            right: auto;
+            left: $spacing-small;
+          }
+          
+          .stat-title,
+          .stat-value {
+            text-align: right;
+          }
+        }
+        
+        .stat-title {
+          font-size: 0.875rem;
+          color: $text-muted;
+          margin-bottom: $spacing-small;
+          font-weight: 500;
+        }
+        
+        .stat-value {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: $text-dark;
+        }
+      }
+    }
+    
+    // Recent Sessions
+    .recent-activity {
+      margin-bottom: $spacing-medium;
+      
+      .card {
+        background-color: white;
+        border-radius: $border-radius;
+        box-shadow: $box-shadow-sm;
+        overflow: hidden;
+        
+        .card-header {
+          padding: $spacing-medium;
+          border-bottom: 1px solid $border-color;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          
+          .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: $text-dark;
+            margin: 0;
+          }
+        }
+        
+        .card-body {
+          padding: 0;
+          
+          .table-responsive {
+            overflow-x: auto;
+            
+            .table {
+              width: 100%;
+              border-collapse: collapse;
+              
+              th, td {
+                padding: $spacing-small $spacing-medium;
+                text-align: left;
+                border-bottom: 1px solid $border-color;
+              }
+              
+              th {
+                background-color: $background-light;
+                font-weight: 600;
+                color: $text-muted;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              }
+              
+              .user-info {
+                display: flex;
+                align-items: center;
+                
+                .user-avatar {
+                  width: 36px;
+                  height: 36px;
+                  border-radius: 50%;
+                  background-color: $primary-light;
+                  color: $primary-color;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-weight: 600;
+                  margin-right: $spacing-small;
+                }
+                
+                .user-details {
+                  .user-name {
+                    font-weight: 500;
+                    color: $text-dark;
+                    margin-bottom: 2px;
+                  }
+                  
+                  .user-phone {
+                    font-size: 0.75rem;
+                    color: $text-muted;
+                  }
+                }
+              }
+              
+              .status-badge {
+                display: inline-block;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                font-weight: 500;
+                
+                &.completed {
+                  background-color: $success-light;
+                  color: $success-color;
+                }
+                
+                &.in_progress {
+                  background-color: $primary-light;
+                  color: $primary-color;
+                }
+                
+                &.scheduled {
+                  background-color: $warning-light;
+                  color: $warning-color;
+                }
+              }
+              
+              .btn {
+                margin-right: $spacing-small;
+                
+                &:last-child {
+                  margin-right: 0;
+                }
+              }
+              
+              .empty-state {
+                padding: $spacing-large;
+                text-align: center;
+                color: $text-muted;
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // Upcoming Interviews
+    .upcoming-interviews {
+      .card {
+        background-color: white;
+        border-radius: $border-radius;
+        box-shadow: $box-shadow-sm;
+        overflow: hidden;
+        
+        .card-header {
+          padding: $spacing-medium;
+          border-bottom: 1px solid $border-color;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          
+          .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: $text-dark;
+            margin: 0;
+          }
+        }
+        
+        .card-body {
+          padding: $spacing-medium;
+          
+          .empty-state {
+            padding: $spacing-large;
+            text-align: center;
+            color: $text-muted;
+            background-color: $background-light;
+            border-radius: $border-radius;
+          }
+        }
+      }
+    }
+  }
+}

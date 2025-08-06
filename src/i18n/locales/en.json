@@ -1,0 +1,620 @@
+{
+  "common": {
+    "login": "Login",
+    "logout": "Logout",
+    "notifications": "Notifications",
+    "search": "Search...",
+    "language": "Language",
+    "guest": "Guest",
+    "admin": "Admin",
+    "user": "User",
+    "notLoggedIn": "Not logged in",
+    "accessDenied": "Access denied. Admin privileges required.",
+    "loading": "Loading...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of",
+    "clearFilters": "Clear Filters",
+    "add": "Add",
+    "cancel": "Cancel"
+  },
+  "navbar": {
+    "brand": "Legamunity"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "sessions": "Life Stories",
+    "interviews": "Interviews",
+    "admin": "Admin",
+    "adminDashboard": "Admin Dashboard",
+    "scheduleInterview": "Schedule Interview",
+    "drafts": "Drafts",
+    "conflicts": "Conflicts",
+    "analytics": "Analytics",
+    "projectProgress": "Project Progress"
+  },
+  "admin": {
+    "title": "Admin Dashboard: User Management",
+    "dashboardTitle": "Admin Dashboard",
+    "backToDashboard": "Back to Dashboard",
+    "searchPlaceholder": "Search client...",
+    "loading": "Loading users...",
+    "error": "Error",
+    "noUsers": "No users found.",
+    "filters": "Filters",
+    "kpi": {
+      "totalSessions": "Total Sessions",
+      "activeSessions": "Active Sessions",
+      "cqsAverage": "Average CQS",
+      "pendingReview": "Pending Review"
+    },
+    "sessions": {
+      "title": "Life Stories Management",
+      "createNew": "Create New Life Story",
+      "createSession": "Create Life Story",
+      "creating": "Creating...",
+      "search": "Search life stories...",
+      "noSessions": "No life stories found",
+      "noSessionsDesc": "Create your first life story to get started.",
+      "collaborators": "Collaborators",
+      "interviews": "Interviews",
+      "metadata": "Life Story Info",
+      "totalDuration": "Total Duration",
+      "completed": "Completed",
+      "cqsScore": "CQS Score",
+      "startInterview": "Start Interview",
+      "uploadFile": "Upload File",
+      "viewDetails": "View Details",
+      "viewDrafts": "View Drafts",
+      "showing": "Showing",
+      "words": "Words",
+      "of": "of",
+      "sessions": "life stories",
+      "createModalPlaceholder": "Create life story form will be implemented here.",
+      "active": "Active Life Stories",
+      "viewAll": "View All",
+      "noActiveSessions": "No active life stories.",
+      "clientInfo": "Client Information",
+      "language": "Language",
+      "specialRequirements": "Special Requirements",
+      "focusAreas": "Focus Areas",
+      "tonePreference": "Tone Preference",
+      "filters": {
+        "allStages": "All Stages",
+        "allStatuses": "All Statuses",
+        "allPriorities": "All Priorities"
+      },
+      "fileUpload": {
+        "title": "Upload Life Story File",
+        "dragDrop": "Drag and drop your file here, or",
+        "browse": "browse",
+        "supportedFormats": "Supported formats: MP3, WAV, MP4, TXT, DOCX (max 100MB)",
+        "uploading": "Uploading...",
+        "processing": "Processing file...",
+        "fileUploaded": "File uploaded",
+        "draftGenerated": "Draft generated",
+        "viewFile": "View uploaded file",
+        "viewDraft": "View AI draft",
+        "fileDetails": "File Details",
+        "fileInfo": "File Information",
+        "fileName": "File Name",
+        "fileSize": "File Size",
+        "fileType": "File Type",
+        "uploadedAt": "Uploaded At",
+        "transcription": "Transcription",
+        "draftDetails": "Draft Details",
+        "draftInfo": "Draft Information",
+        "draftTitle": "Title",
+        "draftStatus": "Status",
+        "draftVersion": "Version",
+        "createdAt": "Created At",
+        "draftContent": "Content",
+        "summary": "Summary",
+        "sections": "Sections",
+        "keyThemes": "Key Themes",
+        "success": "File uploaded successfully!",
+        "error": "Upload failed. Please try again.",
+        "cancel": "Cancel",
+        "close": "Close",
+        "whatHappensNext": "What happens next?",
+        "step1": "Your file will be uploaded to our secure servers",
+        "step2": "AI will transcribe and analyze the content",
+        "step3": "A draft will be generated and saved",
+        "step4": "Interview status will be marked as completed",
+        "invalidFileType": "Invalid file type. Please upload audio or text files only.",
+        "fileTooLarge": "File is too large. Maximum size is 100MB.",
+        "uploadProgress": "Uploading... {{progress}}%"
+      },
+      "stages": {
+        "scheduled": "Scheduled",
+        "inProgress": "In Progress",
+        "pendingReview": "Pending Review",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "active": "Active",
+        "inProgress": "In Progress",
+        "pendingReview": "Pending Review",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "clientStory": "{{clientName}}'s Life Story",
+      "form": {
+        "userInfo": "User Information",
+        "selectUser": "Select User",
+        "chooseUser": "Choose a user...",
+        "sessionDetails": "Life Story Details",
+        "stage": "Stage",
+        "priority": "Priority",
+        "notes": "Notes",
+        "notesPlaceholder": "Add any additional notes about this life story...",
+        "collaborators": "Collaborators",
+        "addCollaborator": "Add Collaborator",
+        "collaboratorName": "Collaborator name",
+        "collaboratorEmail": "Collaborator email",
+        "interviews": "Interviews",
+        "addInterview": "Add Interview",
+        "duration": "Duration (min)",
+        "interviewerName": "Interviewer name",
+        "interviewerEmail": "Interviewer email",
+        "interview1": "Interview 1",
+        "interview2": "Interview 2",
+        "interview3": "Interview 3",
+        "interview4": "Interview 4",
+        "interview5": "Interview 5",
+        "interviewNotes": "Interview notes (optional)"
+      },
+      "validation": {
+        "userRequired": "Please select a user",
+        "interviewRequired": "At least one interview is required"
+      },
+      "priority": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "roles": {
+        "collaborator": "Collaborator",
+        "interviewer": "Interviewer",
+        "observer": "Observer"
+      },
+      "interviewTypes": {
+        "standard": "Standard",
+        "technical": "Technical",
+        "behavioral": "Behavioral",
+        "final": "Final",
+        "friend": "Friend"
+      },
+      "locations": {
+        "online": "Online",
+        "office": "Office",
+        "phone": "Phone",
+        "home": "Client Home"
+      },
+      "friendInterview": "Friend Interview",
+      "interviewNamePlaceholder": "Interview name",
+      "addInterview": "Add Interview",
+      "viewSchedule": "View Schedule",
+      "setSchedule": "Set Schedule",
+      "editSchedule": "Edit Schedule",
+      "updateSchedule": "Update Schedule",
+      "currentSchedule": "Current Schedule",
+      "dayOfWeek": "Day of Week",
+      "selectDay": "Select day",
+      "startTime": "Start Time",
+      "duration": "Duration (minutes)",
+      "minutes": "minutes",
+      "location": "Location",
+      "scheduleNotes": "Notes",
+      "scheduleNotesPlaceholder": "Additional scheduling notes...",
+      "scheduleValidationError": "Please fill in all required fields",
+      "scheduleUpdated": "Schedule updated successfully",
+      "scheduleUpdateError": "Failed to update schedule",
+      "interviewScheduling": "Interview Scheduling",
+      "days": {
+        "sunday": "Sunday",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday"
+      },
+      "interviewStatus": {
+        "pending": "Pending",
+        "in_progress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "statuses": {
+        "scheduled": "Scheduled",
+        "active": "Active",
+        "pendingReview": "Pending Review",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "priorities": {
+        "standard": "Standard",
+        "urgent": "Urgent",
+        "memorial": "Memorial"
+      }
+    },
+    "table": {
+      "email": "Email",
+      "displayName": "Display Name",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "actions": {
+      "enable": "Enable",
+      "disable": "Disable",
+      "delete": "Delete",
+      "edit": "Edit display name",
+      "save": "Save",
+      "cancel": "Cancel",
+      "view": "View",
+      "reviewDetailed": "Review"
+    },
+    "confirmations": {
+      "deleteUser": "Are you sure you want to permanently delete this user?"
+    },
+    "placeholders": {
+      "enterDisplayName": "Enter display name",
+      "noDisplayName": "N/A"
+    }
+  },
+  "scheduling": {
+    "title": "Schedule Interview",
+    "form": {
+      "sessionSelection": "Session Type",
+      "existingSession": "Add to Existing Session",
+      "newSession": "Create New Session",
+      "selectSession": "Select Session",
+      "selectSessionPlaceholder": "Choose a session...",
+      "selectUser": "Select User",
+      "selectUserPlaceholder": "Choose a user...",
+      "interviewType": "Interview Type",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration",
+      "location": "Location",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes for the interview...",
+      "friendInterview": "Friend Interview"
+    },
+    "interviewTypes": {
+      "standard": "Standard Interview",
+      "technical": "Technical Interview",
+      "behavioral": "Behavioral Interview",
+      "final": "Final Interview"
+    },
+    "locations": {
+      "online": "Online",
+      "office": "Office",
+      "phone": "Phone Call"
+    },
+    "durations": {
+      "30": "30 minutes",
+      "45": "45 minutes",
+      "60": "1 hour",
+      "90": "1.5 hours",
+      "120": "2 hours"
+    },
+    "actions": {
+      "schedule": "Schedule Interview",
+      "scheduling": "Scheduling...",
+      "cancel": "Cancel",
+      "reset": "Reset Form"
+    },
+    "validation": {
+      "sessionRequired": "Please select a session",
+      "userRequired": "Please select a user",
+      "dateRequired": "Please select a date",
+      "timeRequired": "Please select a time",
+      "pastDate": "Date cannot be in the past"
+    },
+    "messages": {
+      "success": "Interview scheduled successfully!",
+      "defaultEmail": "admin@legamunity.com",
+      "defaultAvailability": "Available 24 hours for interviews"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "he": "Hebrew"
+  },
+  "login": {
+    "title": "Sign in to your account",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "Email address",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "registerNow": "Register now",
+    "noAccount": "Don't have an account?"
+  },
+  "register": {
+    "title": "Register to your account",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "Email address",
+    "nameLabel": "Name",
+    "namePlaceholder": "Name",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm Password",
+    "register": "Register",
+    "registering": "Registering...",
+    "loginNow": "Sign in now",
+    "haveAccount": "Have an account?"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "activeSessionsCard": "Active Sessions",
+    "completedSessionsCard": "Completed Sessions",
+    "cqsScoreCard": "CQS Score",
+    "conflictResolutionCard": "Conflict Resolution",
+    "friendApprovalCard": "Friend Approval",
+    "recentSessions": "Recent Sessions",
+    "viewAll": "View All",
+    "tableUser": "User",
+    "tableStatus": "Status",
+    "tableDate": "Date",
+    "tableCQS": "CQS",
+    "tableActions": "Actions",
+    "noSessionsFound": "No sessions found",
+    "view": "View",
+    "export": "Export",
+    "upcomingInterviews": "Upcoming Interviews",
+    "scheduleNew": "Schedule New",
+    "noUpcomingInterviews": "No upcoming interviews scheduled"
+  },
+  "drafts": {
+    "title": "Drafts Management",
+    "subtitle": "Review and approve interview drafts across all sessions",
+    "searchPlaceholder": "Search drafts...",
+    "noDrafts": "No drafts found",
+    "noDraftsDesc": "Drafts will appear here after interviews are completed.",
+    "stages": {
+      "all": "All Stages",
+      "first_draft": "First Draft",
+      "under_review": "Under Review",
+      "pending_approval": "Pending Approval",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "versions": "Versions",
+      "history": "History"
+    },
+    "progress": {
+      "sortBy": "Sort by",
+      "sortOrder": "Sort Order",
+      "ascending": "Ascending",
+      "descending": "Descending"
+    },
+    "sortOptions": {
+      "updatedAt": "Last Updated",
+      "createdAt": "Created Date",
+      "progress": "Progress",
+      "stage": "Stage",
+      "title": "Title"
+    },
+    "card": {
+      "session": "Session",
+      "user": "User",
+      "interviews": "Interviews",
+      "progress": "Progress",
+      "lastUpdated": "Last Updated",
+      "version": "Version",
+      "reviewedBy": "Reviewed by",
+      "approvedBy": "Approved by"
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "approve": "Approve",
+      "reject": "Reject",
+      "export": "Export",
+      "exportPdf": "Export as PDF",
+      "exportJson": "Export as JSON",
+      "viewHistory": "View History",
+      "bulkApprove": "Bulk Approve",
+      "bulkReject": "Bulk Reject",
+      "reviewDetailed": "Review",
+      "review": "Send to Review",
+      "compare": "Compare",
+      "transitionStage": "Change Stage"
+    },
+    "sections": {
+      "professional": "Professional Summary",
+      "technical": "Technical Skills",
+      "behavioral": "Behavioral Assessment",
+      "interviews": "Interview Details"
+    },
+    "content": {
+      "overallRating": "Overall Rating",
+      "recommendation": "Recommendation",
+      "summary": "Summary",
+      "strengths": "Strengths",
+      "improvements": "Areas for Improvement",
+      "skills": "Technical Skills",
+      "achievements": "Key Achievements",
+      "completed": "interviews completed",
+      "progressBreakdown": "Progress Breakdown",
+      "averageRating": "Average Rating",
+      "totalDuration": "Total Duration",
+      "interviewTypes": "Interview Types",
+      "aggregatedSkills": "Aggregated Skills",
+      "individualInterviews": "Individual Interviews",
+      "keyPoints": "Key Points",
+      "version": "Version",
+      "interviews": "Interviews"
+    },
+    "recommendations": {
+      "hire": "Hire",
+      "maybe": "Maybe",
+      "reject": "Reject",
+      "undefined": "Not Specified"
+    },
+    "review": {
+      "title": "Draft Review",
+      "content": "Content",
+      "sections": {
+        "personal": "Personal Information",
+        "professional": "Professional Background",
+        "technical": "Technical Skills",
+        "behavioral": "Behavioral Assessment",
+        "interviews": "Interview Details",
+        "recommendations": "Recommendations"
+      },
+      "history": "Version History",
+      "comments": "Comments",
+      "addComment": "Add Comment",
+      "saveChanges": "Save Changes",
+      "discardChanges": "Discard Changes",
+      "rejectionReasonRequired": "Rejection reason must be at least 10 characters",
+      "versions": {
+        "title": "Version History",
+        "subtitle": "Compare different versions of this draft",
+        "current": "Current",
+        "changes": "Changes",
+        "changeTypes": {
+          "added": "Added",
+          "modified": "Modified",
+          "removed": "Removed"
+        }
+      }
+    },
+    "history": {
+      "title": "Draft History",
+      "noHistory": "No history available",
+      "viewChanges": "View Changes",
+      "filters": {
+        "action": "Filter by Action",
+        "dateRange": "Date Range",
+        "today": "Today",
+        "week": "This Week",
+        "month": "This Month"
+      },
+      "actions": {
+        "created": "Created",
+        "updated": "Updated",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "stage_changed": "Stage Changed"
+      }
+    },
+    "approval": {
+      "approveTitle": "Approve Draft",
+      "rejectTitle": "Reject Draft",
+      "approveConfirm": "Are you sure you want to approve this draft?",
+      "rejectConfirm": "Are you sure you want to reject this draft?",
+      "rejectionReason": "Rejection Reason",
+      "rejectionReasonPlaceholder": "Please provide a reason for rejection...",
+      "approveButton": "Approve Draft",
+      "rejectButton": "Reject Draft"
+    },
+    "export": {
+      "title": "Export Draft",
+      "format": "Export Format",
+      "pdf": "PDF Document",
+      "json": "JSON Data",
+      "exporting": "Exporting...",
+      "success": "Draft exported successfully",
+      "error": "Failed to export draft"
+    },
+    "messages": {
+      "updateSuccess": "Draft updated successfully",
+      "updateError": "Failed to update draft",
+      "approveSuccess": "Draft approved successfully",
+      "approveError": "Failed to approve draft",
+      "rejectSuccess": "Draft rejected successfully",
+      "rejectError": "Failed to reject draft",
+      "loadError": "Failed to load drafts"
+    }
+  },
+  "projectProgress": {
+    "title": "Project Progress",
+    "subtitle": "Executive dashboard for project monitoring and client reporting",
+    "health": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "overview": {
+      "overallProgress": "Overall Progress"
+    },
+    "budget": {
+      "title": "Budget Status"
+    },
+    "timeline": {
+      "title": "Timeline",
+      "daysAhead": "days ahead",
+      "daysRemaining": "days remaining"
+    },
+    "satisfaction": {
+      "title": "Client Satisfaction",
+      "excellent": "Excellent rating"
+    },
+    "currentSprint": {
+      "title": "Current Sprint"
+    },
+    "velocity": {
+      "high": "High Velocity",
+      "medium": "Medium Velocity",
+      "low": "Low Velocity"
+    },
+    "daysRemaining": "days remaining",
+    "kpis": {
+      "title": "Key Performance Indicators",
+      "codeQuality": "Code Quality",
+      "testCoverage": "Test Coverage"
+    },
+    "criticalPath": {
+      "title": "Critical Path Items"
+    },
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "status": {
+      "in-progress": "In Progress",
+      "pending": "Pending",
+      "completed": "Completed"
+    },
+    "recentWins": {
+      "title": "Recent Achievements"
+    },
+    "risks": {
+      "title": "Risk Management"
+    },
+    "riskLevel": {
+      "high": "High Risk",
+      "medium": "Medium Risk",
+      "low": "Low Risk"
+    },
+    "mitigation": "Mitigation",
+    "team": {
+      "title": "Team Performance",
+      "velocity": "Sprint Velocity",
+      "storyPoints": "story points",
+      "utilization": "Team Utilization",
+      "satisfaction": "Team Satisfaction"
+    }
+  }
+}

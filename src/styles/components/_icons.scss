@@ -1,0 +1,285 @@
+// _icons.scss - Styling for Lucide icons and icon-based components
+
+// Icon spacing utilities
+.icon-mr {
+  margin-right: 0.5rem;
+}
+
+.icon-ml {
+  margin-left: 0.5rem;
+}
+
+// Icon sizing classes
+.icon-sm {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-md {
+  width: 24px;
+  height: 24px;
+}
+
+.icon-lg {
+  width: 32px;
+  height: 32px;
+}
+
+// Icon colors - using variables from _variables.scss
+.icon-primary {
+  color: var(--color-primary);
+}
+
+.icon-secondary {
+  color: var(--color-secondary);
+}
+
+.icon-success {
+  color: var(--color-success);
+}
+
+.icon-warning {
+  color: var(--color-warning);
+}
+
+.icon-danger {
+  color: var(--color-danger);
+}
+
+.icon-info {
+  color: var(--color-info);
+}
+
+// Status badge styling for IconBadge component
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  
+  .status-icon {
+    display: flex;
+    align-items: center;
+    margin-inline-end: 0.375rem;
+  }
+  
+  &.primary {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+  
+  &.secondary {
+    background-color: var(--color-secondary-light);
+    color: var(--color-secondary);
+  }
+  
+  &.success {
+    background-color: var(--color-success-light);
+    color: var(--color-success);
+  }
+  
+  &.warning {
+    background-color: var(--color-warning-light);
+    color: var(--color-warning);
+  }
+  
+  &.danger {
+    background-color: var(--color-danger-light);
+    color: var(--color-danger);
+  }
+  
+  &.info {
+    background-color: var(--color-info-light);
+    color: var(--color-info);
+  }
+}
+
+// Icon containers
+.icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  &.rounded {
+    border-radius: 50%;
+    padding: 0.5rem;
+  }
+  
+  &.bg-primary {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+  
+  &.bg-secondary {
+    background-color: var(--color-secondary-light);
+    color: var(--color-secondary);
+  }
+  
+  &.bg-success {
+    background-color: var(--color-success-light);
+    color: var(--color-success);
+  }
+  
+  &.bg-warning {
+    background-color: var(--color-warning-light);
+    color: var(--color-warning);
+  }
+  
+  &.bg-danger {
+    background-color: var(--color-danger-light);
+    color: var(--color-danger);
+  }
+  
+  &.bg-info {
+    background-color: var(--color-info-light);
+    color: var(--color-info);
+  }
+}
+
+// Navbar specific icon styling
+.header {
+  .search-container {
+    position: relative;
+    
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+    }
+    
+    .search-input {
+      padding-left: 2.5rem;
+    }
+  }
+  
+  .notification-icon {
+    position: relative;
+    cursor: pointer;
+    margin-right: 1rem;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 8px;
+      height: 8px;
+      background-color: var(--color-danger);
+      border-radius: 50%;
+      display: block;
+    }
+  }
+  
+  .user-profile {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+    
+    svg {
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+// Sidebar specific icon styling
+.sidebar {
+  .nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 0.75rem;
+    color: var(--color-text-muted);
+    
+    .nav-link:hover & {
+      color: var(--color-primary);
+    }
+    
+    .nav-link.active & {
+      color: var(--color-primary);
+    }
+  }
+  
+  // IconNav component styling
+  .icon-nav {
+    margin-bottom: 1.5rem;
+    
+    .section-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      padding: 0 1rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+// Dashboard stat card icon styling
+.stat-card {
+  background-color: var(--color-background-light);
+  border-radius: var(--border-radius);
+  padding: 1.25rem;
+  box-shadow: var(--box-shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-md);
+  }
+  
+  .stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    
+    &.primary {
+      background-color: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+    
+    &.secondary {
+      background-color: var(--color-secondary-light);
+      color: var(--color-secondary);
+    }
+    
+    &.success {
+      background-color: var(--color-success-light);
+      color: var(--color-success);
+    }
+    
+    &.warning {
+      background-color: var(--color-warning-light);
+      color: var(--color-warning);
+    }
+    
+    &.info {
+      background-color: var(--color-info-light);
+      color: var(--color-info);
+    }
+  }
+  
+  .stat-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-bottom: 0.25rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+  }
+}

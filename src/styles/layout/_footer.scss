@@ -1,0 +1,142 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.footer {
+  background-color: #f8f9fa;
+  padding: $spacing-large 0;
+  border-top: 1px solid #e9ecef;
+  
+  &-container {
+    display: flex;
+    flex-direction: column;
+    
+    @include respond-to(md) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+  
+  &-logo {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-medium;
+    
+    @include respond-to(md) {
+      margin-bottom: 0;
+    }
+    
+    img {
+      height: 24px;
+      margin-right: $spacing-small;
+    }
+    
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      color: $primary-color;
+    }
+  }
+  
+  &-nav {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: $spacing-medium;
+    
+    @include respond-to(md) {
+      margin-bottom: 0;
+    }
+    
+    .nav-item {
+      margin-right: $spacing-medium;
+      margin-bottom: $spacing-small;
+      
+      &:last-child {
+        margin-right: 0;
+      }
+      
+      a {
+        color: $text-color;
+        font-size: 0.875rem;
+        text-decoration: none;
+        
+        &:hover {
+          color: $primary-color;
+        }
+      }
+    }
+  }
+  
+  &-social {
+    display: flex;
+    
+    .social-item {
+      margin-right: $spacing-medium;
+      
+      &:last-child {
+        margin-right: 0;
+      }
+      
+      a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: $text-color;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background-color: $primary-color;
+          color: white;
+        }
+      }
+    }
+  }
+  
+  &-bottom {
+    margin-top: $spacing-large;
+    padding-top: $spacing-medium;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    @include respond-to(md) {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    
+    .copyright {
+      font-size: 0.75rem;
+      color: #6c757d;
+      margin-bottom: $spacing-small;
+      
+      @include respond-to(md) {
+        margin-bottom: 0;
+      }
+    }
+    
+    .footer-links {
+      display: flex;
+      
+      .footer-link {
+        margin-left: $spacing-medium;
+        font-size: 0.75rem;
+        color: #6c757d;
+        text-decoration: none;
+        
+        &:first-child {
+          margin-left: 0;
+        }
+        
+        &:hover {
+          color: $primary-color;
+        }
+      }
+    }
+  }
+}

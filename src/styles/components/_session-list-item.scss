@@ -1,0 +1,162 @@
+@import '../abstracts/variables';
+
+.session-list-item {
+  padding: $spacing-medium $spacing-large;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  border-bottom: 1px solid $border-color;
+
+  &:hover {
+    background-color: $background-dark;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-medium;
+  }
+
+  &__user-info {
+    flex: 0 0 30%;
+    min-width: 0;
+  }
+
+  &__user-name {
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: $text-dark;
+    margin-bottom: $spacing-xs;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__user-phone {
+    font-size: $font-size-sm;
+    color: $text-muted;
+  }
+
+  &__details {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-medium;
+  }
+
+  &__metrics {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    font-size: $font-size-sm;
+  }
+
+  &__priority {
+    display: inline-flex;
+    align-items: center;
+    padding: $spacing-xs $spacing-small;
+    border-radius: $border-radius;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    margin-bottom: $spacing-xs;
+
+    &--high {
+      background-color: $danger-light;
+      color: $danger-dark;
+    }
+
+    &--medium {
+      background-color: $warning-light;
+      color: $warning-dark;
+    }
+
+    &--standard {
+      background-color: $info-light;
+      color: $info-dark;
+    }
+  }
+
+  &__interviews {
+    display: flex;
+    align-items: center;
+    color: $text-dark;
+    margin: $spacing-xs 0;
+  }
+
+  &__duration {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    color: $text-muted;
+
+    &-icon {
+      color: $text-muted;
+    }
+  }
+
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    padding: $spacing-xs $spacing-small;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    min-width: 90px;
+    justify-content: center;
+
+    &--in-progress {
+      background-color: $info-light;
+      color: $info-dark;
+    }
+
+    &--pending-review {
+      background-color: $warning-light;
+      color: $warning-dark;
+    }
+
+    &--scheduled {
+      background-color: $secondary-light;
+      color: $secondary-dark;
+    }
+
+    &--completed {
+      background-color: $success-light;
+      color: $success-dark;
+    }
+
+    &--default {
+      background-color: $background-dark;
+      color: $text-color;
+    }
+  }
+
+  &__arrow {
+    height: $font-size-lg;
+    width: $font-size-lg;
+    color: $text-muted;
+    flex-shrink: 0;
+  }
+
+  &__progress-bar-container {
+    margin-top: $spacing-medium;
+  }
+
+  &__progress-bar {
+    width: 100%;
+    background-color: $border-color;
+    border-radius: 50rem;
+    height: $spacing-xs;
+
+    &-inner {
+      background-color: $primary-color;
+      height: 100%;
+      border-radius: 50rem;
+      transition: width 0.3s ease-in-out;
+    }
+  }
+}

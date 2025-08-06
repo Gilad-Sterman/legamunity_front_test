@@ -1,0 +1,800 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.project-progress {
+    &__overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: $spacing-large;
+        margin-bottom: $spacing-xxlarge;
+    }
+
+    &__section {
+        margin-bottom: $spacing-xxlarge;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: $spacing-large;
+    }
+}
+
+// Enhanced header styling
+
+.header-main {
+    flex: 1;
+}
+
+.admin-page__subtitle {
+    font-size: $font-size-base;
+    color: $text-muted;
+    margin-top: $spacing-small;
+    font-weight: 400;
+}
+
+.project-health {
+    flex-shrink: 0;
+}
+
+.health-indicator {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    padding: $spacing-small $spacing-medium;
+    border-radius: $border-radius-lg;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &--excellent {
+        background: $success-light;
+        color: $success-color;
+        border: 1px solid rgba($success-color, 0.3);
+    }
+
+    &--good {
+        background: $primary-light;
+        color: $primary-color;
+        border: 1px solid rgba($primary-color, 0.3);
+    }
+
+    &--warning {
+        background: $warning-light;
+        color: $warning-color;
+        border: 1px solid rgba($warning-color, 0.3);
+    }
+
+    &--critical {
+        background: $danger-light;
+        color: $danger-color;
+        border: 1px solid rgba($danger-color, 0.3);
+    }
+}
+
+.progress-card {
+    background: $background-light;
+    border-radius: $border-radius-lg;
+    padding: $spacing-large;
+    box-shadow: $box-shadow-sm;
+    border: 1px solid $border-color;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+        box-shadow: $box-shadow-md;
+        transform: translateY(-2px);
+    }
+
+    &--featured {
+        border-left: 4px solid $primary-color;
+        background: linear-gradient(135deg, $background-light 0%, rgba($primary-color, 0.02) 100%);
+    }
+
+    &__icon {
+        color: $primary-color;
+        margin-bottom: $spacing-medium;
+    }
+
+    &__content {
+        h3 {
+            font-size: $font-size-base;
+            font-weight: 600;
+            color: $text-dark;
+            margin-bottom: $spacing-medium;
+        }
+
+        p {
+            color: $text-muted;
+            font-size: $font-size-sm;
+            line-height: 1.5;
+        }
+    }
+}
+
+// Enhanced progress display elements
+.progress-display {
+    display: flex;
+    align-items: center;
+    gap: $spacing-medium;
+    margin-bottom: $spacing-small;
+}
+
+.budget-display {
+    display: flex;
+    align-items: baseline;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-small;
+
+    .budget-amount {
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: $text-dark;
+    }
+
+    .budget-total {
+        font-size: $font-size-base;
+        color: $text-muted;
+    }
+}
+
+.timeline-display {
+    margin-bottom: $spacing-small;
+}
+
+.timeline-status {
+    display: inline-flex;
+    align-items: center;
+    padding: $spacing-xs $spacing-small;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+    font-weight: 600;
+
+    &--ahead {
+        background: $success-light;
+        color: $success-color;
+    }
+
+    &--on-track {
+        background: $primary-light;
+        color: $primary-color;
+    }
+
+    &--delayed {
+        background: $warning-light;
+        color: $warning-color;
+    }
+}
+
+.satisfaction-display {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-small;
+
+    .satisfaction-score {
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: $text-dark;
+    }
+
+    .satisfaction-max {
+        font-size: $font-size-base;
+        color: $text-muted;
+    }
+}
+
+.progress-meta {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    margin: 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: $primary-light;
+    border-radius: $border-radius-sm;
+    overflow: hidden;
+    margin: $spacing-small 0;
+    position: relative;
+
+    &--large {
+        height: 12px;
+        flex: 1;
+    }
+
+    &--medium {
+        height: 10px;
+    }
+
+    &__fill {
+        height: 100%;
+        border-radius: $border-radius-sm;
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        &--success {
+            background: linear-gradient(90deg, $success-color 0%, lighten($success-color, 10%) 100%);
+        }
+
+        &--primary {
+            background: linear-gradient(90deg, $primary-color 0%, lighten($primary-color, 10%) 100%);
+        }
+
+        &--warning {
+            background: linear-gradient(90deg, $warning-color 0%, lighten($warning-color, 10%) 100%);
+        }
+
+        &--danger {
+            background: linear-gradient(90deg, $danger-color 0%, lighten($danger-color, 10%) 100%);
+        }
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.progress-percentage {
+    font-size: $font-size-lg;
+    font-weight: 700;
+    color: $text-dark;
+    white-space: nowrap;
+
+    &--large {
+        font-size: $font-size-xl;
+    }
+}
+
+// Trend indicators
+.trend-icon {
+    &--up {
+        color: $success-color;
+    }
+
+    &--down {
+        color: $danger-color;
+    }
+
+    &--stable {
+        color: $text-muted;
+    }
+}
+
+// Section layouts
+.section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-xlarge;
+
+    @media (max-width: $breakpoint-md) {
+        grid-template-columns: 1fr;
+        gap: $spacing-large;
+    }
+}
+
+.section-column {
+    min-width: 0; // Prevent grid overflow
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $text-dark;
+    margin-bottom: $spacing-large;
+
+    .section-icon {
+        margin-right: $spacing-small;
+        color: $primary-color;
+    }
+}
+
+// Sprint card styling
+.sprint-card {
+    background: $background-light;
+    border-radius: $border-radius-lg;
+    padding: $spacing-large;
+    box-shadow: $box-shadow-sm;
+    border: 1px solid $border-color;
+}
+
+.sprint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-medium;
+    gap: $spacing-small;
+}
+
+.sprint-name {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0;
+    flex: 1;
+}
+
+.velocity-badge {
+    padding: $spacing-xs $spacing-small;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &--high {
+        background: $success-light;
+        color: $success-color;
+    }
+
+    &--medium {
+        background: $warning-light;
+        color: $warning-color;
+    }
+
+    &--low {
+        background: $danger-light;
+        color: $danger-color;
+    }
+}
+
+.sprint-progress {
+    display: flex;
+    align-items: center;
+    gap: $spacing-medium;
+    margin-bottom: $spacing-medium;
+}
+
+.sprint-meta {
+    display: flex;
+    align-items: center;
+    gap: $spacing-medium;
+}
+
+.days-remaining {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-sm;
+    color: $text-muted;
+}
+
+// KPI styling
+.kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-medium;
+}
+
+.kpi-item {
+    background: $background-light;
+    border-radius: $border-radius;
+    padding: $spacing-medium;
+    border: 1px solid $border-color;
+    text-align: center;
+}
+
+.kpi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-small;
+}
+
+.kpi-label {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.kpi-value {
+    font-size: $font-size-lg;
+    font-weight: 700;
+    color: $text-dark;
+}
+
+.phase-card {
+    background: $background-light;
+    border-radius: $border-radius-lg;
+    padding: $spacing-large;
+    box-shadow: $box-shadow-sm;
+    border: 1px solid $border-color;
+
+    &__title {
+        font-size: $font-size-base;
+        font-weight: 600;
+        color: $text-dark;
+        margin-bottom: $spacing-medium;
+    }
+
+    &__metrics {
+        display: flex;
+        gap: $spacing-large;
+        flex-wrap: wrap;
+    }
+}
+
+.metric {
+    display: flex;
+    align-items: center;
+    font-size: $font-size-sm;
+    color: $text-muted;
+
+    &__icon {
+        margin-right: $spacing-xs;
+
+        &--success {
+            color: $success-color;
+        }
+
+        &--warning {
+            color: $warning-color;
+        }
+
+        &--danger {
+            color: $danger-color;
+        }
+    }
+}
+
+// Critical path styling
+.critical-path-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-medium;
+}
+
+.critical-item {
+    background: $background-light;
+    border-radius: $border-radius;
+    padding: $spacing-medium;
+    box-shadow: $box-shadow-sm;
+    border: 1px solid $border-color;
+    border-left: 3px solid $warning-color;
+}
+
+.critical-item__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-small;
+    gap: $spacing-small;
+}
+
+.critical-item__task {
+    font-weight: 600;
+    color: $text-dark;
+    flex: 1;
+}
+
+.priority-badge {
+    padding: $spacing-xs $spacing-small;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &--high {
+        background: $danger-light;
+        color: $danger-color;
+    }
+
+    &--medium {
+        background: $warning-light;
+        color: $warning-color;
+    }
+
+    &--low {
+        background: $info-light;
+        color: $info-color;
+    }
+}
+
+.critical-item__meta {
+    display: flex;
+    align-items: center;
+    gap: $spacing-medium;
+}
+
+.status-badge {
+    padding: $spacing-xs $spacing-small;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 500;
+
+    &--in-progress {
+        background: $primary-light;
+        color: $primary-color;
+    }
+
+    &--pending {
+        background: $warning-light;
+        color: $warning-color;
+    }
+
+    &--completed {
+        background: $success-light;
+        color: $success-color;
+    }
+}
+
+.due-date {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-xs;
+    color: $text-muted;
+}
+
+// Recent wins styling
+.wins-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-small;
+}
+
+.win-item {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-small;
+    padding: $spacing-small;
+    border-radius: $border-radius;
+    background: rgba($success-color, 0.05);
+    border: 1px solid rgba($success-color, 0.1);
+
+    &__icon {
+        color: $success-color;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    &__text {
+        font-size: $font-size-sm;
+        color: $text-dark;
+        line-height: 1.4;
+    }
+}
+
+// Risk management styling
+.risks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $spacing-medium;
+}
+
+.risk-card {
+    background: $background-light;
+    border-radius: $border-radius;
+    padding: $spacing-medium;
+    box-shadow: $box-shadow-sm;
+    border: 1px solid $border-color;
+    border-left: 3px solid $warning-color;
+}
+
+.risk-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-small;
+    gap: $spacing-small;
+}
+
+.risk-item {
+    font-weight: 600;
+    color: $text-dark;
+    flex: 1;
+}
+
+.risk-level {
+    padding: $spacing-xs $spacing-small;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &--high {
+        background: $danger-light;
+        color: $danger-color;
+    }
+
+    &--medium {
+        background: $warning-light;
+        color: $warning-color;
+    }
+
+    &--low {
+        background: $success-light;
+        color: $success-color;
+    }
+}
+
+.risk-mitigation {
+    font-size: $font-size-sm;
+    color: $text-muted;
+    line-height: 1.4;
+
+    strong {
+        color: $text-dark;
+    }
+}
+
+// Team performance styling
+.team-summary {
+    background: $background-light;
+    border-radius: $border-radius-lg;
+    padding: $spacing-large;
+    box-shadow: $box-shadow-sm;
+    border: 1px solid $border-color;
+}
+
+.team-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $spacing-large;
+}
+
+.team-metric {
+    display: flex;
+    align-items: center;
+    gap: $spacing-medium;
+    padding: $spacing-medium;
+    background: rgba($primary-color, 0.02);
+    border-radius: $border-radius;
+    border: 1px solid rgba($primary-color, 0.1);
+
+    &__icon {
+        color: $primary-color;
+        flex-shrink: 0;
+    }
+
+    &__content {
+        flex: 1;
+    }
+
+    &__label {
+        display: block;
+        font-size: $font-size-xs;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: $spacing-xs;
+    }
+
+    &__value {
+        display: block;
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: $text-dark;
+    }
+}
+
+// Responsive design improvements
+@media (max-width: $breakpoint-md) {
+    .project-progress__overview {
+        grid-template-columns: 1fr;
+    }
+
+    .header-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .team-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .risks-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Recent wins */
+.wins-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+}
+
+.win-item {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-small;
+  
+  &__icon {
+    color: $success-color;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  &__text {
+    font-size: $font-size-sm;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: $spacing-small;
+  }
+}
+
+.impact-badge {
+  display: inline-block;
+  padding: 2px $spacing-small;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: $spacing-small;
+  
+  &--high {
+    background-color: $success-light;
+    color: $success-color;
+  }
+  
+  &--medium {
+    background-color: $info-light;
+    color: $info-color;
+  }
+  
+  &--low {
+    background-color: $secondary-light;
+    color: $secondary-color;
+  }
+}
+
+// RTL Support
+[dir="rtl"] {
+
+    .progress-card__icon,
+    .section-icon {
+        margin-right: 0;
+        margin-left: $spacing-small;
+    }
+
+    .step-item__number {
+        margin-right: 0;
+        margin-left: $spacing-medium;
+    }
+
+    .milestone-item__icon {
+        margin-right: 0;
+        margin-left: $spacing-small;
+    }
+
+    .metric__icon {
+        margin-right: 0;
+        margin-left: $spacing-xs;
+    }
+}

@@ -1,0 +1,501 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+@import '../components/button';
+@import '../components/form';
+
+.admin-dashboard-page {
+  background-color: $background-color;
+  min-height: 100vh;
+  padding: $spacing-xlarge $spacing-xxlarge;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-xlarge;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-medium;
+
+    .btn--icon {
+        background: transparent;
+        border: none;
+        padding: $spacing-small;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $text-muted;
+
+        &:hover {
+            background-color: $background-dark;
+        }
+
+        .icon {
+            height: $spacing-large;
+            width: $spacing-large;
+        }
+    }
+  }
+
+  &__kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: $spacing-large;
+    margin-bottom: $spacing-xlarge;
+
+    @media (min-width: $breakpoint-md) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: $breakpoint-lg) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-medium;
+  }
+}
+
+.search-bar {
+  position: relative;
+  width: 100%;
+  max-width: 24rem; // This can remain a magic number for now
+
+  &__icon {
+    position: absolute;
+    top: 50%;
+    left: $spacing-medium;
+    transform: translateY(-50%);
+    height: $font-size-lg;
+    width: $font-size-lg;
+    color: $text-muted;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    padding: $spacing-small $spacing-medium $spacing-small ($spacing-xlarge + $spacing-small);
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    background-color: $background-light;
+    font-size: $font-size-sm;
+    line-height: 1.25;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 1px $primary-color;
+    }
+  }
+}
+
+
+.admin-dashboard-page {
+  padding: $spacing-medium;
+  background-color: $background-color;
+  min-height: calc(100vh - 80px); // Assuming header height
+  
+  .admin-header {
+    margin-bottom: $spacing-large;
+    
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: $spacing-small $spacing-medium;
+      background-color: $background-light;
+      border: 1px solid $border-color;
+      border-radius: $border-radius;
+      color: $text-color;
+      font-size: $font-size-sm;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: $spacing-medium;
+      text-decoration: none;
+      
+      &:hover {
+        background-color: $primary-light;
+        border-color: $primary-color;
+        color: $primary-color;
+        transform: translateX(-2px);
+      }
+      
+      &:active {
+        transform: translateX(-1px);
+      }
+    }
+    
+    h1 {
+      @include heading-2;
+      color: $text-dark;
+      margin-bottom: $spacing-small;
+    }
+  }
+  
+  .admin-search {
+    margin-bottom: $spacing-large;
+    
+    .search-input {
+      width: 100%;
+      padding: $spacing-medium;
+      border: 1px solid $border-color;
+      border-radius: $border-radius;
+      font-size: $font-size-base;
+      font-family: $font-family-base;
+      background-color: $background-light;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+      }
+      
+      &::placeholder {
+        color: $text-muted;
+      }
+    }
+  }
+  
+  .admin-loading {
+    text-align: center;
+    padding: $spacing-xlarge;
+    color: $text-muted;
+    font-size: $font-size-lg;
+  }
+  
+  .admin-error {
+    background-color: $danger-light;
+    color: $danger-dark;
+    padding: $spacing-medium;
+    border-radius: $border-radius;
+    border: 1px solid rgba($danger-color, 0.3);
+    margin-bottom: $spacing-large;
+  }
+  
+  .admin-content {
+    background-color: $background-light;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow-sm;
+    overflow: hidden;
+  }
+}
+
+// User Table Styles
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  
+  thead {
+    background-color: $background-dark;
+    
+    th {
+      padding: $spacing-medium;
+      text-align: left;
+      font-weight: 600;
+      color: $text-dark;
+      font-size: $font-size-sm;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid $border-color;
+      
+      &:first-child {
+        padding-left: $spacing-large;
+      }
+      
+      &:last-child {
+        padding-right: $spacing-large;
+      }
+    }
+  }
+  
+  tbody {
+    tr {
+      transition: background-color 0.2s;
+      
+      &:hover {
+        background-color: rgba($primary-color, 0.02);
+        
+        .edit-trigger-btn {
+          opacity: 1;
+        }
+      }
+      
+      &:not(:last-child) {
+        border-bottom: 1px solid $border-color;
+      }
+    }
+    
+    td {
+      padding: $spacing-medium;
+      color: $text-color;
+      font-size: $font-size-base;
+      vertical-align: middle;
+      
+      &:first-child {
+        padding-left: $spacing-large;
+      }
+      
+      &:last-child {
+        padding-right: $spacing-large;
+      }
+    }
+  }
+  
+  .user-email {
+    font-weight: 500;
+    color: $text-dark;
+  }
+  
+  .user-name {
+    color: $text-muted;
+    
+    .display-name-container {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      
+      span {
+        flex: 1;
+      }
+      
+      .edit-trigger-btn {
+        // opacity: 0;
+        transition: opacity 0.2s;
+      }
+    }
+    
+    .edit-name-container {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      
+      .edit-name-input {
+        flex: 1;
+        padding: $spacing-xs $spacing-small;
+        border: 1px solid $primary-color;
+        border-radius: $border-radius-sm;
+        font-size: $font-size-sm;
+        font-family: $font-family-base;
+        background-color: $background-light;
+        
+        &:focus {
+          outline: none;
+          box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+        }
+      }
+      
+      .edit-name-actions {
+        display: flex;
+        gap: $spacing-xs;
+      }
+    }
+    
+    .edit-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: $spacing-xs;
+      border: none;
+      border-radius: $border-radius-sm;
+      cursor: pointer;
+      transition: all 0.2s;
+      background-color: transparent;
+      
+      &.edit-trigger-btn {
+        color: $text-muted;
+        
+        &:hover {
+          color: $primary-color;
+          background-color: rgba($primary-color, 0.1);
+        }
+      }
+      
+      &.save-btn {
+        color: $success-color;
+        
+        &:hover {
+          color: $success-dark;
+          background-color: $success-light;
+        }
+      }
+      
+      &.cancel-btn {
+        color: $danger-color;
+        
+        &:hover {
+          color: $danger-dark;
+          background-color: $danger-light;
+        }
+      }
+    }
+  }
+  
+  .user-status {
+    .status-badge {
+      display: inline-block;
+      padding: $spacing-xs $spacing-small;
+      border-radius: $border-radius-sm;
+      font-size: $font-size-xs;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      
+      &.status-enabled {
+        background-color: $success-light;
+        color: $success-dark;
+        border: 1px solid rgba($success-color, 0.3);
+      }
+      
+      &.status-disabled {
+        background-color: $danger-light;
+        color: $danger-dark;
+        border: 1px solid rgba($danger-color, 0.3);
+      }
+    }
+  }
+  
+  .user-actions {
+    display: flex;
+    gap: $spacing-small;
+    
+    .action-btn {
+      padding: $spacing-xs $spacing-small;
+      border: none;
+      border-radius: $border-radius-sm;
+      font-size: $font-size-sm;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 70px;
+      
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      &.btn-enable {
+        background-color: $success-color;
+        color: white;
+        
+        &:hover:not(:disabled) {
+          background-color: $success-dark;
+          transform: translateY(-1px);
+          box-shadow: $box-shadow-sm;
+        }
+      }
+      
+      &.btn-disable {
+        background-color: $warning-color;
+        color: $text-dark;
+        
+        &:hover:not(:disabled) {
+          background-color: $warning-dark;
+          transform: translateY(-1px);
+          box-shadow: $box-shadow-sm;
+        }
+      }
+      
+      &.btn-delete {
+        background-color: $danger-color;
+        color: white;
+        
+        &:hover:not(:disabled) {
+          background-color: $danger-dark;
+          transform: translateY(-1px);
+          box-shadow: $box-shadow-sm;
+        }
+      }
+    }
+  }
+}
+
+.no-users-message {
+  text-align: center;
+  padding: $spacing-xxlarge;
+  color: $text-muted;
+  font-size: $font-size-lg;
+  background-color: $background-light;
+  border-radius: $border-radius;
+  border: 2px dashed $border-color;
+}
+
+// Responsive design
+@include respond-to(sm) {
+  .admin-dashboard-page {
+    padding: $spacing-large;
+  }
+  
+  .user-table {
+    thead th,
+    tbody td {
+      &:first-child {
+        padding-left: $spacing-xlarge;
+      }
+      
+      &:last-child {
+        padding-right: $spacing-xlarge;
+      }
+    }
+  }
+}
+
+@include respond-to(md) {
+  .admin-dashboard-page {
+    padding: $spacing-xlarge;
+  }
+}
+
+// Mobile responsive table
+@media (max-width: $breakpoint-md) {
+  .user-table {
+    font-size: $font-size-sm;
+    
+    thead th,
+    tbody td {
+      padding: $spacing-small;
+      
+      &:first-child {
+        padding-left: $spacing-medium;
+      }
+      
+      &:last-child {
+        padding-right: $spacing-medium;
+      }
+    }
+    
+    .user-actions {
+      flex-direction: column;
+      gap: $spacing-xs;
+      
+      .action-btn {
+        min-width: 60px;
+        font-size: $font-size-xs;
+      }
+    }
+  }
+}

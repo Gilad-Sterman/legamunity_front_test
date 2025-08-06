@@ -1,0 +1,595 @@
+{
+  "common": {
+    "login": "התחברות",
+    "logout": "התנתקות",
+    "notifications": "התראות",
+    "search": "חיפוש...",
+    "language": "שפה",
+    "guest": "אורח",
+    "admin": "מנהל",
+    "user": "משתמש",
+    "notLoggedIn": "לא מחובר",
+    "accessDenied": "גישה נדחתה. נדרשות הרשאות מנהל.",
+    "loading": "טוען...",
+    "edit": "עריכה",
+    "delete": "מחיקה",
+    "previous": "הקודם",
+    "next": "הבא",
+    "page": "עמוד",
+    "of": "מתוך",
+    "clearFilters": "נקה מסננים",
+    "add": "הוסף",
+    "cancel": "בטל"
+  },
+  "navbar": {
+    "brand": "לגמיוניטי"
+  },
+  "sidebar": {
+    "dashboard": "לוח בקרה",
+    "users": "משתמשים",
+    "sessions": "פגישות",
+    "interviews": "ראיונות",
+    "admin": "ניהול",
+    "adminDashboard": "לוח בקרה למנהל",
+    "scheduleInterview": "תזמון ראיון",
+    "drafts": "טיוטות",
+    "conflicts": "קונפליקטים",
+    "analytics": "אנליטיקה",
+    "projectProgress": "התקדמות הפרויקט"
+  },
+  "admin": {
+    "title": "לוח בקרה למנהל: ניהול משתמשים",
+    "dashboardTitle": "מנהל מערכת",
+    "backToDashboard": "חזרה ללוח הבקרה",
+    "searchPlaceholder": "חיפוש לקוח...",
+    "loading": "טוען משתמשים...",
+    "error": "שגיאה",
+    "noUsers": "לא נמצאו משתמשים.",
+    "filters": "סינון",
+    "kpi": {
+      "totalSessions": "סך הכל סשנים",
+      "activeSessions": "סשנים פעילים",
+      "cqsAverage": "CQS ממוצע",
+      "pendingReview": "ממתינים לבדיקה"
+    },
+    "sessions": {
+      "title": "ניהול פגישות",
+      "createNew": "צור פגישה חדשה",
+      "createSession": "צור פגישה",
+      "creating": "יוצר...",
+      "search": "חיפוש פגישות...",
+      "noSessions": "לא נמצאו פגישות",
+      "noSessionsDesc": "צור את הפגישה הראשונה שלך כדי להתחיל.",
+      "collaborators": "משתתפים",
+      "interviews": "ראיונות",
+      "metadata": "מידע על הפגישה",
+      "totalDuration": "משך כולל",
+      "completed": "הושלמו",
+      "cqsScore": "ציון CQS",
+      "startInterview": "התחל ראיון",
+      "minutes": "דקות",
+      "words": "מילים",
+      "uploadFile": "העלה קובץ",
+      "viewDetails": "צפה בפרטים",
+      "showing": "מציג",
+      "of": "מתוך",
+      "sessions": "פגישות",
+      "tPriority": "עדיפות",
+      "createModalPlaceholder": "טופס יצירת פגישה יוטמע כאן.",
+      "active": "סשנים פעילים",
+      "viewAll": "הצג הכל",
+      "noActiveSessions": "אין סשנים פעילים.",
+      "filters": {
+        "allStatuses": "כל סטטוס",
+        "allInterviewStatuses": "כל סטטוס ראיון",
+        "allPriorities": "כל עדיפות"
+      },
+      "status": {
+        "scheduled": "מתוזמן",
+        "completed": "הושלם",
+        "active": "פעיל",
+        "inProgress": "בתהליך",
+        "pendingReview": "ממתין לבדיקה",
+        "pending": "בהמתנה",
+        "cancelled": "בוטל"
+      },
+      "clientStory": "סיפור החיים של {{clientName}}",
+      "age": "גיל",
+      "stages": {
+        "scheduled": "מתוזמן",
+        "inProgress": "בתהליך",
+        "pendingReview": "ממתין לבדיקה",
+        "completed": "הושלם",
+        "cancelled": "בוטל",
+        "fileUploaded": "קובץ הועלה",
+        "draftGenerated": "טיוטה נוצרה",
+        "viewFile": "צפה בקובץ שהועלה",
+        "viewDraft": "צפה בטיוטת AI",
+        "fileDetails": "פרטי קובץ",
+        "fileInfo": "מידע על הקובץ",
+        "fileName": "שם קובץ",
+        "fileSize": "גודל קובץ",
+        "fileType": "סוג קובץ",
+        "uploadedAt": "הועלה ב",
+        "transcription": "תמלול",
+        "draftDetails": "פרטי טיוטה",
+        "draftInfo": "מידע על הטיוטה",
+        "draftTitle": "כותרת",
+        "draftStatus": "סטטוס",
+        "draftVersion": "גרסה",
+        "createdAt": "נוצר ב",
+        "draftContent": "תוכן",
+        "summary": "סיכום",
+        "sections": "חלקים",
+        "keyThemes": "נושאים מרכזיים"
+      },
+      "form": {
+        "userInfo": "מידע משתמש",
+        "selectUser": "בחר משתמש",
+        "chooseUser": "בחר משתמש...",
+        "sessionDetails": "פרטי הפגישה",
+        "stage": "שלב",
+        "priority": "עדיפות",
+        "notes": "הערות",
+        "notesPlaceholder": "הוסף הערות נוספות על הפגישה...",
+        "collaborators": "משתתפים",
+        "addCollaborator": "הוסף משתתף",
+        "collaboratorName": "שם המשתתף",
+        "collaboratorEmail": "אימייל המשתתף",
+        "interviews": "ראיונות",
+        "addInterview": "הוסף ראיון",
+        "duration": "משך (דקות)",
+        "interviewerName": "שם המראיין",
+        "interviewerEmail": "אימייל המראיין",
+        "interview1": "ראיון 1",
+        "interview2": "ראיון 2",
+        "interview3": "ראיון 3",
+        "interview4": "ראיון 4",
+        "interview5": "ראיון 5",
+        "interviewNotes": "הערות ראיון (אופציונלי)"
+      },
+      "validation": {
+        "userRequired": "אנא בחר משתמש",
+        "interviewRequired": "נדרש לפחות ראיון אחד"
+      },
+      "priority": {
+        "low": "נמוכה",
+        "medium": "בינונית",
+        "high": "גבוהה"
+      },
+      "roles": {
+        "collaborator": "משתתף",
+        "interviewer": "מראיין",
+        "observer": "צופה"
+      },
+      "interviewTypes": {
+        "standard": "סטנדרטי",
+        "technical": "טכני",
+        "behavioral": "התנהגותי",
+        "final": "סופי",
+        "friend": "חבר"
+      },
+      "locations": {
+        "online": "אונליין",
+        "office": "משרד",
+        "phone": "טלפון"
+      },
+      "priorities": {
+        "standard": "רגיל",
+        "urgent": "דחוף",
+        "memorial": "זיכרון"
+      }
+    },
+    "table": {
+      "email": "אימייל",
+      "displayName": "שם תצוגה",
+      "status": "סטטוס",
+      "actions": "פעולות"
+    },
+    "status": {
+      "enabled": "פעיל",
+      "disabled": "מושבת"
+    },
+    "actions": {
+      "enable": "הפעל",
+      "disable": "השבת",
+      "delete": "מחק",
+      "edit": "ערוך שם תצוגה",
+      "save": "שמור",
+      "cancel": "בטל"
+    },
+    "confirmations": {
+      "deleteUser": "האם אתה בטוח שברצונך למחוק משתמש זה לצמיתות?"
+    },
+    "placeholders": {
+      "enterDisplayName": "הזן שם תצוגה",
+      "noDisplayName": "לא זמין"
+    }
+  },
+  "scheduling": {
+    "title": "תזמון ראיון",
+    "form": {
+      "sessionSelection": "סוג סשן",
+      "existingSession": "הוסף לסשן קיים",
+      "newSession": "צור סשן חדש",
+      "selectSession": "בחר סשן",
+      "selectSessionPlaceholder": "בחר סשן...",
+      "selectUser": "בחר משתמש",
+      "selectUserPlaceholder": "בחר משתמש...",
+      "interviewType": "סוג ראיון",
+      "date": "תאריך",
+      "time": "שעה",
+      "duration": "משך",
+      "location": "מיקום",
+      "notes": "הערות",
+      "notesPlaceholder": "הערות נוספות לראיון...",
+      "friendInterview": "ראיון חבר"
+    },
+    "interviewTypes": {
+      "standard": "ראיון רגיל",
+      "technical": "ראיון טכני",
+      "behavioral": "ראיון התנהגותי",
+      "final": "ראיון סופי"
+    },
+    "locations": {
+      "online": "מקוון",
+      "office": "משרד",
+      "phone": "שיחת טלפון"
+    },
+    "durations": {
+      "30": "30 דקות",
+      "45": "45 דקות",
+      "60": "שעה",
+      "90": "שעה וחצי",
+      "120": "שעתיים"
+    },
+    "actions": {
+      "schedule": "קבע ראיון",
+      "scheduling": "מתזמן...",
+      "cancel": "ביטול",
+      "reset": "איפוס טופס"
+    },
+    "messages": {
+      "success": "הראיון נקבע בהצלחה!",
+      "error": "נכשל בקביעת הראיון. אנא נסה שוב.",
+      "selectUser": "אנא בחר משתמש",
+      "selectDate": "אנא בחר תאריך",
+      "selectTime": "אנא בחר שעה"
+    },
+    "validation": {
+      "sessionRequired": "אנא בחר סשן",
+      "userRequired": "אנא בחר משתמש",
+      "dateRequired": "אנא בחר תאריך",
+      "timeRequired": "אנא בחר שעה",
+      "pastDate": "לא ניתן לקבוע ראיון בתאריכים עבר"
+    },
+    "generalDetails": {
+      "title": "פרטים כלליים",
+      "phone": "טלפון",
+      "email": "אימייל",
+      "availability": "זמינות",
+      "defaultPhone": "050-123-4567",
+      "defaultEmail": "admin@legamunity.com",
+      "defaultAvailability": "זמין 24 שעות לראיונות"
+    }
+  },
+  "languages": {
+    "en": "אנגלית",
+    "he": "עברית"
+  },
+  "login": {
+    "title": "התחברות לחשבון שלך",
+    "emailLabel": "כתובת אימייל",
+    "emailPlaceholder": "כתובת אימייל",
+    "passwordLabel": "סיסמה",
+    "passwordPlaceholder": "סיסמה",
+    "signIn": "התחבר",
+    "signingIn": "מתחבר...",
+    "registerNow": "הירשם עכשיו",
+    "noAccount": "אין לך חשבון?"
+  },
+  "register": {
+    "title": "הירשם לחשבון שלך",
+    "emailLabel": "כתובת אימייל",
+    "emailPlaceholder": "כתובת אימייל",
+    "nameLabel": "שם",
+    "namePlaceholder": "שם",
+    "passwordLabel": "סיסמה",
+    "passwordPlaceholder": "סיסמה",
+    "confirmPasswordLabel": "אישור סיסמה",
+    "confirmPasswordPlaceholder": "אישור סיסמה",
+    "register": "הירשם",
+    "registering": "הירשם...",
+    "loginNow": "התחבר עכשיו",
+    "haveAccount": "יש לך חשבון?"
+  },
+  "dashboard": {
+    "title": "לוח בקרה",
+    "activeSessionsCard": "פגישות פעילות",
+    "completedSessionsCard": "פגישות שהושלמו",
+    "cqsScoreCard": "ציון CQS",
+    "conflictResolutionCard": "יישוב סכסוכים",
+    "friendApprovalCard": "אישור חברים",
+    "recentSessions": "פגישות אחרונות",
+    "viewAll": "צפה בהכל",
+    "tableUser": "משתמש",
+    "tableStatus": "סטטוס",
+    "tableDate": "תאריך",
+    "tableCQS": "CQS",
+    "tableActions": "פעולות",
+    "noSessionsFound": "לא נמצאו פגישות",
+    "view": "צפה",
+    "export": "ייצא",
+    "upcomingInterviews": "ראיונות קרובים",
+    "scheduleNew": "קבע חדש",
+    "noUpcomingInterviews": "אין ראיונות מתוכננים"
+  },
+  "drafts": {
+    "title": "ניהול טיוטות",
+    "subtitle": "סקירה ואישור טיוטות ראיונות מכל הסשנים",
+    "searchPlaceholder": "חיפוש טיוטות...",
+    "noDrafts": "לא נמצאו טיוטות",
+    "noDraftsDesc": "טיוטות יופיעו כאן לאחר השלמת ראיונות.",
+    "stages": {
+      "all": "כל השלבים",
+      "first_draft": "טיוטה ראשונה",
+      "under_review": "בבדיקה",
+      "pending_approval": "ממתין לאישור",
+      "approved": "מאושר",
+      "rejected": "נדחה"
+    },
+    "progress": {
+      "sortBy": "מיין לפי",
+      "sortOrder": "סדר מיון",
+      "ascending": "עולה",
+      "descending": "יורד",
+      "all": "כל ההתקדמות",
+      "low": "0-30%",
+      "medium": "31-70%",
+      "high": "71-100%"
+    },
+    "actions": {
+      "view": "צפייה",
+      "edit": "עריכה",
+      "review": "שליחה לסקירה",
+      "approve": "אישור",
+      "reject": "דחייה",
+      "export": "ייצוא",
+      "exportPdf": "ייצוא כ-PDF",
+      "exportJson": "ייצוא כ-JSON",
+      "viewHistory": "צפייה בהיסטוריה",
+      "bulkApprove": "אישור מרובה",
+      "bulkReject": "דחייה מרובה",
+      "reviewDetailed": "סקירה",
+      "compare": "השוואה",
+      "transitionStage": "שינוי שלב"
+    },
+    "sections": {
+      "professional": "סיכום מקצועי",
+      "technical": "כישורים טכניים",
+      "behavioral": "הערכה התנהגותית",
+      "interviews": "פרטי ראיונות"
+    },
+    "content": {
+      "overallRating": "דירוג כללי",
+      "recommendation": "המלצה",
+      "summary": "סיכום",
+      "strengths": "חוזקות",
+      "improvements": "תחומים לשיפור",
+      "skills": "כישורים טכניים",
+      "achievements": "הישגים מרכזיים",
+      "completed": "ראיונות הושלמו",
+      "progressBreakdown": "פירוט התקדמות",
+      "averageRating": "דירוג ממוצע",
+      "totalDuration": "משך כולל",
+      "interviewTypes": "סוגי ראיונות",
+      "aggregatedSkills": "כישורים מצטברים",
+      "individualInterviews": "ראיונות פרטניים",
+      "keyPoints": "נקודות מפתח",
+      "version": "גרסה",
+      "interviews": "ראיונות"
+    },
+    "recommendations": {
+      "hire": "לגייס",
+      "maybe": "אולי",
+      "reject": "לדחות",
+      "undefined": "לא צוין"
+    },
+    "filters": {
+      "stage": "סנן לפי שלב",
+      "progress": "סנן לפי התקדמות",
+      "dateRange": "טווח תאריכים",
+      "sortBy": "מיין לפי",
+      "sortOrder": "סדר מיון",
+      "ascending": "עולה",
+      "descending": "יורד"
+    },
+    "sortOptions": {
+      "updatedAt": "עודכן לאחרונה",
+      "createdAt": "תאריך יצירה",
+      "progress": "התקדמות",
+      "stage": "שלב",
+      "title": "כותרת"
+    },
+    "card": {
+      "session": "סשן",
+      "user": "משתמש",
+      "interviews": "ראיונות",
+      "progress": "התקדמות",
+      "lastUpdated": "עודכן לאחרונה",
+      "version": "גרסה",
+      "reviewedBy": "נבדק על ידי",
+      "approvedBy": "אושר על ידי"
+    },
+    "review": {
+      "title": "בדיקת טיוטה",
+      "content": "תוכן",
+      "sections": {
+        "personal": "מידע אישי",
+        "professional": "רקע מקצועי",
+        "technical": "כישורים טכניים",
+        "behavioral": "הערכה התנהגותית",
+        "interviews": "פרטי ראיונות",
+        "recommendations": "המלצות"
+      },
+      "history": "היסטוריית גרסאות",
+      "comments": "הערות",
+      "addComment": "הוסף הערה",
+      "saveChanges": "שמור שינויים",
+      "discardChanges": "בטל שינויים",
+      "rejectionReasonRequired": "סיבת הדחייה חייבת להכיל לפחות 10 תווים",
+      "versions": {
+        "title": "היסטוריית גרסאות",
+        "subtitle": "השוואה בין גרסאות שונות של הטיוטה",
+        "current": "נוכחית",
+        "changes": "שינויים",
+        "changeTypes": {
+          "added": "נוסף",
+          "modified": "שונה",
+          "removed": "הוסר"
+        }
+      }
+    },
+    "tabs": {
+      "overview": "סקירה כללית",
+      "versions": "גרסאות",
+      "history": "היסטוריה"
+    },
+    "history": {
+      "title": "היסטוריית טיוטה",
+      "noHistory": "אין היסטוריה זמינה",
+      "viewChanges": "צפייה בשינויים",
+      "filters": {
+        "action": "סינון לפי פעולה",
+        "dateRange": "טווח תאריכים",
+        "today": "היום",
+        "week": "השבוע",
+        "month": "החודש"
+      },
+      "actions": {
+        "created": "נוצר",
+        "updated": "עודכן",
+        "approved": "אושר",
+        "rejected": "נדחה",
+        "stage_changed": "שלב שונה"
+      }
+    },
+    "approval": {
+      "title": "אישור טיוטה",
+      "confirmMessage": "האם אתה בטוח שברצונך לאשר טיוטה זו?",
+      "notesPlaceholder": "הערות אישור (אופציונלי)...",
+      "approveTitle": "אשר טיוטה",
+      "rejectTitle": "דחה טיוטה",
+      "approveConfirm": "האם אתה בטוח שברצונך לאשר טיוטה זו?",
+      "rejectConfirm": "האם אתה בטוח שברצונך לדחות טיוטה זו?",
+      "rejectionReason": "סיבת הדחייה",
+      "rejectionReasonPlaceholder": "אנא ספק סיבה לדחייה...",
+      "approveButton": "אשר טיוטה",
+      "rejectButton": "דחה טיוטה"
+    },
+    "rejection": {
+      "title": "דחיית טיוטה",
+      "confirmMessage": "האם אתה בטוח שברצונך לדחות טיוטה זו?",
+      "reasonPlaceholder": "אנא ספק סיבה לדחייה...",
+      "reasonRequired": "נדרשת סיבה מפורטת לדחייה"
+    },
+    "export": {
+      "title": "ייצא טיוטה",
+      "format": "פורמט ייצוא",
+      "pdf": "מסמך PDF",
+      "json": "נתוני JSON",
+      "exporting": "מייצא...",
+      "success": "הטיוטה יוצאה בהצלחה",
+      "error": "שגיאה בייצוא הטיוטה"
+    },
+    "messages": {
+      "updateSuccess": "הטיוטה עודכנה בהצלחה",
+      "updateError": "שגיאה בעדכון הטיוטה",
+      "approveSuccess": "הטיוטה אושרה בהצלחה",
+      "approveError": "שגיאה באישור הטיוטה",
+      "rejectSuccess": "הטיוטה נדחתה בהצלחה",
+      "rejectError": "שגיאה בדחיית הטיוטה",
+      "loadError": "שגיאה בטעינת הטיוטות"
+    }
+  },
+  "interviews": {
+    "types": {
+      "technical": "ראיון טכני",
+      "behavioral": "ראיון התנהגותי",
+      "friend": "ראיון חבר",
+      "final": "ראיון סופי",
+      "standard": "ראיון רגיל"
+    }
+  },
+  "projectProgress": {
+    "title": "התקדמות הפרויקט",
+    "subtitle": "לוח בקרה מנהלים למעקב פרויקט ודיווח ללקוח",
+    "health": {
+      "excellent": "מצוין",
+      "good": "טוב",
+      "warning": "אזהרה",
+      "critical": "קריטי"
+    },
+    "overview": {
+      "overallProgress": "התקדמות כללית"
+    },
+    "budget": {
+      "title": "מצב תקציב"
+    },
+    "timeline": {
+      "title": "לוח זמנים",
+      "daysAhead": "ימים לפני הזמן",
+      "daysRemaining": "ימים נותרו"
+    },
+    "satisfaction": {
+      "title": "שביעות רצון לקוח",
+      "excellent": "דירוג מצוין"
+    },
+    "currentSprint": {
+      "title": "ספרינט נוכחי"
+    },
+    "velocity": {
+      "high": "מהירות גבוהה",
+      "medium": "מהירות בינונית",
+      "low": "מהירות נמוכה"
+    },
+    "daysRemaining": "ימים נותרו",
+    "kpis": {
+      "title": "מדדי ביצוע מרכזיים",
+      "codeQuality": "איכות קוד",
+      "testCoverage": "כיסוי בדיקות"
+    },
+    "criticalPath": {
+      "title": "פריטים במסלול קריטי"
+    },
+    "priority": {
+      "high": "גבוה",
+      "medium": "בינוני",
+      "low": "נמוך"
+    },
+    "status": {
+      "in-progress": "בתהליך",
+      "pending": "ממתין",
+      "completed": "הושלם"
+    },
+    "recentWins": {
+      "title": "הישגים אחרונים"
+    },
+    "risks": {
+      "title": "ניהול סיכונים"
+    },
+    "riskLevel": {
+      "high": "סיכון גבוה",
+      "medium": "סיכון בינוני",
+      "low": "סיכון נמוך"
+    },
+    "mitigation": "הפחתת סיכון",
+    "team": {
+      "title": "ביצועי צוות",
+      "velocity": "מהירות ספרינט",
+      "storyPoints": "נקודות סיפור",
+      "utilization": "ניצול צוות",
+      "satisfaction": "שביעות רצון צוות"
+    }
+  }
+}

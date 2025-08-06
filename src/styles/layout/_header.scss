@@ -1,0 +1,106 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.header {
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+
+  &-container {
+    // max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $spacing-medium;
+  }
+
+  &-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+  }
+
+  &-search {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 $spacing-large;
+
+    .search-container {
+      position: relative;
+      width: 100%;
+
+      .search-icon {
+        position: absolute;
+        left: $spacing-small;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-muted;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: $spacing-small;
+        padding-left: $spacing-large;
+        border: 1px solid $border-color;
+        border-radius: 4px;
+        font-size: 0.875rem;
+
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+        }
+      }
+    }
+  }
+
+  &-brand {
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: $primary-color;
+      margin: 0;
+    }
+  }
+
+  &-admin-info {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    background-color: $primary-color;
+    margin: 0;
+    padding: $spacing-small $spacing-medium;
+    border-radius: 4px;
+    color: white;
+  }
+
+  &-actions {
+    display: flex;
+    align-items: center;
+
+    .user-controls {
+      display: flex;
+      align-items: center;
+      gap: $spacing-medium;
+
+      .user-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $text-dark;
+
+        @include respond-to(sm-down) {
+          display: none;
+        }
+      }
+    }
+
+    .btn {
+      white-space: nowrap;
+    }
+  }
+
+  // Responsive adjustments
+  @include respond-to(sm-down) {
+    &-container {
+      padding: 0 $spacing-small;
+    }
+  }
+}

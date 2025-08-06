@@ -1,0 +1,139 @@
+// RTL Support
+html[dir="rtl"] {
+  // Text alignment
+  text-align: right;
+  
+  // Form elements
+  .form-label {
+    text-align: right;
+  }
+  
+  .form-control {
+    text-align: right;
+    direction: rtl;
+  }
+  
+  // Flip directions for layout elements
+  .header-content {
+    flex-direction: row-reverse;
+  }
+  
+  .header-actions,
+  .user-controls {
+    flex-direction: row-reverse;
+  }
+  
+  // Adjust search input for RTL
+  .search-container {
+    .search-icon {
+      left: auto;
+      right: $spacing-small;
+    }
+    
+    .search-input {
+      padding-left: $spacing-small;
+      padding-right: $spacing-large;
+      text-align: right;
+    }
+  }
+  
+  // Adjust header search margins
+  .header-search {
+    margin: 0 $spacing-large;
+  }
+  
+  // Adjust margins and paddings
+  .header-brand {
+    margin-right: 0;
+    margin-left: $spacing-medium;
+  }
+  
+  // Fix spacing in header for RTL
+  .header-content {
+    .header-brand {
+      order: 2;
+    }
+    
+    .header-search {
+      order: 1;
+    }
+    
+    .header-actions {
+      order: 0;
+    }
+  }
+  
+  // Adjust icon spacing in buttons
+  .btn {
+    flex-direction: row-reverse;
+    
+    .btn-icon {
+      margin-right: 0;
+      margin-left: $spacing-small;
+    }
+  }
+  
+  // Adjust search input
+  .search-container {
+    .search-icon {
+      left: auto;
+      right: $spacing-small;
+    }
+    
+    .search-input {
+      padding-left: $spacing-small;
+      padding-right: $spacing-large;
+    }
+  }
+  
+  // Adjust sidebar
+  .sidebar {
+    &-nav {
+      &-item {
+        text-align: right;
+        
+        &-icon {
+          margin-right: 0;
+          margin-left: $spacing-small;
+        }
+      }
+    }
+    
+
+  }
+  
+  // Dashboard RTL adjustments
+  .dashboard-page {
+    // Table text alignment
+    .table th, 
+    .table td {
+      text-align: right;
+    }
+    
+    // User info in tables
+    .user-info {
+      .user-avatar {
+        margin-right: 0;
+        margin-left: $spacing-small;
+      }
+    }
+    
+    // Stat cards
+    .stat-card {
+      .stat-icon {
+        right: auto;
+        left: $spacing-small;
+      }
+    }
+    
+    // Button spacing in tables
+    .table .btn {
+      margin-right: 0;
+      margin-left: $spacing-small;
+      
+      &:last-child {
+        margin-left: 0;
+      }
+    }
+  }
+}

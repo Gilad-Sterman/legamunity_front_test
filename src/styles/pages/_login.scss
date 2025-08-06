@@ -1,0 +1,124 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.login-page {
+  min-height: 100vh;
+  @include flex-center;
+  background-color: #f8f9fa;
+  
+  .login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: $spacing-large;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    
+    .login-language-selector {
+      position: absolute;
+      top: $spacing-small;
+      right: $spacing-small;
+      
+      html[dir="rtl"] & {
+        right: auto;
+        left: $spacing-small;
+      }
+      
+      .language-btn {
+        display: flex;
+        align-items: center;
+        gap: $spacing-small;
+        padding: $spacing-small;
+        font-size: 0.875rem;
+      }
+    }
+    
+    .login-header {
+      margin-bottom: $spacing-large;
+      text-align: center;
+      
+      h1 {
+        @include heading-2;
+        color: $primary-color;
+      }
+      
+      p {
+        color: #6c757d;
+      }
+    }
+    
+    .login-form {
+      .form-group {
+        margin-bottom: $spacing-medium;
+      }
+      
+      .password-input-container {
+        position: relative;
+        
+        .password-toggle-btn {
+          position: absolute;
+          right: $spacing-small;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          color: $text-color;
+          cursor: pointer;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          
+          &:hover {
+            color: $primary-color;
+          }
+          
+          html[dir="rtl"] & {
+            right: auto;
+            left: $spacing-small;
+          }
+        }
+      }
+      
+      .btn-login {
+        width: 100%;
+        margin-top: $spacing-medium;
+      }
+      
+      .auth-toggle {
+        margin-top: $spacing-medium;
+        text-align: center;
+        
+        p {
+          font-size: 0.875rem;
+          color: $text-color;
+        }
+        
+        .auth-toggle-btn {
+          background: none;
+          border: none;
+          color: $primary-color;
+          font-weight: 500;
+          cursor: pointer;
+          padding: $spacing-small;
+          
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+    
+    .login-footer {
+      margin-top: $spacing-large;
+      text-align: center;
+      font-size: 0.875rem;
+      
+      a {
+        color: $primary-color;
+        font-weight: 500;
+      }
+    }
+  }
+}

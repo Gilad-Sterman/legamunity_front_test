@@ -1,0 +1,59 @@
+@import '../abstracts/variables';
+
+.admin-page {
+  background-color: $background-color;
+  min-height: 100vh;
+  padding: $spacing-xlarge $spacing-xxlarge;
+
+  &__header {
+    margin-bottom: $spacing-xlarge;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  &__content {
+    background-color: $background-light;
+    border-radius: $border-radius-lg;
+    box-shadow: $box-shadow-md;
+    padding: $spacing-xlarge;
+  }
+}
+
+.placeholder-content {
+  text-align: center;
+  padding: $spacing-xxlarge;
+
+  .placeholder-icon {
+    color: $primary-color;
+    margin-bottom: $spacing-large;
+  }
+
+  h2 {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $text-dark;
+    margin-bottom: $spacing-medium;
+  }
+
+  p {
+    color: $text-muted;
+    margin-bottom: $spacing-medium;
+    font-size: $font-size-base;
+  }
+
+  ul {
+    text-align: left;
+    max-width: 400px;
+    margin: 0 auto;
+    color: $text-color;
+
+    li {
+      margin-bottom: $spacing-small;
+      font-size: $font-size-sm;
+    }
+  }
+}

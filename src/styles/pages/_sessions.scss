@@ -1,0 +1,997 @@
+// Sessions Page Styles
+.sessions-page {
+  .admin-page__header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+}
+
+// Sessions Filters
+.sessions-filters {
+  display: flex;
+  gap: $spacing-medium;
+  align-items: center;
+  margin-bottom: $spacing-large;
+  padding: $spacing-medium;
+  background: $background-light;
+  border-radius: $border-radius;
+  border: 1px solid $border-color;
+
+  &__search {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+
+    &-icon {
+      position: absolute;
+      left: $spacing-small;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $text-muted;
+    }
+
+    &-input {
+      width: 100%;
+      padding: $spacing-small $spacing-small $spacing-small $spacing-xlarge;
+      border: 1px solid $border-color;
+      border-radius: $border-radius-sm;
+      font-size: $font-size-sm;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+      }
+    }
+  }
+
+  &__status, &__priority, &__interview-status {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+
+    &-select {
+      padding: $spacing-small $spacing-medium;
+      border: 1px solid $border-color;
+      border-radius: $border-radius-sm;
+      font-size: $font-size-sm;
+      background: white;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+    }
+  }
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    align-items: stretch;
+
+    &__search {
+      max-width: none;
+    }
+  }
+}
+
+// Sessions Loading
+.sessions-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xxlarge;
+  color: $text-muted;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid $border-color;
+    border-top: 3px solid $primary-color;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: $spacing-medium;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+// Sessions Empty State
+.sessions-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xxlarge;
+  text-align: center;
+  color: $text-muted;
+
+  &__icon {
+    margin-bottom: $spacing-large;
+    color: $text-light;
+  }
+
+  h3 {
+    margin-bottom: $spacing-small;
+    color: $text-dark;
+  }
+}
+
+// Sessions List
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
+}
+
+// Session Card
+.session-card {
+  background: white;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow-sm;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: $box-shadow-md;
+    border-color: darken($border-color, 10%);
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-medium;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: $background-light;
+    }
+  }
+
+  &__main {
+    display: flex;
+    align-items: center;
+    gap: $spacing-large;
+    flex: 1;
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    min-width: 200px;
+
+    &-icon {
+      color: $text-muted;
+    }
+
+    &-name {
+      margin: 0;
+      font-size: $font-size-base;
+      font-weight: 600;
+      color: $text-dark;
+    }
+
+    &-email {
+      margin: 0;
+      font-size: $font-size-sm;
+      color: $text-muted;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: $spacing-medium;
+    flex: 1;
+  }
+
+  &__date {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-sm;
+    color: $text-muted;
+  }
+
+  &__stats {
+    display: flex;
+    gap: $spacing-medium;
+  }
+
+  &__stat {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-sm;
+    color: $text-muted;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+  }
+
+  &__expand {
+    background: none;
+    border: none;
+    padding: $spacing-xs;
+    cursor: pointer;
+    color: $text-muted;
+    border-radius: $border-radius-sm;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: $background-light;
+      color: $text-dark;
+    }
+  }
+
+  &__details {
+    border-top: 1px solid $border-color;
+    padding: $spacing-medium;
+    background-color: $background-light;
+  }
+
+  &__client {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    min-width: 200px;
+
+    &-icon {
+      color: $text-muted;
+    }
+
+    &-name {
+      margin: 0;
+      font-size: $font-size-base;
+      font-weight: 600;
+      color: $text-dark;
+    }
+
+    &-email {
+      margin: 0;
+      font-size: $font-size-sm;
+      color: $text-muted;
+    }
+
+    &-age {
+      margin: 0;
+      font-size: $font-size-sm;
+      color: $text-muted;
+    }
+  }
+
+  @media (max-width: $breakpoint-md) {
+    &__main {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-small;
+    }
+
+    &__meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-small;
+    }
+
+    &__stats {
+      flex-direction: column;
+      gap: $spacing-xs;
+    }
+  }
+}
+
+// Session Badge
+.session-badge {
+  padding: $spacing-xs $spacing-small;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &--scheduled {
+    background-color: rgba($info-color, 0.1);
+    color: $info-color;
+  }
+
+  &--in-progress {
+    background-color: rgba($warning-color, 0.1);
+    color: $warning-color;
+  }
+
+  &--pending {
+    background-color: rgba($secondary-color, 0.1);
+    color: $secondary-color;
+  }
+
+  &--completed {
+    background-color: rgba($success-color, 0.1);
+    color: $success-color;
+  }
+
+  &--cancelled {
+    background-color: rgba($danger-color, 0.1);
+    color: $danger-color;
+  }
+}
+
+// Session Details Sections
+.session-details__section {
+  margin-bottom: $spacing-large;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  h4 {
+    margin: 0 0 $spacing-small 0;
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $text-dark;
+  }
+}
+
+// Client Info
+.client-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $spacing-small;
+
+  &__item {
+    padding: $spacing-xs $spacing-small;
+    background: white;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+
+    strong {
+      color: $text-dark;
+      margin-right: $spacing-xs;
+    }
+  }
+}
+
+// Session Interviews
+.session-interviews {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+}
+
+.interview {
+  padding: $spacing-small;
+  background: white;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__info {
+    display: flex;
+    gap: $spacing-xs;
+    align-items: center;
+    flex: 1;
+  }
+
+  &__name-container {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    flex-wrap: wrap;
+  }
+
+  &__name {
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  &__friend-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: 2px $spacing-xs;
+    background-color: rgba($info-color, 0.1);
+    color: $info-color;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__status {
+    padding: 2px $spacing-xs;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    text-transform: uppercase;
+
+    &--pending {
+      background-color: rgba($info-color, 0.1);
+      color: $info-color;
+    }
+
+    &--scheduled {
+      background-color: rgba($warning-color, 0.1);
+      color: $warning-color;
+    }
+
+    &--completed {
+      background-color: rgba($success-color, 0.1);
+      color: $success-color;
+    }
+
+    &--cancelled {
+      background-color: rgba($danger-color, 0.1);
+      color: $danger-color;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-xs;
+    align-items: center;
+  }
+
+  &__details {
+    display: flex;
+    gap: $spacing-medium;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    color: $text-muted;
+    font-size: $font-size-xs;
+    margin-top: $spacing-xs;
+  }
+
+  &__file-link {
+    background: none;
+    border: none;
+    color: $primary-color;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $primary-dark;
+      text-decoration: none;
+    }
+
+    &:focus {
+      outline: 2px solid $primary-color;
+      outline-offset: 2px;
+    }
+  }
+
+  &__notes {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $text-dark;
+    font-style: italic;
+  }
+
+  // Interview editing form
+  &__edit {
+    width: 100%;
+  }
+
+  &__edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-small;
+    margin-bottom: $spacing-small;
+  }
+
+  &__name-input {
+    padding: $spacing-xs $spacing-small;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+    }
+  }
+
+  &__friend-checkbox {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    cursor: pointer;
+    font-size: $font-size-sm;
+
+    input[type="checkbox"] {
+      margin: 0;
+    }
+  }
+
+  &__friend-label {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    color: $text-dark;
+  }
+
+  &__edit-actions {
+    display: flex;
+    gap: $spacing-xs;
+  }
+
+  &--add {
+    border-style: dashed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+  }
+
+  &__add-btn {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    &__details {
+      flex-direction: column;
+      gap: $spacing-xs;
+    }
+
+    &__actions {
+      flex-wrap: wrap;
+    }
+  }
+}
+
+// Session Metadata
+.session-metadata {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-small;
+}
+
+.metadata-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-xs $spacing-small;
+  background: white;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $text-muted;
+  }
+
+  &__value {
+    font-weight: 500;
+    color: $text-dark;
+
+    &.priority {
+      padding: 2px $spacing-xs;
+      border-radius: $border-radius-sm;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+
+      &--standard {
+        background-color: rgba($info-color, 0.1);
+        color: $info-color;
+      }
+
+      &--urgent {
+        background-color: rgba($warning-color, 0.1);
+        color: $warning-color;
+      }
+
+      &--memorial {
+        background-color: rgba($danger-color, 0.1);
+        color: $danger-color;
+      }
+    }
+  }
+}
+
+// Session Details Actions
+.session-details__actions {
+  display: flex;
+  gap: $spacing-small;
+  margin-top: $spacing-large;
+  padding-top: $spacing-medium;
+  border-top: 1px solid $border-color;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+  }
+}
+
+// Sessions Pagination
+.sessions-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: $spacing-large;
+  padding: $spacing-medium;
+  background: $background-light;
+  border-radius: $border-radius;
+  border: 1px solid $border-color;
+
+  .pagination-info {
+    font-size: $font-size-sm;
+    color: $text-muted;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: $spacing-medium;
+  }
+
+  .pagination-current {
+    font-size: $font-size-sm;
+    color: $text-dark;
+    font-weight: 500;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    gap: $spacing-small;
+    text-align: center;
+  }
+}
+
+.modal {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow-lg;
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-medium;
+    border-bottom: 1px solid $border-color;
+
+    h2 {
+      margin: 0;
+      font-size: $font-size-lg;
+      color: $text-dark;
+    }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: $font-size-xl;
+    cursor: pointer;
+    color: $text-muted;
+    padding: 0;
+
+    &:hover {
+      color: $text-dark;
+    }
+  }
+
+  &__content {
+    padding: $spacing-medium;
+  }
+
+  &--large {
+    max-width: 800px;
+    width: 95%;
+  }
+}
+
+// Modal Overlay
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+// File and Draft View Modals
+.file-details, .draft-details {
+  &__info {
+    margin-bottom: $spacing-large;
+    
+    h4 {
+      margin: 0 0 $spacing-medium 0;
+      font-size: $font-size-md;
+      font-weight: 600;
+      color: $text-dark;
+      border-bottom: 1px solid $border-color;
+      padding-bottom: $spacing-small;
+    }
+  }
+
+  &__transcription, &__content {
+    margin-top: $spacing-large;
+    
+    h4 {
+      margin: 0 0 $spacing-medium 0;
+      font-size: $font-size-md;
+      font-weight: 600;
+      color: $text-dark;
+      border-bottom: 1px solid $border-color;
+      padding-bottom: $spacing-small;
+    }
+  }
+}
+
+.file-info-grid, .draft-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $spacing-medium;
+  margin-top: $spacing-medium;
+}
+
+.file-info-item, .draft-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  padding: $spacing-small;
+  background: $background-light;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+
+  strong {
+    color: $text-dark;
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+
+  span {
+    color: $text-color;
+    font-size: $font-size-sm;
+    word-break: break-word;
+  }
+}
+
+.transcription-content {
+  background: $background-light;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  padding: $spacing-medium;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: $spacing-small;
+
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: $font-family-base;
+    font-size: $font-size-sm;
+    line-height: 1.6;
+    margin: 0;
+    color: $text-color;
+  }
+}
+
+.draft-content {
+  background: $background-light;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  padding: $spacing-medium;
+  max-height: 500px;
+  overflow-y: auto;
+  margin-top: $spacing-small;
+}
+
+.draft-section {
+  margin-bottom: $spacing-large;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  h5 {
+    color: $text-dark;
+    font-size: $font-size-md;
+    font-weight: 600;
+    margin-bottom: $spacing-small;
+    border-bottom: 1px solid $border-color;
+    padding-bottom: $spacing-xs;
+  }
+
+  p {
+    color: $text-color;
+    font-size: $font-size-sm;
+    line-height: 1.6;
+    margin-bottom: $spacing-small;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: $spacing-medium;
+
+    li {
+      color: $text-color;
+      font-size: $font-size-sm;
+      line-height: 1.5;
+      margin-bottom: $spacing-xs;
+    }
+  }
+}
+
+.draft-subsection {
+  margin-bottom: $spacing-medium;
+  padding-left: $spacing-medium;
+  border-left: 3px solid $primary-light;
+
+  h6 {
+    color: $text-dark;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    margin-bottom: $spacing-xs;
+  }
+
+  p {
+    color: $text-color;
+    font-size: $font-size-sm;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+// Interview editing and scheduling styles
+.session-details__section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-medium;
+
+  h4 {
+    margin: 0;
+  }
+}
+
+.interview {
+  &__edit {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+  }
+
+  &__name-input {
+    padding: $spacing-xs $spacing-small;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+    }
+  }
+
+  &__edit-actions {
+    display: flex;
+    gap: $spacing-xs;
+  }
+
+  &--add {
+    border: 2px dashed $border-color;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-medium;
+    border-radius: $border-radius;
+
+    &:hover {
+      border-color: $primary-color;
+      background: rgba($primary-color, 0.05);
+    }
+  }
+
+  &__add-btn {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    color: $text-muted;
+    background: transparent;
+    border: none;
+
+    &:hover {
+      color: $primary-color;
+      background: transparent;
+    }
+  }
+}
+
+.session-card__stat--accessibility {
+  color: $warning-color;
+
+  svg {
+    color: $warning-color;
+  }
+}
+
+// Scheduling modal styles
+.scheduling-info {
+  .scheduling-display {
+    h4 {
+      margin-bottom: $spacing-medium;
+      color: $text-dark;
+    }
+  }
+
+  .schedule-details {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-small;
+  }
+
+  .schedule-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    padding: $spacing-small;
+    background: $background-light;
+    border-radius: $border-radius-sm;
+
+    svg {
+      color: $primary-color;
+      flex-shrink: 0;
+    }
+  }
+
+  .no-schedule {
+    text-align: center;
+    padding: $spacing-large;
+
+    p {
+      margin-bottom: $spacing-medium;
+      color: $text-muted;
+
+      &:last-of-type {
+        margin-bottom: $spacing-large;
+      }
+    }
+  }
+}

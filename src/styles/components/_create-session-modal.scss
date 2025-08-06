@@ -1,0 +1,311 @@
+// Create Session Modal Styles
+.modal--large {
+  max-width: 800px;
+  width: 95%;
+}
+
+.create-session-form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-large;
+}
+
+// Form Sections
+.form-section {
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    margin: 0 0 $spacing-medium 0;
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-medium;
+  }
+}
+
+// Form Elements
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.form-label {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $text-dark;
+}
+
+.form-input {
+  padding: $spacing-small $spacing-medium;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-sm;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+  }
+
+  &--error {
+    border-color: $danger-color;
+    
+    &:focus {
+      border-color: $danger-color;
+      box-shadow: 0 0 0 2px rgba($danger-color, 0.1);
+    }
+  }
+
+  &--textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-medium;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-error {
+  font-size: $font-size-xs;
+  color: $danger-color;
+  margin-top: $spacing-xs;
+}
+
+.form-actions {
+  display: flex;
+  gap: $spacing-small;
+  margin-top: $spacing-small;
+}
+
+// Collaborators List
+.collaborators-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+  margin-bottom: $spacing-medium;
+}
+
+.collaborator-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-small;
+  background: $background-light;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+}
+
+.collaborator-info {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  flex: 1;
+}
+
+.collaborator-name {
+  font-weight: 500;
+  color: $text-dark;
+}
+
+.collaborator-email {
+  color: $text-muted;
+  font-size: $font-size-sm;
+}
+
+.collaborator-role {
+  color: $text-muted;
+  font-size: $font-size-sm;
+  font-style: italic;
+}
+
+// Add Collaborator Form
+.add-collaborator-form {
+  padding: $spacing-medium;
+  background: $background-light;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  margin-top: $spacing-small;
+}
+
+// Interviews List
+.interviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+  margin-bottom: $spacing-medium;
+}
+
+.interview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: $spacing-small;
+  background: $background-light;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+}
+
+.interview-info {
+  flex: 1;
+}
+
+.interview-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-small;
+  margin-bottom: $spacing-xs;
+}
+
+.interview-type {
+  font-weight: 600;
+  color: $text-dark;
+  text-transform: capitalize;
+  padding: 2px $spacing-xs;
+  background: rgba($primary-color, 0.1);
+  color: $primary-color;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-xs;
+}
+
+.interview-duration {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  
+  &::before {
+    content: "⏱ ";
+  }
+}
+
+.interview-location {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  
+  &::before {
+    content: "📍 ";
+  }
+}
+
+.interview-interviewer {
+  font-size: $font-size-sm;
+  color: $text-dark;
+  margin-bottom: $spacing-xs;
+  
+  &::before {
+    content: "👤 ";
+  }
+}
+
+.interview-notes {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  font-style: italic;
+  margin-top: $spacing-xs;
+}
+
+// Add Interview Form
+.add-interview-form {
+  padding: $spacing-medium;
+  background: $background-light;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  margin-top: $spacing-small;
+}
+
+// Modal Actions
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-medium;
+  padding-top: $spacing-medium;
+  border-top: 1px solid $border-color;
+  margin-top: $spacing-large;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column-reverse;
+  }
+}
+
+// Spinner for loading states
+.spinner {
+  &--sm {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: $spacing-xs;
+  }
+}
+
+// Button modifications for the modal
+.btn {
+  &--sm {
+    padding: $spacing-xs $spacing-small;
+    font-size: $font-size-xs;
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: $breakpoint-md) {
+  .modal--large {
+    max-width: 95%;
+    margin: $spacing-medium;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .collaborator-item,
+  .interview-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-small;
+  }
+
+  .interview-header {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .modal--large {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .form-section__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-small;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}

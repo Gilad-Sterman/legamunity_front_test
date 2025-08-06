@@ -1,0 +1,45 @@
+@import '../abstracts/variables';
+
+.kpi-card {
+  background-color: $background-light;
+  padding: $spacing-large;
+  border-radius: $border-radius-lg;
+  box-shadow: $box-shadow-md;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $text-muted;
+  }
+
+  &__icon {
+    height: $spacing-large;
+    width: $spacing-large;
+    color: $text-muted;
+  }
+
+  &__body {
+    margin-top: $spacing-small;
+  }
+
+  &__value {
+    font-size: $font-size-xxl; // 32px, slightly smaller than original 36px
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  &__trend {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    margin-top: $spacing-xs;
+  }
+}

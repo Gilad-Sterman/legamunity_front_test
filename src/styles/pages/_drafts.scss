@@ -1,0 +1,448 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.drafts-page {
+  .admin-page__header-content {
+    @include flex-between;
+    margin-bottom: $spacing-medium;
+  }
+
+  .admin-page__title-section {
+    .admin-page__subtitle {
+      color: $text-muted;
+      font-size: $font-size-sm;
+      margin-top: $spacing-xs;
+    }
+  }
+
+  .admin-page__actions {
+    .bulk-actions {
+      @include flex-center;
+      gap: $spacing-small;
+      padding: $spacing-small $spacing-medium;
+      background: $background-light;
+      border-radius: $border-radius;
+      border: 1px solid $border-color;
+
+      &__count {
+        font-size: $font-size-sm;
+        color: $text-muted;
+        margin-right: $spacing-small;
+      }
+    }
+  }
+
+  .admin-page__toolbar {
+    @include flex-between;
+    gap: $spacing-medium;
+    margin-bottom: $spacing-medium;
+    padding: $spacing-medium 0;
+    border-bottom: 1px solid $border-color;
+
+    .search-bar {
+      flex: 1;
+      max-width: 400px;
+
+      &__input {
+        position: relative;
+        width: 100%;
+      }
+
+      &__icon {
+        position: absolute;
+        left: $spacing-small;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-muted;
+        pointer-events: none;
+      }
+
+      &__field {
+        width: 100%;
+        padding: $spacing-small $spacing-small $spacing-small 40px;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        font-size: $font-size-sm;
+        
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+          box-shadow: 0 0 0 2px $primary-light;
+        }
+      }
+    }
+
+    .toolbar-actions {
+      @include flex-center;
+      gap: $spacing-small;
+
+      .chevron {
+        transition: transform 0.2s ease;
+        
+        &--up {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+}
+
+// Stage Summary Cards
+.stage-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: $spacing-medium;
+  margin-bottom: $spacing-large;
+
+  &__card {
+    @include flex-center;
+    flex-direction: column;
+    padding: $spacing-medium;
+    background: $background-light;
+    border: 2px solid $border-color;
+    border-radius: $border-radius-lg;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: $primary-color;
+      box-shadow: $box-shadow-sm;
+    }
+
+    &--active {
+      border-color: $primary-color;
+      background: $primary-light;
+    }
+  }
+
+  &__icon {
+    margin-bottom: $spacing-small;
+    
+    .stage-icon {
+      &--first { color: $info-color; }
+      &--review { color: $warning-color; }
+      &--pending { color: $secondary-color; }
+      &--approved { color: $success-color; }
+      &--rejected { color: $danger-color; }
+      &--default { color: $text-muted; }
+    }
+  }
+
+  &__content {
+    text-align: center;
+  }
+
+  &__count {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $text-dark;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $text-muted;
+  }
+}
+
+// Drafts List
+.drafts-list {
+  &__loading {
+    @include flex-center;
+    flex-direction: column;
+    padding: $spacing-xxlarge;
+    color: $text-muted;
+    
+    p {
+      margin-top: $spacing-medium;
+    }
+  }
+
+  &__empty {
+    @include flex-center;
+    flex-direction: column;
+    padding: $spacing-xxlarge;
+    color: $text-muted;
+    text-align: center;
+
+    .empty-icon {
+      margin-bottom: $spacing-medium;
+      opacity: 0.5;
+    }
+
+    h3 {
+      margin-bottom: $spacing-small;
+      color: $text-color;
+    }
+  }
+
+  &__header {
+    @include flex-between;
+    padding: $spacing-medium;
+    background: $background-color;
+    border-radius: $border-radius $border-radius 0 0;
+    border: 1px solid $border-color;
+    border-bottom: none;
+
+    &-checkbox {
+      margin-right: $spacing-medium;
+    }
+
+    &-content {
+      font-size: $font-size-sm;
+      color: $text-muted;
+    }
+  }
+
+  &__items {
+    border: 1px solid $border-color;
+    border-radius: 0 0 $border-radius $border-radius;
+    overflow: hidden;
+  }
+}
+
+// Pagination
+.pagination {
+  @include flex-center;
+  gap: $spacing-medium;
+  margin-top: $spacing-large;
+  padding: $spacing-medium 0;
+
+  &__info {
+    font-size: $font-size-sm;
+    color: $text-muted;
+  }
+}
+
+// Draft Filters
+.draft-filters {
+  background: $background-color;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  margin-bottom: $spacing-medium;
+  overflow: hidden;
+
+  &__header {
+    @include flex-between;
+    padding: $spacing-medium;
+    background: $background-light;
+    border-bottom: 1px solid $border-color;
+
+    .draft-filters__title {
+      @include flex-center;
+      gap: $spacing-small;
+      
+      h3 {
+        margin: 0;
+        font-size: $font-size-base;
+        color: $text-dark;
+      }
+    }
+
+    .draft-filters__close {
+      background: none;
+      border: none;
+      color: $text-muted;
+      cursor: pointer;
+      padding: $spacing-xs;
+      border-radius: $border-radius-sm;
+
+      &:hover {
+        background: $background-dark;
+      }
+    }
+  }
+
+  &__content {
+    padding: $spacing-medium;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-large;
+    margin-bottom: $spacing-medium;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    @include respond-to(md-down) {
+      grid-template-columns: 1fr;
+      gap: $spacing-medium;
+    }
+  }
+}
+
+.filter-group {
+  &__label {
+    @include flex-center;
+    gap: $spacing-xs;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $text-dark;
+    margin-bottom: $spacing-small;
+  }
+
+  &__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+  }
+
+  &__date-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: $spacing-small;
+    align-items: end;
+  }
+
+  &__sort {
+    @include flex-center;
+    gap: $spacing-small;
+  }
+}
+
+.filter-option {
+  padding: $spacing-xs $spacing-small;
+  background: $background-light;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $primary-color;
+  }
+
+  &--active {
+    background: $primary-color;
+    color: $color-white;
+    border-color: $primary-color;
+  }
+}
+
+.date-input {
+  &__label {
+    display: block;
+    font-size: $font-size-xs;
+    color: $text-muted;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__field {
+    width: 100%;
+    padding: $spacing-xs $spacing-small;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+    }
+  }
+}
+
+.sort-order {
+  @include flex-center;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  overflow: hidden;
+
+  &__btn {
+    padding: $spacing-xs $spacing-small;
+    background: $background-light;
+    border: none;
+    cursor: pointer;
+    font-size: $font-size-sm;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: $background-color;
+    }
+
+    &--active {
+      background: $primary-color;
+      color: $color-white;
+    }
+
+    &:not(:last-child) {
+      border-right: 1px solid $border-color;
+    }
+  }
+}
+
+// Loading Spinner
+.loading-spinner {
+  @include flex-center;
+  gap: $spacing-small;
+
+  &__icon {
+    animation: spin 1s linear infinite;
+  }
+
+  &--small .loading-spinner__icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  &--medium .loading-spinner__icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  &--large .loading-spinner__icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: $text-muted;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// Error Alert
+.error-alert {
+  @include flex-between;
+  padding: $spacing-medium;
+  background: $danger-light;
+  border: 1px solid $danger-color;
+  border-radius: $border-radius;
+  margin-bottom: $spacing-medium;
+
+  &__content {
+    @include flex-center;
+    gap: $spacing-small;
+  }
+
+  &__icon {
+    color: $danger-color;
+    flex-shrink: 0;
+  }
+
+  &__message {
+    color: $danger-color;
+    font-size: $font-size-sm;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    color: $danger-color;
+    cursor: pointer;
+    padding: $spacing-xs;
+    border-radius: $border-radius-sm;
+
+    &:hover {
+      background: $danger-light;
+    }
+  }
+}
