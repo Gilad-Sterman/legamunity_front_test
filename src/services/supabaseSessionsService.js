@@ -3,7 +3,8 @@
  * Frontend service for interacting with Supabase sessions API
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Using relative URL to avoid CORS/CSP issues in production
+const API_BASE_URL = '/api';
 
 class SupabaseSessionsService {
   /**

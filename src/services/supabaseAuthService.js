@@ -4,8 +4,8 @@
  * Maintains the same interface as the original authService.js for seamless migration
  */
 
-// API base URL - should be configured based on environment
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// API base URL - using relative URL to avoid CORS/CSP issues in production
+const API_URL = '/api';
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
