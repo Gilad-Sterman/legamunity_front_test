@@ -1,0 +1,237 @@
+// File Upload Component Styles
+.file-upload {
+  position: relative;
+  width: 100%;
+  
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-medium;
+    border-bottom: 1px solid $border-color;
+    
+    h3 {
+      margin: 0;
+      font-size: $font-size-lg;
+    }
+    
+    &__close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: $text-muted;
+      
+      &:hover {
+        color: $text-color;
+      }
+    }
+  }
+  
+  &__content {
+    padding: $spacing-large;
+  }
+  
+  &__dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-xlarge;
+    border: 2px dashed $border-color;
+    border-radius: $border-radius;
+    background-color: $background-light;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    
+    &:hover, &--active {
+      border-color: $primary-color;
+      background-color: rgba($primary-color, 0.05);
+    }
+    
+    h4 {
+      margin: $spacing-medium 0 $spacing-small;
+      color: $text-color;
+    }
+    
+    p {
+      color: $text-muted;
+      margin: $spacing-xs 0;
+    }
+  }
+  
+  &__icon {
+    color: $primary-color;
+  }
+  
+  &__size-limit {
+    font-size: $font-size-sm;
+    margin-top: $spacing-medium;
+  }
+  
+  &__selected {
+    margin: $spacing-medium 0;
+  }
+  
+  &__file-info {
+    display: flex;
+    align-items: center;
+    padding: $spacing-medium;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    background-color: $background-light;
+  }
+  
+  &__file-icon {
+    margin-right: $spacing-medium;
+    color: $text-color;
+    
+    &--audio {
+      color: $info-color;
+    }
+    
+    &--text {
+      color: $primary-color;
+    }
+  }
+  
+  &__file-details {
+    flex: 1;
+    
+    h4 {
+      margin: 0 0 $spacing-xs;
+      font-size: $font-size-base;
+    }
+    
+    p {
+      margin: $spacing-xs 0;
+      color: $text-muted;
+      font-size: $font-size-sm;
+    }
+  }
+  
+  &__remove {
+    background: none;
+    border: none;
+    color: $text-muted;
+    cursor: pointer;
+    
+    &:hover {
+      color: $danger-color;
+    }
+  }
+  
+  &__status {
+    display: flex;
+    align-items: center;
+    padding: $spacing-medium;
+    margin: $spacing-medium 0;
+    border-radius: $border-radius;
+    
+    svg {
+      margin-right: $spacing-small;
+    }
+    
+    &--success {
+      background-color: rgba($success-color, 0.1);
+      color: $success-color;
+    }
+    
+    &--error {
+      background-color: rgba($danger-color, 0.1);
+      color: $danger-color;
+    }
+  }
+  
+  &__progress {
+    display: flex;
+    align-items: center;
+    padding: $spacing-medium;
+    margin: $spacing-medium 0;
+    border-radius: $border-radius;
+    background-color: rgba($info-color, 0.1);
+    color: $info-color;
+  }
+  
+  &__spinner {
+    animation: spin 1s linear infinite;
+    margin-right: $spacing-small;
+  }
+  
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-medium;
+    margin-top: $spacing-large;
+  }
+  
+  &__info {
+    margin-top: $spacing-xlarge;
+    padding-top: $spacing-medium;
+    border-top: 1px solid $border-color;
+    
+    h5 {
+      margin: 0 0 $spacing-small;
+      color: $text-color;
+    }
+    
+    ul {
+      padding-left: $spacing-large;
+      margin: $spacing-small 0;
+      
+      li {
+        margin-bottom: $spacing-small;
+        color: $text-muted;
+      }
+    }
+  }
+  
+  // Processing overlay styles
+  &__processing-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba($background-color, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+  }
+  
+  &__processing-content {
+    background-color: white;
+    border-radius: $border-radius;
+    padding: $spacing-xlarge;
+    text-align: center;
+    box-shadow: $box-shadow-lg;
+    max-width: 400px;
+    width: 90%;
+    
+    h3 {
+      margin: $spacing-medium 0 $spacing-small;
+      color: $primary-color;
+    }
+    
+    p {
+      color: $text-muted;
+      margin: $spacing-small 0 0;
+    }
+  }
+  
+  &__processing-spinner {
+    color: $primary-color;
+    animation: spin 1.5s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

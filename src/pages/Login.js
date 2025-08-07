@@ -84,12 +84,6 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="login-container">
-        <div className="login-language-selector">
-          <button onClick={toggleLanguage} className="btn btn-secondary btn-sm language-btn">
-            <Globe size={16} />
-            <span>{language === 'en' ? t('languages.he') : t('languages.en')}</span>
-          </button>
-        </div>
         <div className="login-header">
           <h1>{isLogin ? t('login.title') : t('register.title')}</h1>
         </div>
@@ -209,6 +203,12 @@ const Login = () => {
             </p>
           </div>
         </form>
+        <div className="login-language-selector">
+          <button onClick={toggleLanguage} className="btn btn-secondary btn-sm language-btn">
+            <Globe size={16} />
+            <span>{language === 'en' ? t('languages.hebrew') : t('languages.english')}</span>
+          </button>
+        </div>
       </div>
     </div>
   );

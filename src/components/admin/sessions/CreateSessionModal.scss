@@ -2,10 +2,14 @@
 
 .create-session-modal {
   .modal__content {
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-width: 1200px;
+    width: 95vw;
+    margin: 0 auto;
     padding: 0;
+    
+    // @media (min-width: 1400px) {
+    //   max-width: 1400px;
+    // }
   }
 
   .modal__header {
@@ -26,14 +30,55 @@
         color: $primary-color;
       }
     }
+    
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: $spacing-small;
+      
+      .step {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: $font-size-sm;
+        font-weight: 600;
+        border: 2px solid $border-color;
+        background: white;
+        color: $text-muted;
+        transition: all 0.2s ease;
+        
+        &.active {
+          border-color: $primary-color;
+          background: $primary-color;
+          color: white;
+        }
+        
+        &.completed {
+          border-color: $success-color;
+          background: $success-color;
+          color: white;
+        }
+      }
+    }
+  }
+
+  .modal__footer {
+    padding: $spacing-large;
+    border-top: 1px solid $border-color;
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-medium;    
   }
 }
 
 .create-session-form {
-  padding: $spacing-large;
+  padding: $spacing-large $spacing-xlarge;
   
   .form-section {
-    margin-bottom: $spacing-xlarge;
+    margin-bottom: $spacing-large;
     border: 1px solid $border-color;
     border-radius: $border-radius;
     background: $background-color;
@@ -100,11 +145,19 @@
   .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: $spacing-medium;
+    gap: $spacing-large;
     margin-bottom: $spacing-medium;
     
     &:last-child {
       margin-bottom: 0;
+    }
+    
+    &.form-row--three-cols {
+      grid-template-columns: 1fr 1fr 1fr;
+      
+      @media (max-width: $breakpoint-lg) {
+        grid-template-columns: 1fr 1fr;
+      }
     }
     
     @media (max-width: $breakpoint-md) {
@@ -221,6 +274,36 @@
     padding-top: $spacing-large;
     border-top: 1px solid $border-color;
     margin-top: $spacing-xlarge;
+  }
+  
+  .modal__actions {
+    display: flex;
+    gap: $spacing-medium;
+    justify-content: space-between;
+    align-items: center;
+    
+    .step-navigation {
+      display: flex;
+      gap: $spacing-medium;
+      align-items: center;
+      
+      .btn {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        
+        &.btn--outline {
+          background: transparent;
+          border: 1px solid $border-color;
+          color: $text-color;
+          
+          &:hover {
+            border-color: $primary-color;
+            color: $primary-color;
+          }
+        }
+      }
+    }
   }
   
   // Button styles

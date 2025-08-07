@@ -1,5 +1,7 @@
 // Sessions Page Styles
 .sessions-page {
+  position: relative;
+
   .admin-page__header-content {
     display: flex;
     justify-content: space-between;
@@ -671,13 +673,13 @@
 
 .modal {
   position: absolute;
-  top: 60%;
+  top: 1rem;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 0);
   background: white;
   border-radius: $border-radius;
   box-shadow: $box-shadow-lg;
-  max-width: 900px;
+  // max-width: 900px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;

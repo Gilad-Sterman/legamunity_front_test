@@ -1021,7 +1021,7 @@ const Sessions = () => {
 
                       <div className="form-group form-group--full">
                         <label className="form-group__label">
-                          {t('admin.sessions.scheduleNotes', 'Notes')}
+                          {t('admin.sessions.notes', 'Notes')}
                         </label>
                         <textarea
                           value={scheduleForm.notes}

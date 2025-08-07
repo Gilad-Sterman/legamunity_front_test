@@ -28,9 +28,9 @@ const SessionList = ({ sessions, title, loading, emptyMessage }) => {
     <div className="session-list">
       <div className="session-list__header">
         <h3 className="session-list__title">{title || t('admin.sessions.active')}</h3>
-        <div className="session-list__button-container">
+        <div className="session-list__button-container" onClick={() => navigate('/admin/sessions')}>
           <Eye className="session-list__button-icon" />
-          <button className="session-list__button" onClick={() => navigate('/admin/sessions')}>{t('admin.sessions.viewAll')}</button>
+          <button className="session-list__button">{t('admin.sessions.viewAll')}</button>
         </div>
       </div>
       <ul className="session-list__content">

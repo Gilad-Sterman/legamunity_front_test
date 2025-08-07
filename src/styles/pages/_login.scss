@@ -16,14 +16,8 @@
     position: relative;
     
     .login-language-selector {
-      position: absolute;
-      top: $spacing-small;
-      right: $spacing-small;
-      
-      html[dir="rtl"] & {
-        right: auto;
-        left: $spacing-small;
-      }
+      width: max-content;
+      margin: auto;
       
       .language-btn {
         display: flex;

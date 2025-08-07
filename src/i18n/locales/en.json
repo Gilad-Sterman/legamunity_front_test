@@ -19,7 +19,10 @@
     "of": "of",
     "clearFilters": "Clear Filters",
     "add": "Add",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "save": "Save",
+    "confirm": "Confirm",
+    "close": "Close"
   },
   "navbar": {
     "brand": "Legamunity"
@@ -245,6 +248,19 @@
         "memorial": "Memorial"
       }
     },
+    "interviews": {
+      "upload": {
+        "title": "Upload Interview",
+        "subtitle": "Upload an interview",
+        "processInfo": {
+          "title": "What happens after upload?",
+          "step1": "File is securely uploaded and stored",
+          "step2": "Audio files are automatically transcribed",
+          "step3": "AI generates a draft life story",
+          "step4": "Interview is marked as completed"
+        }
+      }
+    },
     "table": {
       "email": "Email",
       "displayName": "Display Name",
@@ -330,8 +346,10 @@
     }
   },
   "languages": {
-    "en": "English",
-    "he": "Hebrew"
+    "en": "Eng",
+    "he": "Heb",
+    "english": "English",
+    "hebrew": "Hebrew"
   },
   "login": {
     "title": "Sign in to your account",

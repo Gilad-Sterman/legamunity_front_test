@@ -27,7 +27,7 @@
   "sidebar": {
     "dashboard": "לוח בקרה",
     "users": "משתמשים",
-    "sessions": "פגישות",
+    "sessions": "סיפורי חיים",
     "interviews": "ראיונות",
     "admin": "ניהול",
     "adminDashboard": "לוח בקרה למנהל",
@@ -53,15 +53,62 @@
       "pendingReview": "ממתינים לבדיקה"
     },
     "sessions": {
-      "title": "ניהול פגישות",
-      "createNew": "צור פגישה חדשה",
-      "createSession": "צור פגישה",
+      "title": "ניהול סיפורי חיים",
+      "createNew": "צור סיפור חיים חדש",
+      "createSession": "צור סיפור חיים",
       "creating": "יוצר...",
-      "search": "חיפוש פגישות...",
-      "noSessions": "לא נמצאו פגישות",
+      "search": "חיפוש סיפורי חיים...",
+      "noSessions": "לא נמצאו סיפורי חיים",
       "noSessionsDesc": "צור את הפגישה הראשונה שלך כדי להתחיל.",
+      "clientInfo": "מידע לקוח",
       "collaborators": "משתתפים",
+      "viewSchedule": "צפה בלוח הזמנים",
+      "setSchedule": "הגדר לוח זמנים",
+      "interviewScheduling": "תיזמון ראיון",
+      "dayOfWeek": "יום בשבוע",
+      "selectDay": "בחר יום",
+      "days": {
+        "sunday": "ראשון",
+        "monday": "שני",
+        "tuesday": "שלישי",
+        "wednesday": "רביעי",
+        "thursday": "חמישי",
+        "friday": "שישי",
+        "saturday": "שבת"
+      },
+      "startTime": "זמן תחילת הפגישה",
+      "selectUser": "בחר משתמש",
+      "selectUserPlaceholder": "בחר משתמש...",
+      "interviewType": "סוג ראיון",
+      "date": "תאריך",
+      "time": "שעה",
+      "duration": "משך",
+      "location": "מיקום",
+      "notes": "הערות",
+      "notesPlaceholder": "הערות נוספות לראיון...",
+      "fileDetails": "פרטי קובץ",
+      "fileInfo": "מידע על הקובץ",
+      "fileName": "שם קובץ",
+      "fileSize": "גודל קובץ",
+      "fileType": "סוג קובץ",
+      "uploadedAt": "הועלה ב",
+      "transcription": "תמלול",
+      "draftDetails": "פרטי טיוטה",
+      "draftInfo": "מידע על הטיוטה",
+      "draftTitle": "כותרת",
+      "draftStatus": "סטטוס",
+      "draftVersion": "גרסה",
+      "createdAt": "נוצר ב",
+      "draftContent": "תוכן",
+      "summary": "סיכום",
+      "sections": "חלקים",
+      "keyThemes": "נושאים מרכזיים",
+      "friendInterview": "ראיון חבר",
       "interviews": "ראיונות",
+      "language": "שפה",
+      "specialRequirements": "דרישות מיוחדות",
+      "focusAreas": "תחמי עניין",
+      "tonePreference": "העדפה",
       "metadata": "מידע על הפגישה",
       "totalDuration": "משך כולל",
       "completed": "הושלמו",
@@ -71,14 +118,17 @@
       "words": "מילים",
       "uploadFile": "העלה קובץ",
       "viewDetails": "צפה בפרטים",
+      "viewFile": "צפה בקובץ",
+      "fileUploaded": "קובץ הועלה",
+      "draftGenerated": "טיוטה נוצרה",
       "showing": "מציג",
       "of": "מתוך",
-      "sessions": "פגישות",
+      "sessions": "סיפורי חיים",
       "tPriority": "עדיפות",
-      "createModalPlaceholder": "טופס יצירת פגישה יוטמע כאן.",
-      "active": "סשנים פעילים",
+      "createModalPlaceholder": "טופס יצירת סיפורי חיים יוטמע כאן.",
+      "active": "סיפורי חיים פעילים",
       "viewAll": "הצג הכל",
-      "noActiveSessions": "אין סשנים פעילים.",
+      "noActiveSessions": "אין סיפורי חיים פעילים.",
       "filters": {
         "allStatuses": "כל סטטוס",
         "allInterviewStatuses": "כל סטטוס ראיון",
@@ -124,9 +174,84 @@
         "keyThemes": "נושאים מרכזיים"
       },
       "form": {
-        "userInfo": "מידע משתמש",
-        "selectUser": "בחר משתמש",
-        "chooseUser": "בחר משתמש...",
+        "clientInfo": "מידע לקוח",
+        "clientName": "שם לקוח",
+        "clientNamePlaceholder": "הכנס שם לקוח",
+        "clientAge": "גיל לקוח",
+        "clientAgePlaceholder": "הכנס גיל לקוח",
+        "clientEmail": "אימייל לקוח",
+        "clientEmailPlaceholder": "הכנס אימייל לקוח",
+        "clientPhone": "טלפון לקוח",
+        "clientPhonePlaceholder": "הכנס טלפון לקוח",
+        "clientAddress": "כתובת לקוח",
+        "clientAddressPlaceholder": "הכנס כתובת לקוח",
+        "primaryContact": "איש קשר ראשי",
+        "contactName": "שם איש קשר ראשי",
+        "contactNamePlaceholder": "הכנס שם איש קשר ראשי",
+        "contactPhone": "טלפון איש קשר ראשי",
+        "contactPhonePlaceholder": "הכנס טלפון איש קשר ראשי",
+        "contactEmail": "אימייל איש קשר ראשי",
+        "contactEmailPlaceholder": "הכנס אימייל איש קשר ראשי",
+        "relationship": "יחס",
+        "selectRelationship": "בחר יחס",
+        "relationships": {
+          "spouse": "בן/בת זוג",
+          "child": "בן/בת",
+          "grandchild": "נכד",
+          "sibling": "אח/אחות",
+          "otherFamily": "קשר משפחתי אחר"
+        },
+        "sessionConfig": "פרטים כללים",
+        "language": "שפה",
+        "languages": {
+          "english": "אנגלית",
+          "hebrew": "עברית",
+          "other": "אחר"
+        },
+        "storyPreferences": "הגדרות סיפור",
+        "focusArea": "תחומי עניין",
+        "focusAreas": {
+          "childhood": "ילדות",
+          "family": "משפחה",
+          "career": "קריירה",
+          "education": "חינוך",
+          "relationships": "יחסים",
+          "achievements": "הישגים",
+          "challenges": "אתגרים",
+          "travel": "טיולים",
+          "hobbies": "תחביבים",
+          "community": "קהילה",
+          "immigration_story": "סיפור הגירה",
+          "military_service": "שירות צבאי",
+          "parenthood": "הורות",
+          "wisdom_lessons": "פניני חכמה"
+        },
+        "tonePreference": "העדפה",
+        "tonePreferences": {
+          "nostalgic": "נוסטלגי",
+          "celebratory": "מנציח",
+          "reflective": "מבט פנימי",
+          "inspiring": "מעודד",
+          "humorous": "מצחיק",
+          "heartfelt": "מרגש"
+        },
+        "targetLength": "משך פגישה",
+        "targetLengths": {
+          "short": "קצר (10 - 20 עמודים)",
+          "medium": "בינוני (30 - 50 עמודים)",
+          "long": "ארוך (60+ עמודים)"
+        },
+        "specialTopics": "תחומים נוספים",
+        "specialTopicsPlaceholder": "הוסף תחומים נוספים...",
+        "accessibilityRequirements": "דרישות נגישות",
+        "accessibilityNeeds": "דרישות נגישות",
+        "accessibilityPlaceholder": "מכשירי שמיעה, נגישות לכסא גלגלים, גופן גדול, וכו'...",
+        "specialRequirements": "דרישות מיוחדות",
+        "specialRequirementsPlaceholder": "שיקולי בריאות, צרכים של נוחות, וכו'...",
+        "interviewScheduling": "קביעת לוח זמנים (אופציונלי)",
+        "enableScheduling": "קביעת זמן שבועי לכל הראינות",
+        "selectUser": "בחר לקוח",
+        "chooseUser": "בחר לקוח...",
         "sessionDetails": "פרטי הפגישה",
         "stage": "שלב",
         "priority": "עדיפות",
@@ -146,11 +271,19 @@
         "interview3": "ראיון 3",
         "interview4": "ראיון 4",
         "interview5": "ראיון 5",
-        "interviewNotes": "הערות ראיון (אופציונלי)"
+        "interviewNotes": "הערות ראיון (אופציונלי)",
+        "additionalNotes": "הערות נוספות",
+        "createSession": "צור סיפור חיים"
       },
       "validation": {
+        "clientNameRequired": "אנא הכנס שם לקוח",
+        "clientAgeRequired": "אנא הכנס גיל לקוח",
+        "clientEmailRequired": "אנא הכנס אימייל לקוח",
+        "primaryContactRequired": "אנא הכנס שם איש קשר ראשי",
+        "primaryContactPhoneRequired": "אנא הכנס טלפון איש קשר ראשי",
         "userRequired": "אנא בחר משתמש",
-        "interviewRequired": "נדרש לפחות ראיון אחד"
+        "interviewRequired": "נדרש לפחות ראיון אחד",
+        "focusAreasRequired": "נדרש לפחות תחום עניין אחד"
       },
       "priority": {
         "low": "נמוכה",
@@ -169,10 +302,12 @@
         "final": "סופי",
         "friend": "חבר"
       },
+      "selectLocation": "בחר מיקום",
       "locations": {
         "online": "אונליין",
         "office": "משרד",
-        "phone": "טלפון"
+        "phone": "טלפון",
+        "home": "בית הלקוח"
       },
       "priorities": {
         "standard": "רגיל",
@@ -180,31 +315,63 @@
         "memorial": "זיכרון"
       }
     },
-    "table": {
-      "email": "אימייל",
-      "displayName": "שם תצוגה",
-      "status": "סטטוס",
-      "actions": "פעולות"
-    },
-    "status": {
-      "enabled": "פעיל",
-      "disabled": "מושבת"
-    },
-    "actions": {
-      "enable": "הפעל",
-      "disable": "השבת",
-      "delete": "מחק",
-      "edit": "ערוך שם תצוגה",
-      "save": "שמור",
-      "cancel": "בטל"
-    },
-    "confirmations": {
-      "deleteUser": "האם אתה בטוח שברצונך למחוק משתמש זה לצמיתות?"
-    },
-    "placeholders": {
-      "enterDisplayName": "הזן שם תצוגה",
-      "noDisplayName": "לא זמין"
+    "interviews": {
+      "upload": {
+        "title": "העלאת קובץ",
+        "subtitle": "העלה קובץ ראיון",
+        "upload": "העלה",
+        "uploading": "הועלת",
+        "processing": "מעבד",
+        "success": "הצלחה",
+        "error": "שגיאה",
+        "audioFile": "קובץ אודיו",
+        "textFile": "קובץ טקסט",
+        "sizeLimit": "גודל קובץ מוגבל 100MB",
+        "dropzone": {
+          "title": "העלעת קובץ",
+          "subtitle": "העלה קובץ ראיון",
+          "upload": "העלה",
+          "uploading": "הועלת",
+          "processing": "מעבד",
+          "success": "הצלחה",
+          "error": "שגיאה",
+          "audioFile": "קובץ אודיו",
+          "textFile": "קובץ טקסט"
+        },
+        "processInfo": {
+          "title": "מה קורה אחרי הועלת הקובץ?",
+          "step1": "הקובץ נשמר במערכת",
+          "step2": "יצירת תמלול לקבצי אודיו",
+          "step3": "AI יוצר טיוטה",
+          "step4": "ראיון מושלם"
+        }
+      }
     }
+  },
+  "table": {
+    "email": "אימייל",
+    "displayName": "שם תצוגה",
+    "status": "סטטוס",
+    "actions": "פעולות"
+  },
+  "status": {
+    "enabled": "פעיל",
+    "disabled": "מושבת"
+  },
+  "actions": {
+    "enable": "הפעל",
+    "disable": "השבת",
+    "delete": "מחק",
+    "edit": "ערוך שם תצוגה",
+    "save": "שמור",
+    "cancel": "בטל"
+  },
+  "confirmations": {
+    "deleteUser": "האם אתה בטוח שברצונך למחוק משתמש זה לצמיתות?"
+  },
+  "placeholders": {
+    "enterDisplayName": "הזן שם תצוגה",
+    "noDisplayName": "לא זמין"
   },
   "scheduling": {
     "title": "תזמון ראיון",
@@ -274,8 +441,10 @@
     }
   },
   "languages": {
-    "en": "אנגלית",
-    "he": "עברית"
+    "en": "אנג",
+    "he": "עבר",
+    "english": "אנגלית",
+    "hebrew": "עברית"
   },
   "login": {
     "title": "התחברות לחשבון שלך",

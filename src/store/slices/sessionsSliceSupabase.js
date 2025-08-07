@@ -249,6 +249,7 @@ const initialState = {
   currentSession: null,
   stats: null,
   loading: false,
+  uploadLoading: false,
   error: null,
   filters: {
     status: 'all',
@@ -531,11 +532,11 @@ const sessionsSliceSupabase = createSlice({
 
       // Upload interview file
       .addCase(uploadInterviewFile.pending, (state) => {
-        state.loading = true;
+        state.uploadLoading = true;
         state.error = null;
       })
       .addCase(uploadInterviewFile.fulfilled, (state, action) => {
-        state.loading = false;
+        state.uploadLoading = false;
         const { interviewId, interview } = action.payload;
 
         // Find and update the interview in all sessions
@@ -583,7 +584,7 @@ const sessionsSliceSupabase = createSlice({
         state.error = null;
       })
       .addCase(uploadInterviewFile.rejected, (state, action) => {
-        state.loading = false;
+        state.uploadLoading = false;
         state.error = action.payload;
       });
   }
