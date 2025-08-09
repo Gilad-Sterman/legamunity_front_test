@@ -69,6 +69,40 @@ export const fetchDraftById = createAsyncThunk(
   }
 );
 
+// Async thunk for fetching drafts by session
+export const fetchDraftsBySession = createAsyncThunk(
+  'drafts/fetchDraftsBySession',
+  async (sessionId, { rejectWithValue, getState }) => {
+    try {
+      // Get token from auth state
+      const { auth } = getState();
+      const token = auth.token;
+
+      if (!token) {
+        return rejectWithValue('No authentication token available');
+      }
+
+      const response = await fetch(`/api/sessions-supabase/${sessionId}/drafts`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return rejectWithValue(data.message || 'Failed to fetch session drafts');
+      }
+      
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // Async thunk for updating draft content
 export const updateDraftContent = createAsyncThunk(
   'drafts/updateDraftContent',
@@ -339,6 +373,7 @@ const initialState = {
   items: [],
   currentDraft: null,
   draftHistory: [],
+  sessionDraftsCount: 0,
   loading: false,
   error: null,
   filters: {
@@ -419,6 +454,21 @@ const draftsSlice = createSlice({
         state.currentDraft = action.payload;
       })
       .addCase(fetchDraftById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch drafts by session
+      .addCase(fetchDraftsBySession.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchDraftsBySession.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload.data;
+        state.sessionDraftsCount = action.payload.count;
+      })
+      .addCase(fetchDraftsBySession.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

@@ -12,6 +12,7 @@ import AdminDashboard from './pages/AdminDashboard';
 // Admin Pages
 import ScheduleInterview from './pages/admin/ScheduleInterview';
 import Sessions from './pages/admin/Sessions';
+import SessionDrafts from './pages/admin/SessionDrafts';
 import Drafts from './pages/admin/Drafts';
 import UserManagement from './pages/admin/UserManagement';
 import Conflicts from './pages/admin/Conflicts';
@@ -54,6 +55,7 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/schedule" element={<ScheduleInterview />} />
             <Route path="/admin/sessions" element={<Sessions />} />
+            <Route path="/admin/drafts/:sessionId" element={<SessionDrafts />} />
             <Route path="/admin/drafts" element={<Drafts />} />
             
             {/* Admin tools */}

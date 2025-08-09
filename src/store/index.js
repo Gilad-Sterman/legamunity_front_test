@@ -5,6 +5,7 @@ import languageReducer from './slices/languageSlice';
 import adminReducer from './slices/adminSlice';
 import schedulingReducer from './slices/schedulingSlice';
 import draftsReducer from './slices/draftsSlice';
+import interviewsReducer from './slices/interviewsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     admin: adminReducer,
     scheduling: schedulingReducer,
     drafts: draftsReducer,
+    interviews: interviewsReducer,
     // Add more reducers here as we develop them
   },
   middleware: (getDefaultMiddleware) =>

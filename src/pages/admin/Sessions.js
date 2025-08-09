@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Filter,
@@ -21,7 +22,8 @@ import {
   Calendar,
   Play,
   X,
-  Trash
+  Trash,
+  Database
 } from 'lucide-react';
 import {
   fetchSessions,
@@ -35,12 +37,20 @@ import {
   deleteSession,
   deleteInterview
 } from '../../store/slices/sessionsSliceSupabase';
+import {
+  fetchSessionInterviews,
+  createInterview,
+  updateInterview as updateNormalizedInterview,
+  deleteInterview as deleteNormalizedInterview
+} from '../../store/slices/interviewsSlice';
 import CreateSessionModal from '../../components/admin/sessions/CreateSessionModal';
 import FileUpload from '../../components/admin/interviews/FileUpload';
+import MigrationPanel from '../../components/admin/migration/MigrationPanel';
 
 const Sessions = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const {
     sessions,
@@ -53,6 +63,15 @@ const Sessions = () => {
     deleteLoading
   } = useSelector(state => state.sessions);
 
+  // Normalized interviews state
+  const {
+    interviewsBySession,
+    sessionLoading: interviewSessionLoading,
+    createLoading: interviewCreateLoading,
+    updateLoading: interviewUpdateLoading,
+    deleteLoading: interviewDeleteLoading
+  } = useSelector(state => state.interviews);
+
   const [expandedSessions, setExpandedSessions] = useState({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingInterview, setEditingInterview] = useState(null);
@@ -62,6 +81,7 @@ const Sessions = () => {
   const [showFileUploadModal, setShowFileUploadModal] = useState(null);
   const [showFileViewModal, setShowFileViewModal] = useState(null);
   const [showDraftViewModal, setShowDraftViewModal] = useState(null);
+  const [showMigrationPanel, setShowMigrationPanel] = useState(null);
   const [scheduleForm, setScheduleForm] = useState({
     dayOfWeek: '',
     startTime: '',
@@ -72,6 +92,15 @@ const Sessions = () => {
   const [searchTerm, setSearchTerm] = useState(filters.search);
   const [selectedStatus, setSelectedStatus] = useState(filters.status); // Changed from selectedStage to selectedStatus
   const [selectedPriority, setSelectedPriority] = useState(filters.priority_level); // Added priority filter
+
+  // Helper function to get interviews with fallback logic
+  const getSessionInterviews = (session) => {
+    // Priority: normalized interviews > legacy interviews > empty array
+    const normalizedInterviews = interviewsBySession[session.id];
+    const legacyInterviews = session.preferences?.interviews || session.interviews;
+    
+    return normalizedInterviews || legacyInterviews || [];
+  };
 
   // Load sessions on component mount and when filters change
   useEffect(() => {
@@ -91,6 +120,15 @@ const Sessions = () => {
     dispatch(fetchSessions(params));
   }, [dispatch, pagination.currentPage, pagination.limit, filters]);
 
+  // Fetch normalized interviews when sessions are expanded
+  useEffect(() => {
+    Object.keys(expandedSessions).forEach(sessionId => {
+      if (expandedSessions[sessionId] && !interviewsBySession[sessionId] && !interviewSessionLoading[sessionId]) {
+        dispatch(fetchSessionInterviews(sessionId));
+      }
+    });
+  }, [dispatch, expandedSessions, interviewsBySession, interviewSessionLoading]);
+
   // Apply client-side filtering for nested fields and interview status
   const filteredSessions = useMemo(() => {
     if (!sessions || sessions.length === 0) return [];
@@ -106,8 +144,8 @@ const Sessions = () => {
       if (filters.status && filters.status.startsWith('interview_')) {
         const interviewStatus = filters.status.replace('interview_', '');
         if (interviewStatus !== 'all') {
-          // Check if any interview has the selected status
-          const interviews = session.preferences?.interviews || session.interviews || [];
+          // Check if any interview has the selected status using helper function
+          const interviews = getSessionInterviews(session);
           const hasMatchingInterview = interviews.some(interview => interview.status === interviewStatus);
           if (!hasMatchingInterview) return false;
         }
@@ -187,20 +225,31 @@ const Sessions = () => {
 
   // Handle interview editing
   const handleEditInterview = (sessionId, interview) => {
-    setEditingInterview({ sessionId, interviewId: interview.id });
-    setEditInterviewName(interview.name || `Interview ${interview.id}`);
-    setEditInterviewIsFriend(interview.isFriendInterview || false);
+    setEditingInterview({ sessionId, interviewId: interview.id, content: interview.content });
+    // Get name from content.name (normalized) or interview.name (legacy) or notes field
+    const interviewName = interview.content?.name || interview.name || interview.notes || `Interview ${interview.id}`;
+    const isFriendInterview = interview.content?.isFriendInterview || interview.isFriendInterview || false;
+    
+    setEditInterviewName(interviewName);
+    setEditInterviewIsFriend(isFriendInterview);
   };
 
   const handleSaveInterviewName = async () => {
     if (!editingInterview || !editInterviewName.trim()) return;
 
     try {
-      await dispatch(updateInterview({
+      // Use normalized interview update with correct field names
+      await dispatch(updateNormalizedInterview({
         interviewId: editingInterview.interviewId,
         updateData: {
-          name: editInterviewName.trim(),
-          isFriendInterview: editInterviewIsFriend
+          // The normalized table uses 'notes' field to store interview name/description
+          notes: editInterviewName.trim(),
+          // Add friend interview info to content field as JSON
+          content: {
+            ...editingInterview.content,
+            isFriendInterview: editInterviewIsFriend,
+            name: editInterviewName.trim()
+          }
         }
       })).unwrap();
 
@@ -219,21 +268,65 @@ const Sessions = () => {
   };
 
   // Handle adding new interview
-  const handleAddInterview = (sessionId) => {
+  const handleAddInterview = async (sessionId) => {
     const session = sessions.find(s => s.id === sessionId);
-    const hasSchedule = session?.preferences?.interview_scheduling?.enabled || session?.interview_scheduling?.enabled;
+    const scheduling = session?.preferences?.interview_scheduling || session?.interview_scheduling;
+    const hasSchedule = scheduling?.enabled;
 
-    const newInterview = {
-      id: `interview_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name: 'new interview',
+    const newInterviewData = {
       type: 'life_story',
       notes: '',
       status: hasSchedule ? 'scheduled' : 'pending',
-      duration: 90,
-      isFriendInterview: false
+      duration: hasSchedule ? (scheduling.duration || 90) : 90,
+      location: hasSchedule ? (scheduling.location || 'online') : 'online',
+      is_friend_interview: false
     };
 
-    dispatch(addInterviewToSession({ sessionId, interviewData: newInterview }));
+    try {
+      // Use normalized interview creation
+      await dispatch(createInterview({ sessionId, interviewData: newInterviewData })).unwrap();
+      
+      // Refresh sessions data to show updated interview count and metrics
+      await dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+      }));
+
+      // Also refresh normalized interviews
+      await dispatch(fetchSessionInterviews(sessionId));
+    } catch (error) {
+      console.error('Failed to create interview:', error);
+    }
+  };
+
+  // Handle deleting an interview
+  const handleDeleteInterview = async (sessionId, interviewId) => {
+    const confirmDelete = window.confirm(t('admin.sessions.deleteInterviewConfirm', 'Are you sure you want to delete this interview?'));
+    if (!confirmDelete) return;
+
+    try {
+      // Use normalized interview deletion
+      await dispatch(deleteNormalizedInterview(interviewId)).unwrap();
+      
+      // Refresh sessions data to show updated interview count and metrics
+      await dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+      }));
+
+      // Also refresh normalized interviews
+      await dispatch(fetchSessionInterviews(sessionId));
+    } catch (error) {
+      console.error('Failed to delete interview:', error);
+    }
   };
 
   const handleDeleteSession = async (sessionId) => {
@@ -251,20 +344,20 @@ const Sessions = () => {
     }
   };
 
-  const handleDeleteInterview = async (sessionId, interviewId) => {
-    const confirmDelete = window.confirm(t('admin.sessions.deleteConfirm', `Are you sure you want to delete this interview?`));
-    if (!confirmDelete) return;
-    try {
-      await dispatch(deleteInterview({ sessionId, interviewId })).unwrap();
-      dispatch(fetchSessions({
-        page: pagination.currentPage,
-        limit: pagination.limit,
-        ...filters
-      }));
-    } catch (error) {
-      console.error('Failed to delete interview:', error);
-    }
-  };
+  // const handleDeleteInterview = async (sessionId, interviewId) => {
+  //   const confirmDelete = window.confirm(t('admin.sessions.deleteConfirm', `Are you sure you want to delete this interview?`));
+  //   if (!confirmDelete) return;
+  //   try {
+  //     await dispatch(deleteInterview({ sessionId, interviewId })).unwrap();
+  //     dispatch(fetchSessions({
+  //       page: pagination.currentPage,
+  //       limit: pagination.limit,
+  //       ...filters
+  //     }));
+  //   } catch (error) {
+  //     console.error('Failed to delete interview:', error);
+  //   }
+  // };
 
   // Handle scheduling modal
   const handleShowScheduling = (sessionId) => {
@@ -328,8 +421,23 @@ const Sessions = () => {
         }
       })).unwrap();
 
+      // Refresh sessions data to show updated interview durations and total duration
+      await dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+      }));
+
+      // Also refresh normalized interviews if using the new data structure
+      if (showSchedulingModal) {
+        await dispatch(fetchSessionInterviews(showSchedulingModal));
+      }
+
       handleCloseScheduling();
-      alert(t('admin.sessions.scheduleUpdated', 'Schedule updated successfully'));
+      alert(t('admin.sessions.scheduleUpdated', 'Schedule updated successfully. All non-completed interviews have been updated with new duration and location.'));
     } catch (error) {
       console.error('Failed to update schedule:', error);
       alert(t('admin.sessions.scheduleUpdateError', 'Failed to update schedule'));
@@ -346,7 +454,17 @@ const Sessions = () => {
   };
 
   const handleShowFileView = (interview) => {
-    setShowFileViewModal(interview);
+    // Create a normalized interview object for the modal
+    const fileData = interview.file_upload || interview.content?.file_upload;
+    const transcription = interview.transcription || interview.content?.transcription;
+    
+    const modalData = {
+      ...interview,
+      file_upload: fileData,
+      transcription: transcription
+    };
+    
+    setShowFileViewModal(modalData);
   };
 
   const handleCloseFileView = () => {
@@ -354,35 +472,43 @@ const Sessions = () => {
   };
 
   const handleShowDraftView = (interview) => {
-    setShowDraftViewModal(interview);
+    // Create a normalized interview object for the modal
+    const draftData = interview.ai_draft || interview.content?.ai_draft;
+    
+    const modalData = {
+      ...interview,
+      ai_draft: draftData
+    };
+    
+    setShowDraftViewModal(modalData);
   };
 
   const handleCloseDraftView = () => {
     setShowDraftViewModal(null);
   };
 
-  // Handle file upload modal
-  const handleFileUploadSuccess = (updatedInterview) => {
-    // Update the specific interview in the Redux state immediately
-    if (updatedInterview) {
-      // Find the session containing this interview and update it
-      const updatedSessions = sessions.map(session => {
-        const interviews = session.interviews || session.preferences?.interviews || [];
-        const interviewIndex = interviews.findIndex(interview => interview.id === updatedInterview.id);
-        if (interviewIndex !== -1) {
-          const updatedInterviews = [...interviews];
-          updatedInterviews[interviewIndex] = updatedInterview;
-          return {
-            ...session,
-            interviews: updatedInterviews,
-            updatedAt: new Date().toISOString()
-          };
-        }
-        return session;
-      });
+  // Handle file upload success for normalized interviews
+  const handleFileUploadSuccess = async (updatedInterview) => {
+    try {
+      // Close the file upload modal first
+      setShowFileUploadModal(null);
+      
+      // Refresh sessions data to show updated completion percentage and metrics
+      await dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+      }));
 
-      // Update Redux state with the new sessions
-      dispatch({ type: 'sessions/updateSessionsAfterUpload', payload: updatedSessions });
+      // Also refresh normalized interviews if using the new data structure
+      if (updatedInterview && updatedInterview.session_id) {
+        await dispatch(fetchSessionInterviews(updatedInterview.session_id));
+      }
+    } catch (error) {
+      console.error('Failed to refresh data after file upload:', error);
     }
   };
 
@@ -614,12 +740,17 @@ const Sessions = () => {
 
                           <div className="session-card__stat">
                             <FileText size={16} />
-                            <span>{(session.preferences?.interviews || session.interviews || []).length} {t('admin.sessions.interviews', 'interviews')}</span>
+                            <span>{session.totalInterviews || getSessionInterviews(session).length} {t('admin.sessions.interviews', 'interviews')}</span>
                           </div>
 
                           <div className="session-card__stat">
-                            <Clock size={16} />
-                            <span>{session.preferences?.metadata?.story_completion_percentage || 0}% {t('admin.sessions.storyComplete', 'complete')}</span>
+                            <FileText size={16} />
+                            <span>{session.completionPercentage || 0}% {t('admin.sessions.storyComplete', 'complete')}</span>
+                          </div>
+
+                          <div className="session-card__stat">
+                            <Users size={16} />
+                            <span>{session.completedInterviews || 0}/{session.totalInterviews || getSessionInterviews(session).length} {t('admin.sessions.completed', 'completed')}</span>
                           </div>
 
                           {(session.preferences?.accessibility_needs || session.preferences?.special_requirements) && (
@@ -682,7 +813,7 @@ const Sessions = () => {
                         </div>
 
                         <div className="session-interviews">
-                          {((session.preferences?.interviews || session.interviews || [])).map((interview) => (
+                          {getSessionInterviews(session).map((interview) => (
                             <div key={interview.id} className="interview">
                               <div className="interview__header">
                                 <div className="interview__info">
@@ -728,8 +859,10 @@ const Sessions = () => {
                                   ) : (
                                     <>
                                       <div className="interview__name-container">
-                                        <span className="interview__name">{interview.name || `Interview ${interview.id}`}</span>
-                                        {interview.isFriendInterview && (
+                                        <span className="interview__name">
+                                          {interview.content?.name || interview.name || interview.notes || `Interview ${interview.id}`}
+                                        </span>
+                                        {(interview.content?.isFriendInterview || interview.isFriendInterview) && (
                                           <span className="interview__friend-badge">
                                             <Users size={12} />
                                             {t('admin.sessions.friendInterview', 'Friend')}
@@ -743,7 +876,7 @@ const Sessions = () => {
                                   )}
                                 </div>
                                 <div className="interview__actions">
-                                  {!interview.file_upload && (
+                                  {!(interview.file_upload || interview.content?.file_upload) && (
                                     <button
                                       className="btn btn--secondary btn--xs"
                                       onClick={() => handleShowFileUpload(interview.id)}
@@ -777,7 +910,7 @@ const Sessions = () => {
                                   <FileText size={14} />
                                   <span>{interview.wordCount} {t('admin.sessions.words', 'words')}</span>
                                 </div>}
-                                {interview.file_upload && (
+                                {(interview.file_upload || interview.content?.file_upload) && (
                                   <div className="interview__meta">
                                     <FileText size={14} />
                                     <button
@@ -789,7 +922,7 @@ const Sessions = () => {
                                     </button>
                                   </div>
                                 )}
-                                {interview.ai_draft && (
+                                {(interview.ai_draft || interview.content?.ai_draft) && (
                                   <div className="interview__meta">
                                     <FileText size={14} />
                                     <button
@@ -829,22 +962,26 @@ const Sessions = () => {
                             <span className="metadata-item__label">{t('admin.sessions.totalDuration', 'Total Duration')}:</span>
                             <span className="metadata-item__value">
                               {(() => {
-                                const interviews = session.preferences?.interviews || session.interviews || [];
-                                const totalDuration = interviews.reduce((sum, interview) => {
-                                  return sum + (interview.duration || 0);
-                                }, 0);
-                                return totalDuration > 0 ? `${totalDuration} min` : 'N/A';
+                                const totalMinutes = session.totalDuration || 0;
+                                if (totalMinutes === 0) return 'N/A';
+                                
+                                const hours = Math.floor(totalMinutes / 60);
+                                const minutes = totalMinutes % 60;
+                                
+                                if (hours === 0) {
+                                  return `${minutes} min`;
+                                } else if (minutes === 0) {
+                                  return `${hours}h`;
+                                } else {
+                                  return `${hours}h ${minutes}min`;
+                                }
                               })()}
                             </span>
                           </div>
                           <div className="metadata-item">
-                            <span className="metadata-item__label">{t('admin.sessions.completed', 'Completed')}:</span>
+                            <span className="metadata-item__label">{t('admin.sessions.storyComplete', 'Story Complete')}:</span>
                             <span className="metadata-item__value">
-                              {(() => {
-                                const interviews = session.preferences?.interviews || session.interviews || [];
-                                const completed = interviews.filter(interview => interview.status === 'completed').length;
-                                return `${completed}/${interviews.length}`;
-                              })()}
+                              {session.completionPercentage || 0}%
                             </span>
                           </div>
                           {session.preferences?.metadata?.cqsScore && (
@@ -864,13 +1001,23 @@ const Sessions = () => {
 
                       {/* Actions */}
                       <div className="session-details__actions">
-                        <button className="btn btn--primary btn--sm">
+                        <button 
+                          className="btn btn--primary btn--sm"
+                          onClick={() => navigate(`/admin/drafts/${session.id}`)}
+                        >
                           <Eye size={16} />
                           {t('admin.sessions.viewDrafts', 'View Drafts')}
                         </button>
                         <button className="btn btn--secondary btn--sm">
                           <Edit size={16} />
                           {t('common.edit', 'Edit')}
+                        </button>
+                        <button 
+                          className="btn btn--info btn--sm"
+                          onClick={() => setShowMigrationPanel(session)}
+                        >
+                          <Database size={16} />
+                          Migration
                         </button>
                         <button className="btn btn--danger btn--sm" onClick={() => handleDeleteSession(session.id)}>
                           <Trash2 size={16} />
@@ -1208,6 +1355,26 @@ const Sessions = () => {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Migration Panel Modal */}
+      {showMigrationPanel && (
+        <div className="modal-overlay" onClick={() => setShowMigrationPanel(null)}>
+          <div className="modal-content modal-content--large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{t('admin.sessions.migration.title', 'Interview Migration')}</h3>
+              <button 
+                className="modal-close"
+                onClick={() => setShowMigrationPanel(null)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <MigrationPanel sessionId={showMigrationPanel.id} />
             </div>
           </div>
         </div>

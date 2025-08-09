@@ -1,0 +1,268 @@
+.migration-panel {
+  background: $background-light;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow-lg;
+  width: 100%;
+  max-width: 600px;
+  margin: $spacing-medium 0;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-medium;
+    border-bottom: 1px solid $border-color;
+    background: $background-color;
+    border-radius: $border-radius $border-radius 0 0;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    font-weight: 600;
+    color: $text-dark;
+    font-size: $font-size-md;
+  }
+
+  &__session-name {
+    color: $text-muted;
+    font-weight: 400;
+    font-size: $font-size-sm;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    color: $text-muted;
+    cursor: pointer;
+    padding: $spacing-xs;
+    border-radius: $border-radius-sm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: $background-dark;
+      color: $text-color;
+    }
+  }
+
+  &__content {
+    padding: $spacing-medium;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-medium;
+  }
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    color: $text-muted;
+    padding: $spacing-large;
+    justify-content: center;
+
+    .spinning {
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  &__status {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-small;
+    padding: $spacing-medium;
+    background: $background-color;
+    border-radius: $border-radius-sm;
+    border: 1px solid $border-color;
+  }
+
+  &__status-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+
+    &:first-child {
+      padding-bottom: $spacing-small;
+      border-bottom: 1px solid $border-color;
+      margin-bottom: $spacing-xs;
+    }
+  }
+
+  &__status-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+
+    .text-success {
+      color: $success-color;
+    }
+
+    .text-warning {
+      color: $warning-color;
+    }
+
+    .text-info {
+      color: $info-color;
+    }
+
+    .text-muted {
+      color: $text-muted;
+    }
+  }
+
+  &__status-info {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    flex: 1;
+  }
+
+  &__status-label {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    font-weight: 500;
+  }
+
+  &__status-value {
+    font-size: $font-size-sm;
+    font-weight: 500;
+
+    &.text-success {
+      color: $success-color;
+    }
+
+    &.text-warning {
+      color: $warning-color;
+    }
+
+    &.text-info {
+      color: $info-color;
+    }
+
+    &.text-muted {
+      color: $text-muted;
+    }
+  }
+
+  &__flow {
+    padding: $spacing-medium;
+    background: $background-color;
+    border-radius: $border-radius-sm;
+    border: 1px solid $border-color;
+  }
+
+  &__flow-step {
+    display: flex;
+    align-items: center;
+    gap: $spacing-medium;
+    justify-content: center;
+  }
+
+  &__flow-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-medium;
+    background: $background-light;
+    border: 2px solid $border-color;
+    border-radius: $border-radius;
+    min-width: 140px;
+    text-align: center;
+
+    span {
+      font-weight: 500;
+      color: $text-dark;
+      font-size: $font-size-sm;
+    }
+
+    small {
+      color: $text-muted;
+      font-size: $font-size-xs;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-small;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: $spacing-small 0;
+  }
+
+  &__message {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    padding: $spacing-small $spacing-medium;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+
+    &--error {
+      background: $danger-light;
+      color: $danger-color;
+      border: 1px solid $danger-color;
+    }
+
+    &--success {
+      background: $success-light;
+      color: $success-color;
+      border: 1px solid $success-color;
+    }
+  }
+
+  &__info {
+    display: flex;
+    gap: $spacing-small;
+    padding: $spacing-medium;
+    background: $info-light;
+    border-radius: $border-radius-sm;
+    border: 1px solid $info-color;
+    font-size: $font-size-xs;
+    color: $text-color;
+
+    svg {
+      color: $info-color;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__info-text {
+    flex: 1;
+
+    p {
+      margin: 0 0 $spacing-xs 0;
+      font-weight: 500;
+    }
+
+    ol {
+      margin: 0;
+      padding-left: $spacing-medium;
+      
+      li {
+        margin-bottom: $spacing-xs;
+        line-height: 1.4;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+// Animation for spinning icons
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}

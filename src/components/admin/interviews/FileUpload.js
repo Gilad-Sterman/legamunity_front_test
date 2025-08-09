@@ -2,12 +2,12 @@ import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Upload, X, FileText, Music, AlertCircle, CheckCircle, Loader } from 'lucide-react';
-import { uploadInterviewFile } from '../../../store/slices/sessionsSliceSupabase';
+import { uploadInterviewFile } from '../../../store/slices/interviewsSlice';
 
 const FileUpload = ({ interviewId, onClose, onSuccess }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { uploadLoading } = useSelector(state => state.sessions);
+  const { uploadLoading } = useSelector(state => state.interviews);
   
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -113,6 +113,7 @@ const FileUpload = ({ interviewId, onClose, onSuccess }) => {
       setUploadMessage(t('admin.interviews.upload.success', 'File uploaded and processed successfully!'));
       
       // Call success callback with the updated interview data
+      // result contains { interviewId, interview } from the Redux action
       setTimeout(() => {
         onSuccess && onSuccess(result.interview);
         onClose && onClose();
