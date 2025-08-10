@@ -234,6 +234,13 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
   const scrollToTop = () => {
     // Scroll the main-content element to top when navigating between steps
     const mainContent = document.querySelector('.main-content');
+    const modalContent = document.querySelector('.create-session-modal');
+    if (modalContent) {
+      modalContent.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
     if (mainContent) {
       mainContent.scrollTo({
         top: 0,
@@ -410,6 +417,17 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
       // CLEANUP: Removed debug console.log statements
 
       await dispatch(createSession(sessionData)).unwrap();
+      
+      // Refresh sessions list to show newly created session with interviews immediately
+      const { fetchSessions } = await import('../../../store/slices/sessionsSliceSupabase');
+      dispatch(fetchSessions({
+        page: 1,
+        limit: 10,
+        search: '',
+        sortBy: 'created_at',
+        sortOrder: 'desc'
+      }));
+      
       onClose();
     } catch (error) {
       console.error('Failed to create session:', error);

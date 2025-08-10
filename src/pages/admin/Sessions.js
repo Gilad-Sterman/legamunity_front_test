@@ -2,28 +2,31 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import {
-  Search,
-  Filter,
-  Plus,
+import { 
+  Users, 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Phone, 
+  Mail, 
+  Edit, 
+  Trash, 
+  Plus, 
+  Search, 
+  Filter, 
+  X, 
+  Upload, 
+  FileText, 
+  CheckCircle, 
+  AlertTriangle,
   Eye,
-  Edit,
-  Trash2,
+  Download,
   ChevronDown,
   ChevronUp,
+  MessageSquare,
   User,
-  Clock,
-  Users,
-  FileText,
-  Upload,
-  Phone,
-  Mail,
   AlertCircle,
-  Calendar,
-  Play,
-  X,
-  Trash,
-  Database
+  Trash2
 } from 'lucide-react';
 import {
   fetchSessions,
@@ -37,15 +40,9 @@ import {
   deleteSession,
   deleteInterview
 } from '../../store/slices/sessionsSliceSupabase';
-import {
-  fetchSessionInterviews,
-  createInterview,
-  updateInterview as updateNormalizedInterview,
-  deleteInterview as deleteNormalizedInterview
-} from '../../store/slices/interviewsSlice';
+// Removed interviews slice imports - using sessions API for all interview operations
 import CreateSessionModal from '../../components/admin/sessions/CreateSessionModal';
 import FileUpload from '../../components/admin/interviews/FileUpload';
-import MigrationPanel from '../../components/admin/migration/MigrationPanel';
 
 const Sessions = () => {
   const { t } = useTranslation();
@@ -59,18 +56,11 @@ const Sessions = () => {
     loading,
     error,
     createLoading,
-    updateLoading,
-    deleteLoading
+    // updateLoading,
+    // deleteLoading
   } = useSelector(state => state.sessions);
 
-  // Normalized interviews state
-  const {
-    interviewsBySession,
-    sessionLoading: interviewSessionLoading,
-    createLoading: interviewCreateLoading,
-    updateLoading: interviewUpdateLoading,
-    deleteLoading: interviewDeleteLoading
-  } = useSelector(state => state.interviews);
+  // Removed interviews slice state - using sessions API for all interview operations
 
   const [expandedSessions, setExpandedSessions] = useState({});
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -95,9 +85,9 @@ const Sessions = () => {
 
   // Helper function to get interviews with fallback logic
   const getSessionInterviews = (session) => {
-    // Priority: normalized interviews > legacy interviews > empty array
-    const normalizedInterviews = interviewsBySession[session.id];
-    const legacyInterviews = session.preferences?.interviews || session.interviews;
+    // Priority: normalized interviews from session data > legacy interviews > empty array
+    const normalizedInterviews = session.interviews; // From sessions API
+    const legacyInterviews = session.preferences?.interviews;
     
     return normalizedInterviews || legacyInterviews || [];
   };
@@ -120,14 +110,8 @@ const Sessions = () => {
     dispatch(fetchSessions(params));
   }, [dispatch, pagination.currentPage, pagination.limit, filters]);
 
-  // Fetch normalized interviews when sessions are expanded
-  useEffect(() => {
-    Object.keys(expandedSessions).forEach(sessionId => {
-      if (expandedSessions[sessionId] && !interviewsBySession[sessionId] && !interviewSessionLoading[sessionId]) {
-        dispatch(fetchSessionInterviews(sessionId));
-      }
-    });
-  }, [dispatch, expandedSessions, interviewsBySession, interviewSessionLoading]);
+  // Note: Interviews are already loaded with sessions data from the sessions API
+  // No need to fetch them separately since the sessions API includes normalized interviews
 
   // Apply client-side filtering for nested fields and interview status
   const filteredSessions = useMemo(() => {
@@ -238,8 +222,8 @@ const Sessions = () => {
     if (!editingInterview || !editInterviewName.trim()) return;
 
     try {
-      // Use normalized interview update with correct field names
-      await dispatch(updateNormalizedInterview({
+      // Use sessions slice interview update method
+      await dispatch(updateInterview({
         interviewId: editingInterview.interviewId,
         updateData: {
           // The normalized table uses 'notes' field to store interview name/description
@@ -252,6 +236,16 @@ const Sessions = () => {
           }
         }
       })).unwrap();
+
+      // Refresh sessions data to show updated interview information
+      await dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+      }));
 
       setEditingInterview(null);
       setEditInterviewName('');
@@ -283,8 +277,8 @@ const Sessions = () => {
     };
 
     try {
-      // Use normalized interview creation
-      await dispatch(createInterview({ sessionId, interviewData: newInterviewData })).unwrap();
+      // Use sessions slice interview creation
+      await dispatch(addInterviewToSession({ sessionId, interviewData: newInterviewData })).unwrap();
       
       // Refresh sessions data to show updated interview count and metrics
       await dispatch(fetchSessions({
@@ -295,9 +289,6 @@ const Sessions = () => {
         sortOrder: filters.sortOrder,
         status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
       }));
-
-      // Also refresh normalized interviews
-      await dispatch(fetchSessionInterviews(sessionId));
     } catch (error) {
       console.error('Failed to create interview:', error);
     }
@@ -309,8 +300,8 @@ const Sessions = () => {
     if (!confirmDelete) return;
 
     try {
-      // Use normalized interview deletion
-      await dispatch(deleteNormalizedInterview(interviewId)).unwrap();
+      // Use sessions slice interview deletion
+      await dispatch(deleteInterview({ sessionId, interviewId })).unwrap();
       
       // Refresh sessions data to show updated interview count and metrics
       await dispatch(fetchSessions({
@@ -321,9 +312,6 @@ const Sessions = () => {
         sortOrder: filters.sortOrder,
         status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
       }));
-
-      // Also refresh normalized interviews
-      await dispatch(fetchSessionInterviews(sessionId));
     } catch (error) {
       console.error('Failed to delete interview:', error);
     }
@@ -343,21 +331,6 @@ const Sessions = () => {
       console.error('Failed to delete session:', error);
     }
   };
-
-  // const handleDeleteInterview = async (sessionId, interviewId) => {
-  //   const confirmDelete = window.confirm(t('admin.sessions.deleteConfirm', `Are you sure you want to delete this interview?`));
-  //   if (!confirmDelete) return;
-  //   try {
-  //     await dispatch(deleteInterview({ sessionId, interviewId })).unwrap();
-  //     dispatch(fetchSessions({
-  //       page: pagination.currentPage,
-  //       limit: pagination.limit,
-  //       ...filters
-  //     }));
-  //   } catch (error) {
-  //     console.error('Failed to delete interview:', error);
-  //   }
-  // };
 
   // Handle scheduling modal
   const handleShowScheduling = (sessionId) => {
@@ -431,10 +404,7 @@ const Sessions = () => {
         status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
       }));
 
-      // Also refresh normalized interviews if using the new data structure
-      if (showSchedulingModal) {
-        await dispatch(fetchSessionInterviews(showSchedulingModal));
-      }
+      // Interviews are already included in sessions data - no separate fetch needed
 
       handleCloseScheduling();
       alert(t('admin.sessions.scheduleUpdated', 'Schedule updated successfully. All non-completed interviews have been updated with new duration and location.'));
@@ -503,10 +473,7 @@ const Sessions = () => {
         status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
       }));
 
-      // Also refresh normalized interviews if using the new data structure
-      if (updatedInterview && updatedInterview.session_id) {
-        await dispatch(fetchSessionInterviews(updatedInterview.session_id));
-      }
+      // Interviews are already included in sessions data - no separate fetch needed
     } catch (error) {
       console.error('Failed to refresh data after file upload:', error);
     }
@@ -618,7 +585,7 @@ const Sessions = () => {
             />
           </div>
 
-          <div className="sessions-filters__status">
+          {/* <div className="sessions-filters__status">
             <Filter size={20} />
             <select
               value={selectedStatus}
@@ -632,7 +599,7 @@ const Sessions = () => {
               <option value="completed">{getTranslatedStatus('completed')}</option>
               <option value="cancelled">{getTranslatedStatus('cancelled')}</option>
             </select>
-          </div>
+          </div> */}
 
           <div className="sessions-filters__interview-status">
             <Filter size={20} />
@@ -719,9 +686,9 @@ const Sessions = () => {
                       </div>
 
                       <div className="session-card__meta">
-                        <span className={getStatusClass(session.status)}>
+                        {/* <span className={getStatusClass(session.status)}>
                           {getTranslatedStatus(session.status)}
-                        </span>
+                        </span> */}
 
                         <span className={getPriorityClass(session.preferences?.priority_level || 'standard')}>
                           {getTranslatedPriority(session.preferences?.priority_level || 'standard')}
@@ -912,26 +879,69 @@ const Sessions = () => {
                                 </div>}
                                 {(interview.file_upload || interview.content?.file_upload) && (
                                   <div className="interview__meta">
-                                    <FileText size={14} />
-                                    <button
-                                      className="interview__file-link"
-                                      onClick={() => handleShowFileView(interview)}
-                                      title={t('admin.sessions.viewFile', 'View uploaded file')}
-                                    >
-                                      {t('admin.sessions.fileUploaded', 'File uploaded')}
-                                    </button>
+                                    <div className="interview__file-status">
+                                      <button
+                                        className="interview__draft-link interview__draft-link--success"
+                                        onClick={() => handleShowFileView(interview)}
+                                        title={t('admin.sessions.viewFile', 'View uploaded file')}
+                                      >
+                                        <FileText size={14} />
+                                        <span className="interview__draft-text">{t('admin.sessions.fileUploaded', 'File uploaded')}</span>
+                                      </button>
+                                    </div>
                                   </div>
                                 )}
-                                {(interview.ai_draft || interview.content?.ai_draft) && (
-                                  <div className="interview__meta">
-                                    <FileText size={14} />
-                                    <button
-                                      className="interview__file-link"
-                                      onClick={() => handleShowDraftView(interview)}
-                                      title={t('admin.sessions.viewDraft', 'View AI draft')}
-                                    >
-                                      {t('admin.sessions.draftGenerated', 'Draft generated')}
-                                    </button>
+                                {(interview.ai_draft || interview.content?.ai_draft || (interview.drafts && interview.drafts.length > 0)) && (
+                                  <div className="interview__meta interview__meta--draft">
+                                    {(() => {
+                                      // Get draft information from various sources
+                                      const draft = interview.ai_draft || interview.content?.ai_draft || (interview.drafts && interview.drafts[0]);
+                                      const draftStage = draft?.stage || 'first_draft';
+                                      const notesCount = draft?.content?.notes ? draft.content.notes.length : 0;
+                                      
+                                      // Determine status icon and color
+                                      let statusIcon, statusColor, statusText;
+                                      switch (draftStage) {
+                                        case 'approved':
+                                          statusIcon = <CheckCircle size={14} />;
+                                          statusColor = 'success';
+                                          statusText = t('admin.sessions.draftApproved', 'Draft Approved');
+                                          break;
+                                        case 'rejected':
+                                          statusIcon = <X size={14} />;
+                                          statusColor = 'danger';
+                                          statusText = t('admin.sessions.draftRejected', 'Draft Rejected');
+                                          break;
+                                        case 'pending_review':
+                                          statusIcon = <Clock size={14} />;
+                                          statusColor = 'warning';
+                                          statusText = t('admin.sessions.draftPendingReview', 'Pending Review');
+                                          break;
+                                        default:
+                                          statusIcon = <FileText size={14} />;
+                                          statusColor = 'info';
+                                          statusText = t('admin.sessions.draftGenerated', 'Draft Generated');
+                                      }
+                                      
+                                      return (
+                                        <div className="interview__draft-status">
+                                          <button
+                                            className={`interview__draft-link interview__draft-link--${statusColor}`}
+                                            onClick={() => handleShowDraftView(interview)}
+                                            title={t('admin.sessions.viewDraft', 'View AI draft')}
+                                          >
+                                            {statusIcon}
+                                            <span className="interview__draft-text">{statusText}</span>
+                                          </button>
+                                          {notesCount > 0 && (
+                                            <span className="interview__notes-count" title={t('admin.sessions.notesCount', `${notesCount} notes`)}>
+                                              <MessageSquare size={12} />
+                                              {notesCount}
+                                            </span>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
                                   </div>
                                 )}
                               </div>
@@ -1011,13 +1021,6 @@ const Sessions = () => {
                         <button className="btn btn--secondary btn--sm">
                           <Edit size={16} />
                           {t('common.edit', 'Edit')}
-                        </button>
-                        <button 
-                          className="btn btn--info btn--sm"
-                          onClick={() => setShowMigrationPanel(session)}
-                        >
-                          <Database size={16} />
-                          Migration
                         </button>
                         <button className="btn btn--danger btn--sm" onClick={() => handleDeleteSession(session.id)}>
                           <Trash2 size={16} />
@@ -1355,26 +1358,6 @@ const Sessions = () => {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Migration Panel Modal */}
-      {showMigrationPanel && (
-        <div className="modal-overlay" onClick={() => setShowMigrationPanel(null)}>
-          <div className="modal-content modal-content--large" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{t('admin.sessions.migration.title', 'Interview Migration')}</h3>
-              <button 
-                className="modal-close"
-                onClick={() => setShowMigrationPanel(null)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal-body">
-              <MigrationPanel sessionId={showMigrationPanel.id} />
             </div>
           </div>
         </div>

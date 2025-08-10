@@ -1,10 +1,11 @@
 /**
  * Interview Service
  * Frontend service for interacting with normalized interviews API
+ * Routes through sessions API since standalone interview endpoints are disabled
  */
 
 // Using relative URL to avoid CORS/CSP issues in production
-const API_BASE_URL = '/api';
+const API_BASE_URL = '/api/sessions-supabase';
 
 class InterviewService {
   
@@ -14,7 +15,7 @@ class InterviewService {
   async getSessionInterviews(sessionId, token = null) {
     try {
       const authToken = token || localStorage.getItem('authToken') || localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/interviews/session/${sessionId}`, {
+      const response = await fetch(`${API_BASE_URL}/${sessionId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -80,16 +81,13 @@ class InterviewService {
   async createInterview(sessionId, interviewData, token = null) {
     try {
       const authToken = token || localStorage.getItem('authToken') || localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/interviews`, {
+      const response = await fetch(`${API_BASE_URL}/${sessionId}/interviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken}`,
         },
-        body: JSON.stringify({
-          session_id: sessionId,
-          ...interviewData
-        }),
+        body: JSON.stringify(interviewData),
       });
 
       const data = await response.json();

@@ -103,6 +103,82 @@ export const fetchDraftsBySession = createAsyncThunk(
   }
 );
 
+// Async thunk for adding note to draft (Supabase)
+export const addNoteToDraft = createAsyncThunk(
+  'drafts/addNoteToDraft',
+  async ({ sessionId, draftId, content, author }, { rejectWithValue, getState }) => {
+    try {
+      const { auth } = getState();
+      const token = auth.token;
+
+      if (!token) {
+        return rejectWithValue('No authentication token available');
+      }
+
+      const response = await fetch(`/api/sessions-supabase/${sessionId}/drafts/${draftId}/notes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          content,
+          author: author || 'Admin User'
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return rejectWithValue(data.message || 'Failed to add note to draft');
+      }
+      
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk for updating draft stage (Supabase)
+export const updateDraftStageSupabase = createAsyncThunk(
+  'drafts/updateDraftStageSupabase',
+  async ({ sessionId, draftId, stage, rejectionReason, approvedBy, rejectedBy }, { rejectWithValue, getState }) => {
+    try {
+      const { auth } = getState();
+      const token = auth.token;
+
+      if (!token) {
+        return rejectWithValue('No authentication token available');
+      }
+
+      const response = await fetch(`/api/sessions-supabase/${sessionId}/drafts/${draftId}/stage`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          stage,
+          rejectionReason,
+          approvedBy: approvedBy || 'Admin User',
+          rejectedBy: rejectedBy || 'Admin User'
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return rejectWithValue(data.message || 'Failed to update draft stage');
+      }
+      
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // Async thunk for updating draft content
 export const updateDraftContent = createAsyncThunk(
   'drafts/updateDraftContent',
@@ -499,11 +575,95 @@ const draftsSlice = createSlice({
       })
       .addCase(updateDraftStage.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentDraft = action.payload;
-        // Update in items list if present
+        
+        // Preserve enriched data while updating stage-related fields
+        if (state.currentDraft && state.currentDraft.id === action.payload.id) {
+          state.currentDraft = {
+            ...state.currentDraft,
+            stage: action.payload.stage,
+            content: action.payload.content,
+            updated_at: action.payload.updated_at
+          };
+        }
+        
+        // Update in items list if present, preserving ALL enriched data
         const index = state.items.findIndex(item => item.id === action.payload.id);
         if (index !== -1) {
-          state.items[index] = action.payload;
+          const existingDraft = state.items[index];
+          
+          // Recalculate draft statistics after stage change
+          const totalDrafts = state.items.length;
+          const approvedDrafts = state.items.filter((draft, i) => 
+            i === index ? action.payload.stage === 'approved' : draft.stage === 'approved'
+          ).length;
+          const rejectedDrafts = state.items.filter((draft, i) => 
+            i === index ? action.payload.stage === 'rejected' : draft.stage === 'rejected'
+          ).length;
+          const pendingDrafts = totalDrafts - approvedDrafts - rejectedDrafts;
+          
+          // Update session_info with new draft statistics
+          const updatedSessionInfo = {
+            ...(existingDraft.session_info || {}), // Handle case where session_info might be null/undefined
+            total_drafts: totalDrafts,
+            approved_drafts: approvedDrafts,
+            rejected_drafts: rejectedDrafts,
+            pending_drafts: pendingDrafts
+          };
+          
+
+          
+          state.items[index] = {
+            ...existingDraft, // Preserve ALL enriched data
+            stage: action.payload.stage,
+            content: action.payload.content,
+            updated_at: action.payload.updated_at,
+            // Explicitly preserve key enriched fields
+            interview_name: existingDraft.interview_name,
+            interview_type: existingDraft.interview_type,
+            session_info: updatedSessionInfo, // Updated statistics
+            completion_percentage: existingDraft.completion_percentage
+          };
+          
+          // Update session_info for all drafts in the same session to keep them in sync
+          // Since we're in SessionDrafts page, all drafts should be from the same session
+          state.items.forEach((draft, i) => {
+            if (i !== index) {
+              // If the draft doesn't have session_info, create it from the updated draft
+              if (!draft.session_info && updatedSessionInfo) {
+                draft.session_info = { ...updatedSessionInfo };
+              } else if (draft.session_info) {
+                draft.session_info = {
+                  ...draft.session_info,
+                  total_drafts: totalDrafts,
+                  approved_drafts: approvedDrafts,
+                  rejected_drafts: rejectedDrafts,
+                  pending_drafts: pendingDrafts
+                };
+              }
+              
+              // Also ensure other enriched fields are preserved/added if missing
+              if (!draft.completion_percentage && existingDraft.completion_percentage) {
+                draft.completion_percentage = existingDraft.completion_percentage;
+              }
+              if (!draft.interview_name && existingDraft.interview_name) {
+                draft.interview_name = existingDraft.interview_name;
+              }
+              if (!draft.interview_type && existingDraft.interview_type) {
+                draft.interview_type = existingDraft.interview_type;
+              }
+            }
+          });
+          
+          // Also update currentDraft if it exists and matches
+          if (state.currentDraft && state.currentDraft.session_info) {
+            state.currentDraft.session_info = {
+              ...state.currentDraft.session_info,
+              total_drafts: totalDrafts,
+              approved_drafts: approvedDrafts,
+              rejected_drafts: rejectedDrafts,
+              pending_drafts: pendingDrafts
+            };
+          }
         }
       })
       .addCase(updateDraftStage.rejected, (state, action) => {
@@ -534,6 +694,50 @@ const draftsSlice = createSlice({
         state.draftHistory = action.payload;
       })
       .addCase(fetchDraftHistory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Add note to draft (Supabase)
+      .addCase(addNoteToDraft.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addNoteToDraft.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update the draft with new note
+        const updatedDraft = action.payload.data;
+        const index = state.items.findIndex(item => item.id === updatedDraft.id);
+        if (index !== -1) {
+          state.items[index] = updatedDraft;
+        }
+        if (state.currentDraft && state.currentDraft.id === updatedDraft.id) {
+          state.currentDraft = updatedDraft;
+        }
+      })
+      .addCase(addNoteToDraft.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Update draft stage (Supabase)
+      .addCase(updateDraftStageSupabase.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateDraftStageSupabase.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update the draft with new stage
+        const updatedDraft = action.payload.data;
+        const index = state.items.findIndex(item => item.id === updatedDraft.id);
+        if (index !== -1) {
+          state.items[index] = updatedDraft;
+        }
+        if (state.currentDraft && state.currentDraft.id === updatedDraft.id) {
+          state.currentDraft = updatedDraft;
+        }
+      })
+      .addCase(updateDraftStageSupabase.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

@@ -15,11 +15,15 @@
     "delete": "מחיקה",
     "previous": "הקודם",
     "next": "הבא",
+    "back": "חזרה",
     "page": "עמוד",
     "of": "מתוך",
     "clearFilters": "נקה מסננים",
     "add": "הוסף",
-    "cancel": "בטל"
+    "cancel": "בטל",
+    "save": "שמור",
+    "approve": "אשר",
+    "reject": "דחה"
   },
   "navbar": {
     "brand": "לגמיוניטי"
@@ -38,17 +42,29 @@
     "projectProgress": "התקדמות הפרויקט"
   },
   "admin": {
-    "title": "לוח בקרה למנהל: ניהול משתמשים",
-    "dashboardTitle": "מנהל מערכת",
-    "backToDashboard": "חזרה ללוח הבקרה",
-    "searchPlaceholder": "חיפוש לקוח...",
-    "loading": "טוען משתמשים...",
-    "error": "שגיאה",
-    "noUsers": "לא נמצאו משתמשים.",
+    "dashboardTitle": "לוח בקרה מנהל",
+    "dashboardSubtitle": "סקירה כללית של פעילות המערכת וביצועים",
+    "searchPlaceholder": "חיפוש סיפורי חיים...",
     "filters": "סינון",
+    "sections": {
+      "sessionOverview": "סקירת סיפורי חיים",
+      "draftManagement": "ניהול טיוטות",
+      "interviewProgress": "התקדמות ראיונות",
+      "recentActivity": "פעילות אחרונה (7 ימים אחרונים)"
+    },
     "kpi": {
-      "totalSessions": "סך הכל סשנים",
-      "activeSessions": "סשנים פעילים",
+      "totalSessions": "סך הכל סיפורי חיים",
+      "activeSessions": "סיפורי חיים פעילים",
+      "completedSessions": "סיפורי חיים שהושלמו",
+      "totalDrafts": "סך הכל טיוטות",
+      "draftsAwaitingApproval": "ממתינות לאישור",
+      "approvedDrafts": "טיוטות מאושרות",
+      "draftApprovalRate": "שיעור אישור",
+      "totalInterviews": "סך הכל ראיונות",
+      "completedInterviews": "ראיונות שהושלמו",
+      "interviewCompletionRate": "שיעור השלמה",
+      "recentInterviews": "ראיונות אחרונים",
+      "recentDrafts": "טיוטות אחרונות",
       "cqsAverage": "CQS ממוצע",
       "pendingReview": "ממתינים לבדיקה"
     },
@@ -122,6 +138,10 @@
       "viewFile": "צפה בקובץ",
       "fileUploaded": "קובץ הועלה",
       "draftGenerated": "טיוטה נוצרה",
+      "draftApproved": "טיוטה אושרה",
+      "draftRejected": "טיוטה נדחתה",
+      "draftPendingReview": "ממתינה לבדיקה",
+      "notesCount": "הערות",
       "showing": "מציג",
       "of": "מתוך",
       "sessions": "סיפורי חיים",
@@ -295,7 +315,6 @@
         "created": "נוצר",
         "lastUpdated": "עודכן לאחרונה",
         "reviewedBy": "נבדק על ידי",
-        "approvedBy": "אושר על ידי",
         "interviewsCompleted": "ראיונות הושלמו",
         "approveDraft": "אשר טיוטה",
         "rejectDraft": "דחה טיוטה",
@@ -310,7 +329,21 @@
           "pending_approval": "ממתין לאישור",
           "approved": "מאושר",
           "rejected": "נדחה"
-        }
+        },
+        "approvalInfo": "מידע אישור",
+        "rejectionInfo": "מידע דחייה",
+        "approvedBy": "אושר על ידי",
+        "rejectedBy": "נדחה על ידי",
+        "approvedAt": "תאריך אישור",
+        "rejectedAt": "תאריך דחייה",
+        "rejectionReason": "סיבת דחייה",
+        "actionsDisabled": "פעולות מבוטלות",
+        "actionsDisabledMessage": "לא ניתן לבצע פעולות נוספות על טיוטה שאושרה או נדחתה.",
+        "interviewName": "שם הראיון",
+        "completionPercentage": "אחוז השלמה",
+        "sessionProgress": "התקדמות סיפור החיים",
+        "interviewsProgress": "התקדמות ראיונות",
+        "draftsProgress": "התקדמות טיוטות"
       },
       "validation": {
         "clientNameRequired": "אנא הכנס שם לקוח",

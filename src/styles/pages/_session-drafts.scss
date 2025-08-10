@@ -197,7 +197,7 @@
 
   &__main {
     display: grid;
-    grid-template-columns: 1fr 300px;
+    grid-template-columns: 1fr;
     gap: $spacing-large;
 
     @media (max-width: $breakpoint-lg) {
@@ -486,6 +486,215 @@
       color: $text-muted;
       white-space: pre-wrap;
       word-break: break-word;
+    }
+  }
+
+  // Notes section styling
+  &__notes-section {
+    background: white;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-lg;
+    padding: $spacing-medium;
+    margin-bottom: $spacing-medium;
+
+    h4 {
+      font-size: $font-size-md;
+      font-weight: 600;
+      color: $text-dark;
+      margin: 0 0 $spacing-medium 0;
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding-bottom: $spacing-small;
+      border-bottom: 2px solid $background-light;
+    }
+  }
+
+  &__notes-list {
+    margin-bottom: $spacing-medium;
+  }
+
+  &__note {
+    background: $background-light;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    padding: $spacing-medium;
+    margin-bottom: $spacing-small;
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: $box-shadow-sm;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__note-author {
+    font-weight: 600;
+    color: $primary-color;
+    font-size: $font-size-sm;
+  }
+
+  &__note-date {
+    color: $text-muted;
+    font-size: $font-size-xs;
+  }
+
+  &__note-content {
+    color: $text-color;
+    line-height: 1.5;
+    font-size: $font-size-sm;
+  }
+
+  &__no-notes {
+    color: $text-muted;
+    font-style: italic;
+    text-align: center;
+    padding: $spacing-large;
+    background: $background-light;
+    border-radius: $border-radius;
+    border: 1px dashed $border-color;
+  }
+
+  &__add-note {
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: $spacing-small;
+      border: 1px solid $border-color;
+      border-radius: $border-radius;
+      font-family: $font-family-base;
+      font-size: $font-size-sm;
+      line-height: 1.5;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+      }
+
+      &::placeholder {
+        color: $text-muted;
+      }
+    }
+
+    button {
+      margin-top: $spacing-small;
+      width: 100%;
+    }
+  }
+
+  // Approval/Rejection sections styling
+  &__approval-section,
+  &__rejection-section {
+    background: white;
+    border-radius: $border-radius-lg;
+    padding: $spacing-medium;
+    margin-bottom: $spacing-medium;
+    border-left: 4px solid $success-color;
+
+    h4 {
+      font-size: $font-size-md;
+      font-weight: 600;
+      color: $success-color;
+      margin: 0 0 $spacing-medium 0;
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+    }
+  }
+
+  &__rejection-section {
+    border-left-color: $danger-color;
+    background: rgba($danger-color, 0.02);
+
+    h4 {
+      color: $danger-color;
+    }
+  }
+
+  &__approval-content,
+  &__rejection-content {
+    p {
+      margin: 0 0 $spacing-small 0;
+      color: $text-color;
+      line-height: 1.5;
+      padding: $spacing-small;
+      background: $background-light;
+      border-radius: $border-radius;
+      border: 1px solid $border-color;
+    }
+  }
+
+  &__approval-meta,
+  &__rejection-meta {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    span {
+      font-size: $font-size-xs;
+      color: $text-muted;
+      
+      &:first-child {
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Draft actions styling
+  &__draft-actions {
+    display: flex;
+    gap: $spacing-small;
+    margin-top: $spacing-medium;
+
+    button {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-xs;
+      padding: $spacing-small $spacing-medium;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: $box-shadow-md;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  // Disabled message styling
+  &__disabled-message {
+    text-align: center;
+    padding: $spacing-medium;
+    background: $background-light;
+    border: 1px dashed $border-color;
+    border-radius: $border-radius;
+    margin-top: $spacing-medium;
+
+    p {
+      margin: 0;
+      color: $text-muted;
+      font-style: italic;
+      font-size: $font-size-sm;
     }
   }
 

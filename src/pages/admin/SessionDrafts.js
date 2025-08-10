@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDraftsBySession, updateDraftContent, updateDraftStage } from '../../store/slices/draftsSlice';
+import { fetchDraftsBySession, updateDraftContent, updateDraftStage, addNoteToDraft, updateDraftStageSupabase } from '../../store/slices/draftsSlice';
 import { fetchSessionById } from '../../store/slices/sessionsSliceSupabase';
 import {
   ArrowLeft,
@@ -22,7 +22,6 @@ import {
   History,
   AlertTriangle
 } from 'lucide-react';
-import DraftMigration from './DraftMigration';
 
 const SessionDrafts = () => {
   const { sessionId } = useParams();
@@ -43,10 +42,13 @@ const SessionDrafts = () => {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approvalAction, setApprovalAction] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [selectedDraftId, setSelectedDraftId] = useState(null);
 
   // Get current session and draft from Redux state
   const session = sessions.find(s => s.id === sessionId);
-  const draft = drafts.length > 0 ? drafts[0] : null; // Get the latest draft (first in sorted array)
+  // Find a draft with enriched data (session_info), fallback to first draft
+  const draft = drafts.length > 0 ? 
+    (drafts.find(d => d.session_info) || drafts[0]) : null;
 
   // Fetch real data from Redux/API
   useEffect(() => {
@@ -67,6 +69,8 @@ const SessionDrafts = () => {
       setNotes(draft.notes);
     }
   }, [draft]);
+
+
 
   const handleEditSection = (sectionKey, content) => {
     setEditingSection(sectionKey);
@@ -113,57 +117,44 @@ const SessionDrafts = () => {
     if (!newNote.trim()) return;
 
     try {
-      const note = {
-        id: `note-${Date.now()}`,
-        content: newNote,
-        author: 'Admin User', // In production, get from auth state
-        createdAt: new Date().toISOString(),
-        draftId: draftId
-      };
+      // Dispatch the Redux action to add note to draft
+      await dispatch(addNoteToDraft({
+        sessionId,
+        draftId,
+        content: newNote.trim(),
+        author: 'Admin User' // In production, get from auth state
+      })).unwrap();
 
-      // TODO: Implement draft-specific notes storage
-      // For now, just clear the input
+      // Clear the input on success
       setNewNote('');
-      console.log('Note added for draft:', draftId, note);
     } catch (err) {
       console.error('Error adding note:', err);
       // setError('Failed to add note');
     }
   };
 
-  const handleApprovalAction = async (action) => {
+  const handleApprovalAction = async (action, draftId) => {
     setApprovalAction(action);
+    setSelectedDraftId(draftId);
     setShowApprovalModal(true);
   };
 
   const handleConfirmApproval = async () => {
     try {
-      let newStage;
-      const updateData = {
+      // Dispatch the Redux action to update draft stage
+      await dispatch(updateDraftStageSupabase({
+        sessionId,
+        draftId: selectedDraftId,
         stage: approvalAction,
-        updatedAt: new Date().toISOString()
-      };
+        rejectionReason: approvalAction === 'rejected' ? rejectionReason : undefined,
+        approvedBy: approvalAction === 'approved' ? 'Admin User' : undefined,
+        rejectedBy: approvalAction === 'rejected' ? 'Admin User' : undefined
+      })).unwrap();
 
-      if (approvalAction === 'approved') {
-        newStage = 'approved';
-        updateData.approvedBy = 'Admin User'; // In production, get from auth state
-        updateData.approvedAt = new Date().toISOString();
-      } else if (approvalAction === 'rejected') {
-        newStage = 'rejected';
-        updateData.rejectedBy = 'Admin User';
-        updateData.rejectedAt = new Date().toISOString();
-        updateData.rejectionReason = rejectionReason;
-      }
-
-      const updatedDraft = { ...draft, ...updateData, stage: newStage };
-      // setDraft(updatedDraft);
-
+      // Reset modal state on success
       setShowApprovalModal(false);
       setApprovalAction(null);
       setRejectionReason('');
-
-      // In production, dispatch API call
-      // dispatch(updateDraftStage({ draftId: draft.id, stage: newStage, reason: rejectionReason }));
 
     } catch (err) {
       console.error('Error updating draft stage:', err);
@@ -235,7 +226,6 @@ const SessionDrafts = () => {
             {t('common.goBack')}
           </button>
         </div>
-        <DraftMigration />
       </div>
     );
   }
@@ -271,33 +261,6 @@ const SessionDrafts = () => {
         </div>
 
         <div className="session-drafts__header-actions">
-          {/* <button 
-            onClick={() => setShowNoteModal(true)}
-            className="btn btn--secondary"
-          >
-            <Plus size={16} />
-            {t('admin.sessionDrafts.addNote')}
-          </button> */}
-
-          {/* {draft.stage === 'pending_review' && (
-            <>
-              <button 
-                onClick={() => handleApprovalAction('approved')}
-                className="btn btn--success"
-              >
-                <CheckCircle size={16} />
-                {t('admin.sessionDrafts.approve')}
-              </button>
-              <button 
-                onClick={() => handleApprovalAction('rejected')}
-                className="btn btn--danger"
-              >
-                <XCircle size={16} />
-                {t('admin.sessionDrafts.reject')}
-              </button>
-            </>
-          )} */}
-
           <button className="btn btn--primary">
             <Download size={16} />
             {t('admin.sessionDrafts.export')}
@@ -318,8 +281,13 @@ const SessionDrafts = () => {
           </div>
           <span className="progress-bar__text">{draft.completion_percentage || 0}% {t('common.complete')}</span>
 
-          <div className="session-drafts__interview-progress">
-            <span>{session?.completedInterviews || 0}/{session?.totalInterviews || 0} {t('admin.sessionDrafts.interviewsCompleted')}</span>
+          <div className="session-drafts__progress-details">
+            <div className="session-drafts__interview-progress">
+              <span>{session?.completedInterviews || draft.session_info?.completed_interviews || 0}/{session?.totalInterviews || draft.session_info?.total_interviews || 0} {t('admin.sessionDrafts.interviewsCompleted')}</span>
+            </div>
+            <div className="session-drafts__draft-progress">
+              <span>{drafts.filter(d => d.stage === 'approved').length || 0}/{drafts.length || 0} {t('admin.sessionDrafts.draftsApproved')}</span>
+            </div>
           </div>
         </div>
 
@@ -333,15 +301,16 @@ const SessionDrafts = () => {
                 <div className="session-drafts__draft-header">
                   <div className="session-drafts__draft-meta">
                     <span className="session-drafts__draft-interview">
-                      {t('admin.sessionDrafts.interview')} #{sessionDraft.version || index + 1}
+                      {sessionDraft.interview_name || `${t('admin.sessionDrafts.interview')} #${sessionDraft.version || index + 1}`}
                     </span>
                     <span className={`session-drafts__draft-stage session-drafts__stage--${getStageColor(sessionDraft.stage)}`}>
                       {getStageIcon(sessionDraft.stage)}
                       {t(`admin.sessionDrafts.stages.${sessionDraft.stage}`)}
                     </span>
-                    <span className="session-drafts__draft-completion">
-                      {sessionDraft.completion_percentage || 0}% {t('common.complete')}
-                    </span>
+                    {/* <span className="session-drafts__draft-completion">
+                      {sessionDraft.completion_percentage || 0}% {t('common.complete')} 
+                      ({sessionDraft.session_info?.completed_interviews || 0}/{sessionDraft.session_info?.total_interviews || 0} interviews)
+                    </span> */}
                     <span className="session-drafts__draft-date">
                       {new Date(sessionDraft.updated_at || sessionDraft.created_at).toLocaleDateString()}
                     </span>
@@ -422,51 +391,121 @@ const SessionDrafts = () => {
 
                     {/* Draft Sidebar - Notes & Info */}
                     <div className="session-drafts__draft-sidebar">
+                      {/* Rejection Reason Display */}
+                      {sessionDraft.stage === 'rejected' && sessionDraft.content?.rejection_metadata?.rejection_reason && (
+                        <div className="session-drafts__rejection-section">
+                          <h4>
+                            <XCircle size={16} />
+                            {t('admin.sessionDrafts.rejectionReason')}
+                          </h4>
+                          <div className="session-drafts__rejection-content">
+                            <p>{sessionDraft.content.rejection_metadata.rejection_reason}</p>
+                            <div className="session-drafts__rejection-meta">
+                              <span>{t('admin.sessionDrafts.rejectedBy')}: {sessionDraft.content.rejection_metadata.rejected_by}</span>
+                              <span>{t('admin.sessionDrafts.rejectedAt')}: {new Date(sessionDraft.content.rejection_metadata.rejected_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Approval Display */}
+                      {sessionDraft.stage === 'approved' && sessionDraft.content?.approval_metadata && (
+                        <div className="session-drafts__approval-section">
+                          <h4>
+                            <CheckCircle size={16} />
+                            {t('admin.sessionDrafts.approvalInfo')}
+                          </h4>
+                          <div className="session-drafts__approval-content">
+                            <div className="session-drafts__approval-meta">
+                              <span>{t('admin.sessionDrafts.approvedByMeta')}: {sessionDraft.content.approval_metadata.approved_by}</span>
+                              <span>{t('admin.sessionDrafts.approvedAt')}: {new Date(sessionDraft.content.approval_metadata.approved_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Draft Notes */}
                       <div className="session-drafts__notes-section">
                         <h4>
                           <MessageSquare size={16} />
-                          {t('admin.sessionDrafts.notes')} (0)
+                          {t('admin.sessionDrafts.notes')} ({sessionDraft.content?.notes?.length || 0})
                         </h4>
 
                         <div className="session-drafts__notes-list">
-                          {/* Notes would go here - currently empty */}
+                          {sessionDraft.content?.notes && sessionDraft.content.notes.length > 0 ? (
+                            sessionDraft.content.notes.map((note) => (
+                              <div key={note.id} className="session-drafts__note">
+                                <div className="session-drafts__note-header">
+                                  <span className="session-drafts__note-author">{note.author}</span>
+                                  <span className="session-drafts__note-date">
+                                    {new Date(note.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                <div className="session-drafts__note-content">
+                                  {note.content}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="session-drafts__no-notes">
+                              {t('admin.sessionDrafts.noNotes')}
+                            </p>
+                          )}
                         </div>
 
-                        <div className="session-drafts__add-note">
-                          <textarea
-                            placeholder={t('admin.sessionDrafts.addNotePlaceholder')}
-                            value={newNote}
-                            onChange={(e) => setNewNote(e.target.value)}
-                          />
-                          <button
-                            onClick={() => handleAddNote(sessionDraft.id)}
-                            className="btn btn--primary btn--sm"
-                            disabled={!newNote.trim()}
-                          >
-                            <Plus size={16} />
-                            {t('admin.sessionDrafts.addNote')}
-                          </button>
-                        </div>
+                        {/* Only show add note section if draft is not approved or rejected */}
+                        {sessionDraft.stage !== 'approved' && sessionDraft.stage !== 'rejected' && (
+                          <div className="session-drafts__add-note">
+                            <textarea
+                              placeholder={t('admin.sessionDrafts.addNotePlaceholder')}
+                              value={newNote}
+                              onChange={(e) => setNewNote(e.target.value)}
+                              rows={3}
+                            />
+                            <button
+                              onClick={() => handleAddNote(sessionDraft.id)}
+                              className="btn btn--primary btn--sm"
+                              disabled={!newNote.trim() || loading}
+                            >
+                              <Plus size={16} />
+                              {loading ? t('common.adding') : t('admin.sessionDrafts.addNote')}
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Show disabled message for approved/rejected drafts */}
+                        {(sessionDraft.stage === 'approved' || sessionDraft.stage === 'rejected') && (
+                          <div className="session-drafts__disabled-message">
+                            <p className="text-muted">
+                              {sessionDraft.stage === 'approved' 
+                                ? t('admin.sessionDrafts.noActionsApproved')
+                                : t('admin.sessionDrafts.noActionsRejected')
+                              }
+                            </p>
+                          </div>
+                        )}
                       </div>
 
-                      {sessionDraft.stage === 'pending_review' && (
-                        <>
+                      {/* Approve/Reject Actions for this specific draft - only show if not already approved/rejected */}
+                      {sessionDraft.stage !== 'approved' && sessionDraft.stage !== 'rejected' && (
+                        <div className="session-drafts__draft-actions">
                           <button
-                            onClick={() => handleApprovalAction('approved')}
-                            className="btn btn--success"
+                            onClick={() => handleApprovalAction('approved', sessionDraft.id)}
+                            className="btn btn--success btn--sm"
+                            disabled={loading}
                           >
                             <CheckCircle size={16} />
-                            {t('admin.sessionDrafts.approve')}
+                            {loading ? t('common.approving') : t('admin.sessionDrafts.approve')}
                           </button>
                           <button
-                            onClick={() => handleApprovalAction('rejected')}
-                            className="btn btn--danger"
+                            onClick={() => handleApprovalAction('rejected', sessionDraft.id)}
+                            className="btn btn--danger btn--sm"
+                            disabled={loading}
                           >
                             <XCircle size={16} />
-                            {t('admin.sessionDrafts.reject')}
+                            {loading ? t('common.rejecting') : t('admin.sessionDrafts.reject')}
                           </button>
-                        </>
+                        </div>
                       )}
 
                       {/* Draft Info */}
@@ -520,69 +559,6 @@ const SessionDrafts = () => {
                 <p>{t('admin.sessionDrafts.noDraftsDescription')}</p>
               </div>
             )}
-          </div>
-
-
-
-          {/* Sidebar - Notes */}
-          <div className="session-drafts__sidebar">
-            <div className="session-drafts__notes-section">
-              <h3>
-                <MessageSquare size={20} />
-                {t('admin.sessionDrafts.notes')} (0)
-              </h3>
-
-              {/* <div className="session-drafts__notes-list">
-                {notes.map((note) => (
-                  <div key={note.id} className="session-drafts__note">
-                    <div className="session-drafts__note-header">
-                      <span className="session-drafts__note-author">{note.author}</span>
-                      <span className="session-drafts__note-date">
-                        {new Date(note.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="session-drafts__note-content">{note.content}</p>
-                  </div>
-                ))}
-                
-                {notes.length === 0 && (
-                  <p className="session-drafts__no-notes">
-                    {t('admin.sessionDrafts.noNotes')}
-                  </p>
-                )}
-              </div> */}
-            </div>
-
-            {/* Draft Info */}
-            <div className="session-drafts__info-section">
-              <h3>{t('admin.sessionDrafts.draftInfo')}</h3>
-              <div className="session-drafts__info-item">
-                <Calendar size={16} />
-                <span className="session-drafts__info-label">{t('admin.sessionDrafts.created')}:</span>
-                <span>{new Date(draft.created_at).toLocaleDateString()}</span>
-              </div>
-              <div className="session-drafts__info-item">
-                <Calendar size={16} />
-                <span className="session-drafts__info-label">{t('admin.sessionDrafts.lastUpdated')}:</span>
-                <span>{new Date(draft.updated_at || draft.created_at).toLocaleDateString()}</span>
-              </div>
-              <div className="session-drafts__info-item">
-                <User size={16} />
-                <span className="session-drafts__info-label">{t('admin.sessionDrafts.author')}:</span>
-                <span>AI Generated</span>
-              </div>
-              <div className="session-drafts__info-item">
-                <Clock size={16} />
-                <span className="session-drafts__info-label">{t('admin.sessionDrafts.completion')}:</span>
-                <span>{draft.completion_percentage || 0}%</span>
-              </div>
-              {draft.overall_rating && (
-                <div className="session-drafts__info-item">
-                  <span className="session-drafts__info-label">{t('admin.sessionDrafts.rating')}:</span>
-                  <span>{draft.overall_rating}/5.0</span>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
