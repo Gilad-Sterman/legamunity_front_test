@@ -362,6 +362,12 @@
         background: $danger-light;
         color: $danger-color;
     }
+
+    &--critical {
+        background: $danger-light;
+        color: $danger-color;
+        border: 1px solid rgba($danger-color, 0.3);
+    }
 }
 
 .sprint-progress {
@@ -516,6 +522,11 @@
         background: $info-light;
         color: $info-color;
     }
+
+    &--critical {
+        background: $danger-light;
+        color: $danger-color;
+    }
 }
 
 .critical-item__meta {
@@ -634,6 +645,11 @@
     &--low {
         background: $success-light;
         color: $success-color;
+    }
+
+    &--critical {
+        background: $danger-light;
+        color: $danger-color;
     }
 }
 
@@ -771,6 +787,11 @@
   &--low {
     background-color: $secondary-light;
     color: $secondary-color;
+  }
+
+  &--critical {
+    background-color: $danger-light;
+    color: $danger-color;
   }
 }
 

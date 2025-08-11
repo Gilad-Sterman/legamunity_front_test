@@ -280,7 +280,6 @@
       "version": "Version",
       "progress": "Progress",
       "summary": "Summary",
-      "keyThemes": "Key Themes",
       "notes": "Notes",
       "addNote": "Add Note",
       "noNotes": "No notes yet",
@@ -300,6 +299,30 @@
       "rejectConfirmation": "Please provide a reason for rejecting this draft:",
       "rejectionReasonPlaceholder": "Enter rejection reason...",
       "draftsApproved": "drafts approved",
+      "generateFullStory": "Generate Full Life Story",
+      "generatingStory": "Generating Story...",
+      "storyGeneratedSuccess": "Full life story generated successfully!",
+      "storyGenerationError": "Failed to generate full life story. Please try again.",
+      "fullLifeStory": "Full Life Story",
+      "generateDescription": "Generate a comprehensive life story from all approved drafts",
+      "noChangesDetected": "No changes detected since last generation. Complete more interviews and approve additional drafts to generate a new version.",
+      "loadingStories": "Loading stories...",
+      "generatedStory": "Generated Story",
+      "viewStory": "View Story",
+      "storyHistory": "Story History",
+      "needApprovedDrafts": "Approved interview drafts are required to generate a full life story",
+      "storyDetails": "Full Life Story Details",
+      "untitledStory": "Untitled Story",
+      "generatedOn": "Generated On",
+      "wordCount": "Word Count",
+      "sourceDrafts": "Source Drafts",
+      "storySummary": "Summary",
+      "storyContent": "Story Content",
+      "keyThemes": "Key Themes",
+      "generationDetails": "Generation Details",
+      "processingTime": "Processing Time",
+      "aiModel": "AI Model",
+      "words": "words",
       "allDrafts": "All Drafts",
       "interview": "Interview",
       "addNotePlaceholder": "Add a note about this draft...",
@@ -681,7 +704,8 @@
     "priority": {
       "high": "High",
       "medium": "Medium",
-      "low": "Low"
+      "low": "Low",
+      "critical": "Critical"
     },
     "status": {
       "in-progress": "In Progress",
@@ -697,7 +721,8 @@
     "riskLevel": {
       "high": "High Risk",
       "medium": "Medium Risk",
-      "low": "Low Risk"
+      "low": "Low Risk",
+      "critical": "Critical Risk"
     },
     "mitigation": "Mitigation",
     "team": {

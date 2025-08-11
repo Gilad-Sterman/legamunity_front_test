@@ -43,6 +43,8 @@ import {
 // Removed interviews slice imports - using sessions API for all interview operations
 import CreateSessionModal from '../../components/admin/sessions/CreateSessionModal';
 import FileUpload from '../../components/admin/interviews/FileUpload';
+import StoryViewModal from '../../components/admin/sessions/StoryViewModal';
+import StoryHistoryModal from '../../components/admin/sessions/StoryHistoryModal';
 
 const Sessions = () => {
   const { t } = useTranslation();
@@ -72,6 +74,11 @@ const Sessions = () => {
   const [showFileViewModal, setShowFileViewModal] = useState(null);
   const [showDraftViewModal, setShowDraftViewModal] = useState(null);
   const [showMigrationPanel, setShowMigrationPanel] = useState(null);
+  const [generatingStory, setGeneratingStory] = useState(null); // Track which session is generating story
+  const [showStoryHistoryModal, setShowStoryHistoryModal] = useState(null); // Show previous generations
+  const [showStoryViewModal, setShowStoryViewModal] = useState(null); // Show story content
+  const [sessionStories, setSessionStories] = useState({}); // Cache full life stories by session ID
+  const [loadingStories, setLoadingStories] = useState({}); // Track loading states
   const [scheduleForm, setScheduleForm] = useState({
     dayOfWeek: '',
     startTime: '',
@@ -90,6 +97,188 @@ const Sessions = () => {
     const legacyInterviews = session.preferences?.interviews;
     
     return normalizedInterviews || legacyInterviews || [];
+  };
+
+  // Helper function to check if session has approved drafts
+  const hasApprovedDrafts = (session) => {
+    const interviews = getSessionInterviews(session);
+    
+    // STRICT: Only consider drafts that are explicitly marked as "approved"
+    const hasApproved = interviews.some(interview => {
+      const draft = interview.ai_draft;
+      
+      if (!draft) return false;
+      
+      // Check for explicit approval in multiple possible locations
+      const stage = draft?.metadata?.stage || draft?.stage;
+      
+      // Only return true if explicitly approved (not just completed)
+      return stage === 'approved';
+    });
+    
+    return hasApproved;
+  };
+
+  // Helper function to check if session data has changed since last story generation
+  const hasSessionDataChanged = (session, lastStory) => {
+    if (!lastStory) return true; // No previous story, allow generation
+    
+    const interviews = getSessionInterviews(session);
+    const currentApprovedDrafts = interviews.filter(interview => {
+      const draft = interview.ai_draft;
+      if (!draft) return false;
+      const stage = draft?.metadata?.stage || draft?.stage;
+      return stage === 'approved';
+    }).length;
+    
+    // Get metadata from last story generation (stored in sourceMetadata by backend)
+    const lastMetadata = lastStory.source_metadata || lastStory.sourceMetadata || {};
+    const lastApprovedDrafts = lastMetadata.approvedDrafts || 0;
+    
+    // Only check if approved drafts count has changed
+    const draftsChanged = currentApprovedDrafts !== lastApprovedDrafts;
+    
+    return draftsChanged;
+  };
+
+  // Enhanced function to check if story generation should be allowed
+  const shouldAllowStoryGeneration = (session) => {
+    const hasApproved = hasApprovedDrafts(session);
+    if (!hasApproved) return false;
+    
+    // Get the latest story for this session
+    const stories = sessionStories[session.id];
+    const latestStory = stories && stories.length > 0 ? stories[0] : null;
+    
+    // Check if data has changed since last generation
+    const dataChanged = hasSessionDataChanged(session, latestStory);
+    
+    return dataChanged;
+  };
+
+  // Handler for generating full life story
+  const handleGenerateFullStory = async (sessionId) => {
+    try {
+      setGeneratingStory(sessionId);
+      
+      // Call backend API to generate full life story
+      const response = await fetch(`/api/sessions-supabase/${sessionId}/generate-full-story`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate full life story');
+      }
+
+      const result = await response.json();
+      
+      // Show success message
+      alert(t('admin.sessions.storyGeneratedSuccess', 'Full life story generated successfully!'));
+      
+      // Clear cached story data for this session to force refresh
+      setSessionStories(prev => {
+        const updated = { ...prev };
+        delete updated[sessionId];
+        return updated;
+      });
+      
+      // Clear loading state for this session
+      setLoadingStories(prev => {
+        const updated = { ...prev };
+        delete updated[sessionId];
+        return updated;
+      });
+      
+      // Immediately fetch the updated stories for this session
+      fetchSessionStories(sessionId);
+      
+      // Refresh sessions to show updated data
+      dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder
+      }));
+      
+    } catch (error) {
+      console.error('Error generating full life story:', error);
+      alert(t('admin.sessions.storyGenerationError', 'Failed to generate full life story. Please try again.'));
+    } finally {
+      setGeneratingStory(null);
+    }
+  };
+
+  // Fetch full life stories for a session
+  const fetchSessionStories = async (sessionId) => {
+    if (loadingStories[sessionId] || sessionStories[sessionId]) {
+      return; // Already loading or loaded
+    }
+
+    setLoadingStories(prev => ({ ...prev, [sessionId]: true }));
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/sessions-supabase/${sessionId}/full-stories`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSessionStories(prev => ({ 
+          ...prev, 
+          [sessionId]: data.success ? data.data : [] 
+        }));
+      } else {
+        console.error('Failed to fetch session stories:', response.statusText);
+        setSessionStories(prev => ({ ...prev, [sessionId]: [] }));
+      }
+    } catch (error) {
+      console.error('Error fetching session stories:', error);
+      setSessionStories(prev => ({ ...prev, [sessionId]: [] }));
+    } finally {
+      setLoadingStories(prev => ({ ...prev, [sessionId]: false }));
+    }
+  };
+
+  // Handle viewing a full life story
+  const handleViewStory = (story) => {
+    setShowStoryViewModal(story);
+  };
+
+  // Handle viewing story history
+  const handleViewStoryHistory = (sessionId) => {
+    fetchSessionStories(sessionId);
+    setShowStoryHistoryModal(sessionId);
+  };
+
+  // Close story modals
+  const handleCloseStoryView = () => {
+    setShowStoryViewModal(null);
+  };
+
+  const handleCloseStoryHistory = () => {
+    setShowStoryHistoryModal(null);
+  };
+
+  // Check if session has generated stories
+  const hasGeneratedStories = (sessionId) => {
+    const stories = sessionStories[sessionId];
+    return stories && stories.length > 0;
+  };
+
+  // Get current story for session
+  const getCurrentStory = (sessionId) => {
+    const stories = sessionStories[sessionId];
+    if (!stories || stories.length === 0) return null;
+    return stories.find(story => story.is_current_version) || stories[0];
   };
 
   // Load sessions on component mount and when filters change
@@ -763,6 +952,129 @@ const Sessions = () => {
                         </div>
                       </div>
 
+                      {/* Full Life Story Section */}
+                      <div className="session-details__section session-details__section--story">
+                        <div className="session-details__section-header">
+                          <h4 className="section-title">
+                            <FileText size={18} />
+                            {t('admin.sessions.sessionDrafts.fullLifeStory', 'Full Life Story')}
+                          </h4>
+                        </div>
+                        
+                        <div className="session-story">
+                          {/* Generate Button - Show based on approved drafts and data changes */}
+                          {hasApprovedDrafts(session) && (
+                            <div className="story-generate">
+                              <button 
+                                className="btn btn--success story-generate__btn"
+                                onClick={() => handleGenerateFullStory(session.id)}
+                                disabled={generatingStory === session.id || !shouldAllowStoryGeneration(session)}
+                              >
+                                {generatingStory === session.id ? (
+                                  <>
+                                    <div className="spinner spinner--sm" />
+                                    {t('admin.sessions.sessionDrafts.generatingStory', 'Generating Story...')}
+                                  </>
+                                ) : (
+                                  <>
+                                    <FileText size={16} />
+                                    {t('admin.sessions.sessionDrafts.generateFullStory', 'Generate Full Life Story')}
+                                  </>
+                                )}
+                              </button>
+                              <p className="story-generate__description">
+                                {shouldAllowStoryGeneration(session) ? (
+                                  t('admin.sessions.sessionDrafts.generateDescription', 'Generate a comprehensive life story from all approved interview drafts')
+                                ) : (
+                                  t('admin.sessions.sessionDrafts.noChangesDetected', 'No changes detected since last generation. Complete more interviews or approve additional drafts to generate a new version.')
+                                )}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Story Display - Show if stories exist */}
+                          {(() => {
+                            // Check if we need to load stories for this session
+                            if (!sessionStories[session.id] && !loadingStories[session.id]) {
+                              fetchSessionStories(session.id);
+                            }
+                            
+                            const stories = sessionStories[session.id];
+                            const currentStory = getCurrentStory(session.id);
+                            
+                            if (loadingStories[session.id]) {
+                              return (
+                                <div className="story-loading">
+                                  <div className="spinner spinner--sm" />
+                                  <span>{t('admin.sessions.sessionDrafts.loadingStories', 'Loading stories...')}</span>
+                                </div>
+                              );
+                            }
+                            
+                            if (currentStory) {
+                              return (
+                                <div className="story-display">
+                                  <div className="story-current">
+                                    <div className="story-current__info">
+                                      <h5 className="story-current__title">
+                                        {currentStory.title || t('admin.sessions.sessionDrafts.generatedStory', 'Generated Story')}
+                                      </h5>
+                                      <div className="story-current__meta">
+                                        <span className="story-meta__item">
+                                          <span className="story-version-badge">v{currentStory.version}</span>
+                                        </span>
+                                        <span className="story-meta__item">
+                                          <FileText size={12} />
+                                          {currentStory.total_words} {t('admin.sessions.words', 'words')}
+                                        </span>
+                                        <span className="story-meta__item">
+                                          <Clock size={12} />
+                                          {new Date(currentStory.generated_at).toLocaleDateString()}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="story-current__actions">
+                                      <button 
+                                        className="btn btn--primary btn--sm"
+                                        onClick={() => handleViewStory(currentStory)}
+                                      >
+                                        <Eye size={14} />
+                                        {t('admin.sessions.sessionDrafts.viewStory', 'View Story')}
+                                      </button>
+                                      
+                                      {stories && stories.length > 1 && (
+                                        <button 
+                                          className="btn btn--outline btn--sm"
+                                          onClick={() => handleViewStoryHistory(session.id)}
+                                        >
+                                          <Clock size={14} />
+                                          {t('admin.sessions.sessionDrafts.storyHistory', 'History')} ({stories.length})
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            
+                            if (!hasApprovedDrafts(session)) {
+                              return (
+                                <div className="story-placeholder">
+                                  <div className="story-placeholder__icon">
+                                    <AlertTriangle size={24} />
+                                  </div>
+                                  <p className="story-placeholder__text">
+                                    {t('admin.sessions.needApprovedDrafts', 'Approved interview drafts are required to generate a full life story')}
+                                  </p>
+                                </div>
+                              );
+                            }
+                            
+                            return null;
+                          })()}
+                        </div>
+                      </div>
+
                       {/* Interviews */}
                       <div className="session-details__section">
                         <div className="session-details__section-header">
@@ -1018,6 +1330,8 @@ const Sessions = () => {
                           <Eye size={16} />
                           {t('admin.sessions.viewDrafts', 'View Drafts')}
                         </button>
+
+                        
                         <button className="btn btn--secondary btn--sm">
                           <Edit size={16} />
                           {t('common.edit', 'Edit')}
@@ -1362,6 +1676,21 @@ const Sessions = () => {
           </div>
         </div>
       )}
+
+      {/* Story View Modal */}
+      <StoryViewModal
+        isOpen={!!showStoryViewModal}
+        onClose={handleCloseStoryView}
+        story={showStoryViewModal}
+      />
+
+      {/* Story History Modal */}
+      <StoryHistoryModal
+        isOpen={!!showStoryHistoryModal}
+        onClose={handleCloseStoryHistory}
+        stories={showStoryHistoryModal ? sessionStories[showStoryHistoryModal] : null}
+        onViewStory={handleViewStory}
+      />
     </div>
   );
 };
