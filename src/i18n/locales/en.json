@@ -25,12 +25,20 @@
     "confirm": "Confirm",
     "close": "Close",
     "adding": "Adding...",
+    "approve": "Approve",
+    "reject": "Reject",
     "approving": "Approving...",
     "rejecting": "Rejecting...",
     "complete": "Complete",
     "expand": "Expand",
     "collapse": "Collapse",
-    "age": "Age"
+    "age": "Age",
+    "all": "All",
+    "filters": "Filters",
+    "status": "Status",
+    "sortBy": "Sort By",
+    "dateCreated": "Date Created",
+    "dateUpdated": "Date Updated"
   },
   "navbar": {
     "brand": "Legamunity"
@@ -44,6 +52,7 @@
     "adminDashboard": "Admin Dashboard",
     "scheduleInterview": "Schedule Interview",
     "drafts": "Drafts",
+    "fullLifeStories": "Full Life Stories",
     "conflicts": "Conflicts",
     "analytics": "Analytics",
     "projectProgress": "Project Progress"
@@ -57,6 +66,7 @@
       "sessionOverview": "Session Overview",
       "draftManagement": "Draft Management",
       "interviewProgress": "Interview Progress",
+      "lifeStoriesOverview": "Life Stories Overview",
       "recentActivity": "Recent Activity (Last 7 Days)"
     },
     "kpi": {
@@ -72,6 +82,12 @@
       "interviewCompletionRate": "Completion Rate",
       "recentInterviews": "Recent Interviews",
       "recentDrafts": "Recent Drafts",
+      "totalLifeStories": "Total Life Stories",
+      "generatedLifeStories": "Generated Stories",
+      "approvedLifeStories": "Approved Stories",
+      "rejectedLifeStories": "Rejected Stories",
+      "avgWordsPerStory": "Avg Words/Story",
+      "totalStoryWords": "Total Story Words",
       "cqsAverage": "Average CQS",
       "pendingReview": "Pending Review"
     },
@@ -355,6 +371,27 @@
           "step3": "AI generates a draft life story",
           "step4": "Interview is marked as completed"
         }
+      }
+    },
+    "lifeStories": {
+      "title": "Full Life Stories",
+      "subtitle": "Manage and review complete life story narratives",
+      "searchPlaceholder": "Search by name or title...",
+      "totalStories": "Total Stories",
+      "generated": "Generated",
+      "approved": "Approved",
+      "avgWordCount": "Avg Word Count",
+      "noStories": "No Life Stories Found",
+      "noStoriesDesc": "Life stories will appear here once they are generated from approved drafts.",
+      "regenerate": "Regenerate",
+      "notes": "Notes",
+      "chapters": "Chapters",
+      "participantName": "Participant Name",
+      "status": {
+        "generated": "Generated",
+        "approved": "Approved", 
+        "rejected": "Rejected",
+        "archived": "Archived"
       }
     },
     "table": {

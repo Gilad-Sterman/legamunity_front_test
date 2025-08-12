@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { checkAuthStatus } from './store/slices/authSliceSupabase';
 import './i18n'; // Import i18n configuration
 
@@ -12,8 +12,7 @@ import AdminDashboard from './pages/AdminDashboard';
 // Admin Pages
 import ScheduleInterview from './pages/admin/ScheduleInterview';
 import Sessions from './pages/admin/Sessions';
-import SessionDrafts from './pages/admin/SessionDrafts';
-import Drafts from './pages/admin/Drafts';
+import FullLifeStories from './pages/admin/FullLifeStories';
 import UserManagement from './pages/admin/UserManagement';
 import Conflicts from './pages/admin/Conflicts';
 import Analytics from './pages/admin/Analytics';
@@ -55,8 +54,7 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/schedule" element={<ScheduleInterview />} />
             <Route path="/admin/sessions" element={<Sessions />} />
-            <Route path="/admin/drafts/:sessionId" element={<SessionDrafts />} />
-            <Route path="/admin/drafts" element={<Drafts />} />
+            <Route path="/admin/full-life-stories" element={<FullLifeStories />} />
             
             {/* Admin tools */}
             <Route path="/admin/users" element={<UserManagement />} />

@@ -27,7 +27,7 @@
 @import 'components/draft-testing';
 @import 'components/draft-review';
 @import 'components/file-upload';
-@import 'components/migration-panel';
+// @import 'components/migration-panel';
 @import '../components/admin/sessions/StoryModals';
 
 // Pages
@@ -38,6 +38,5 @@
 @import 'pages/scheduling';
 @import 'pages/project-progress';
 @import 'pages/sessions';
-@import 'pages/session-drafts';
-@import 'pages/drafts';
-@import 'pages/draft-migration';
+@import 'pages/full-life-stories';
+// @import 'pages/draft-migration';

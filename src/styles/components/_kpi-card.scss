@@ -2,44 +2,211 @@
 
 .kpi-card {
   background-color: $background-light;
-  padding: $spacing-large;
-  border-radius: $border-radius-lg;
-  box-shadow: $box-shadow-md;
+  padding: $spacing-lg;
+  border-radius: $border-radius;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-left: 4px solid transparent;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: $spacing-md;
   }
 
   &__title {
     font-size: $font-size-sm;
-    font-weight: 500;
-    color: $text-muted;
+    font-weight: 600;
+    color: $text-color;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   &__icon {
-    height: $spacing-large;
-    width: $spacing-large;
-    color: $text-muted;
+    height: 24px;
+    width: 24px;
+    opacity: 0.8;
   }
 
   &__body {
-    margin-top: $spacing-small;
+    flex: 1;
   }
 
   &__value {
-    font-size: $font-size-xxl; // 32px, slightly smaller than original 36px
-    font-weight: 600;
-    color: $text-dark;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: $spacing-xs;
   }
 
   &__trend {
     font-size: $font-size-xs;
-    color: $text-muted;
+    font-weight: 500;
     margin-top: $spacing-xs;
+  }
+
+  &__loading {
+    .loading-skeleton {
+      height: 2.5rem;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 4px;
+
+      &--text {
+        width: 80%;
+      }
+    }
+  }
+
+  // Color Variants
+  &--default {
+    border-left-color: $primary-color;
+    .kpi-card__icon {
+      color: $primary-color;
+    }
+    .kpi-card__value {
+      color: $primary-color;
+    }
+  }
+
+  &--blue {
+    border-left-color: #3b82f6;
+    .kpi-card__icon {
+      color: #3b82f6;
+    }
+    .kpi-card__value {
+      color: #1e40af;
+    }
+  }
+
+  &--green {
+    border-left-color: #10b981;
+    .kpi-card__icon {
+      color: #10b981;
+    }
+    .kpi-card__value {
+      color: #047857;
+    }
+  }
+
+  &--purple {
+    border-left-color: #8b5cf6;
+    .kpi-card__icon {
+      color: #8b5cf6;
+    }
+    .kpi-card__value {
+      color: #6d28d9;
+    }
+  }
+
+  &--indigo {
+    border-left-color: #6366f1;
+    .kpi-card__icon {
+      color: #6366f1;
+    }
+    .kpi-card__value {
+      color: #4338ca;
+    }
+  }
+
+  &--yellow {
+    border-left-color: #f59e0b;
+    .kpi-card__icon {
+      color: #f59e0b;
+    }
+    .kpi-card__value {
+      color: #d97706;
+    }
+  }
+
+  &--emerald {
+    border-left-color: #059669;
+    .kpi-card__icon {
+      color: #059669;
+    }
+    .kpi-card__value {
+      color: #047857;
+    }
+  }
+
+  &--cyan {
+    border-left-color: #06b6d4;
+    .kpi-card__icon {
+      color: #06b6d4;
+    }
+    .kpi-card__value {
+      color: #0891b2;
+    }
+  }
+
+  &--teal {
+    border-left-color: #14b8a6;
+    .kpi-card__icon {
+      color: #14b8a6;
+    }
+    .kpi-card__value {
+      color: #0f766e;
+    }
+  }
+
+  &--lime {
+    border-left-color: #84cc16;
+    .kpi-card__icon {
+      color: #84cc16;
+    }
+    .kpi-card__value {
+      color: #65a30d;
+    }
+  }
+
+  &--orange {
+    border-left-color: #f97316;
+    .kpi-card__icon {
+      color: #f97316;
+    }
+    .kpi-card__value {
+      color: #ea580c;
+    }
+  }
+
+  &--rose {
+    border-left-color: #f43f5e;
+    .kpi-card__icon {
+      color: #f43f5e;
+    }
+    .kpi-card__value {
+      color: #e11d48;
+    }
+  }
+
+  &--violet {
+    border-left-color: #7c3aed;
+    .kpi-card__icon {
+      color: #7c3aed;
+    }
+    .kpi-card__value {
+      color: #5b21b6;
+    }
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }

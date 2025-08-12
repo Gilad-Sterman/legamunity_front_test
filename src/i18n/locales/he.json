@@ -37,6 +37,7 @@
     "adminDashboard": "לוח בקרה למנהל",
     "scheduleInterview": "תזמון ראיון",
     "drafts": "טיוטות",
+    "fullLifeStories": "סיפורי חיים מלאים",
     "conflicts": "קונפליקטים",
     "analytics": "אנליטיקה",
     "projectProgress": "התקדמות הפרויקט"
@@ -377,6 +378,32 @@
         "makeCurrent": "הפוך לנוכחי",
         "exportStory": "ייצא סיפור",
         "minRead": "דק' קריאה"
+      },
+      "lifeStories": {
+        "title": "סיפורי חיים מלאים",
+        "subtitle": "ניהול וסקירת סיפורי חיים מלאים",
+        "searchPlaceholder": "חיפוש לפי שם או כותרת...",
+        "totalStories": "סך הכל סיפורים",
+        "pendingApproval": "ממתינים לאישור",
+        "approved": "מאושרים",
+        "avgWordCount": "ממוצע מילים",
+        "noStories": "לא נמצאו סיפורי חיים",
+        "noStoriesDesc": "סיפורי חיים יופיעו כאן לאחר יצירתם מטיוטות מאושרות.",
+        "participantName": "שם משתתף",
+        "wordCount": "מספר מילים",
+        "keyMoments": "רגעים מרכזיים",
+        "chapters": "פרקים",
+        "timeline": "ציר זמן",
+        "regenerate": "צור מחדש",
+        "notes": "הערות",
+        "addNote": "הוסף הערה",
+        "addNotePlaceholder": "הוסף הערה על סיפור החיים הזה...",
+        "status": {
+          "pendingApproval": "ממתין לאישור",
+          "approved": "מאושר",
+          "rejected": "נדחה",
+          "regenerating": "נוצר מחדש"
+        }
       },
       "validation": {
         "clientNameRequired": "אנא הכנס שם לקוח",

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { Users, Activity, CheckCircle, Clock, FileText, ThumbsUp, TrendingUp, Calendar } from 'lucide-react';
+import { Users, Activity, CheckCircle, Clock, FileText, ThumbsUp, TrendingUp, Calendar, BookOpen, Star, Archive, BarChart3 } from 'lucide-react';
 import KpiCard from '../components/dashboard/KpiCard';
 import { fetchSessionStats } from '../store/slices/sessionsSliceSupabase';
 
@@ -35,7 +35,15 @@ const AdminDashboard = () => {
     
     // Recent activity
     recentInterviews: stats?.recentInterviews?.toString() || '0',
-    recentDrafts: stats?.recentDrafts?.toString() || '0'
+    recentDrafts: stats?.recentDrafts?.toString() || '0',
+    
+    // Life Story metrics
+    totalLifeStories: stats?.totalLifeStories?.toString() || '0',
+    generatedLifeStories: stats?.generatedLifeStories?.toString() || '0',
+    approvedLifeStories: stats?.approvedLifeStories?.toString() || '0',
+    rejectedLifeStories: stats?.rejectedLifeStories?.toString() || '0',
+    avgWordsPerStory: stats?.avgWordsPerStory?.toString() || '0',
+    totalStoryWords: stats?.totalStoryWords?.toString() || '0'
   };
   
   // Load stats on component mount
@@ -60,19 +68,22 @@ const AdminDashboard = () => {
             title={t('admin.kpi.totalSessions')} 
             value={kpis.totalSessions} 
             icon={Users} 
-            loading={loading} 
+            loading={loading}
+            color="blue"
           />
           <KpiCard 
             title={t('admin.kpi.activeSessions')} 
             value={kpis.activeSessions} 
             icon={Activity} 
-            loading={loading} 
+            loading={loading}
+            color="green"
           />
           <KpiCard 
             title={t('admin.kpi.completedSessions', 'Completed Sessions')} 
             value={kpis.completedSessions} 
             icon={CheckCircle} 
-            loading={loading} 
+            loading={loading}
+            color="purple"
           />
         </div>
       </section>
@@ -85,25 +96,29 @@ const AdminDashboard = () => {
             title={t('admin.kpi.totalDrafts', 'Total Drafts')} 
             value={kpis.totalDrafts} 
             icon={FileText} 
-            loading={loading} 
+            loading={loading}
+            color="indigo"
           />
           <KpiCard 
             title={t('admin.kpi.draftsAwaitingApproval', 'Awaiting Approval')} 
             value={kpis.draftsAwaitingApproval} 
             icon={Clock} 
-            loading={loading} 
+            loading={loading}
+            color="yellow"
           />
           <KpiCard 
             title={t('admin.kpi.approvedDrafts', 'Approved Drafts')} 
             value={kpis.approvedDrafts} 
             icon={ThumbsUp} 
-            loading={loading} 
+            loading={loading}
+            color="green"
           />
           <KpiCard 
             title={t('admin.kpi.draftApprovalRate', 'Approval Rate')} 
             value={kpis.draftApprovalRate} 
             icon={TrendingUp} 
-            loading={loading} 
+            loading={loading}
+            color="emerald"
           />
         </div>
       </section>
@@ -116,19 +131,57 @@ const AdminDashboard = () => {
             title={t('admin.kpi.totalInterviews', 'Total Interviews')} 
             value={kpis.totalInterviews} 
             icon={Users} 
-            loading={loading} 
+            loading={loading}
+            color="cyan"
           />
           <KpiCard 
             title={t('admin.kpi.completedInterviews', 'Completed Interviews')} 
             value={kpis.completedInterviews} 
             icon={CheckCircle} 
-            loading={loading} 
+            loading={loading}
+            color="teal"
           />
           <KpiCard 
             title={t('admin.kpi.interviewCompletionRate', 'Completion Rate')} 
             value={kpis.interviewCompletionRate} 
             icon={TrendingUp} 
-            loading={loading} 
+            loading={loading}
+            color="lime"
+          />
+        </div>
+      </section>
+
+      {/* Life Stories Overview */}
+      <section className="admin-dashboard-page__section">
+        <h2 className="admin-dashboard-page__section-title">{t('admin.sections.lifeStoriesOverview', 'Life Stories Overview')}</h2>
+        <div className="admin-dashboard-page__kpi-grid">
+          <KpiCard 
+            title={t('admin.kpi.totalLifeStories', 'Total Life Stories')} 
+            value={kpis.totalLifeStories} 
+            icon={BookOpen} 
+            loading={loading}
+            color="purple"
+          />
+          <KpiCard 
+            title={t('admin.kpi.generatedLifeStories', 'Generated Stories')} 
+            value={kpis.generatedLifeStories} 
+            icon={FileText} 
+            loading={loading}
+            color="blue"
+          />
+          <KpiCard 
+            title={t('admin.kpi.approvedLifeStories', 'Approved Stories')} 
+            value={kpis.approvedLifeStories} 
+            icon={Star} 
+            loading={loading}
+            color="green"
+          />
+          <KpiCard 
+            title={t('admin.kpi.avgWordsPerStory', 'Avg Words/Story')} 
+            value={kpis.avgWordsPerStory} 
+            icon={BarChart3} 
+            loading={loading}
+            color="orange"
           />
         </div>
       </section>
@@ -141,13 +194,15 @@ const AdminDashboard = () => {
             title={t('admin.kpi.recentInterviews', 'Recent Interviews')} 
             value={kpis.recentInterviews} 
             icon={Calendar} 
-            loading={loading} 
+            loading={loading}
+            color="rose"
           />
           <KpiCard 
             title={t('admin.kpi.recentDrafts', 'Recent Drafts')} 
             value={kpis.recentDrafts} 
             icon={FileText} 
-            loading={loading} 
+            loading={loading}
+            color="violet"
           />
         </div>
       </section>

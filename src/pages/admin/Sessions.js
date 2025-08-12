@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
   Calendar, 
-  Clock, 
-  MapPin, 
-  Phone, 
-  Mail, 
+  Clock,  
   Edit, 
   Trash, 
   Plus, 
@@ -20,7 +17,6 @@ import {
   CheckCircle, 
   AlertTriangle,
   Eye,
-  Download,
   ChevronDown,
   ChevronUp,
   MessageSquare,
@@ -45,11 +41,13 @@ import CreateSessionModal from '../../components/admin/sessions/CreateSessionMod
 import FileUpload from '../../components/admin/interviews/FileUpload';
 import StoryViewModal from '../../components/admin/sessions/StoryViewModal';
 import StoryHistoryModal from '../../components/admin/sessions/StoryHistoryModal';
+import DraftViewModal from '../../components/admin/sessions/DraftViewModal';
+import '../../components/admin/sessions/DraftViewModal.scss';
 
 const Sessions = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const {
     sessions,
@@ -73,7 +71,7 @@ const Sessions = () => {
   const [showFileUploadModal, setShowFileUploadModal] = useState(null);
   const [showFileViewModal, setShowFileViewModal] = useState(null);
   const [showDraftViewModal, setShowDraftViewModal] = useState(null);
-  const [showMigrationPanel, setShowMigrationPanel] = useState(null);
+  // const [showMigrationPanel, setShowMigrationPanel] = useState(null);
   const [generatingStory, setGeneratingStory] = useState(null); // Track which session is generating story
   const [showStoryHistoryModal, setShowStoryHistoryModal] = useState(null); // Show previous generations
   const [showStoryViewModal, setShowStoryViewModal] = useState(null); // Show story content
@@ -646,6 +644,97 @@ const Sessions = () => {
     setShowDraftViewModal(null);
   };
 
+  // Draft management handlers
+  const handleApproveDraft = async (draftId) => {
+    try {
+      // TODO: Implement draft approval API call
+      console.log('Approving draft:', draftId);
+      // await dispatch(approveDraft({ draftId })).unwrap();
+      
+      // Refresh sessions data
+      await dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+      }));
+      
+      setShowDraftViewModal(null);
+    } catch (error) {
+      console.error('Failed to approve draft:', error);
+      alert(t('admin.drafts.approveError', 'Failed to approve draft'));
+    }
+  };
+
+  const handleRejectDraft = async (draftId, reason) => {
+    try {
+      // TODO: Implement draft rejection API call
+      console.log('Rejecting draft:', draftId, 'Reason:', reason);
+      // await dispatch(rejectDraft({ draftId, reason })).unwrap();
+      
+      // Refresh sessions data
+      await dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+      }));
+      
+      setShowDraftViewModal(null);
+    } catch (error) {
+      console.error('Failed to reject draft:', error);
+      alert(t('admin.drafts.rejectError', 'Failed to reject draft'));
+    }
+  };
+
+  const handleRegenerateDraft = async (draftId, instructions) => {
+    try {
+      // TODO: Implement draft regeneration API call
+      console.log('Regenerating draft:', draftId, 'Instructions:', instructions);
+      // await dispatch(regenerateDraft({ draftId, instructions })).unwrap();
+      
+      // Refresh sessions data
+      await dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+      }));
+      
+      setShowDraftViewModal(null);
+    } catch (error) {
+      console.error('Failed to regenerate draft:', error);
+      alert(t('admin.drafts.regenerateError', 'Failed to regenerate draft'));
+    }
+  };
+
+  const handleUpdateDraftNotes = async (draftId, notes) => {
+    try {
+      // TODO: Implement draft notes update API call
+      console.log('Updating draft notes:', draftId, 'Notes:', notes);
+      // await dispatch(updateDraftNotes({ draftId, notes })).unwrap();
+      
+      // Refresh sessions data
+      await dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+      }));
+    } catch (error) {
+      console.error('Failed to update draft notes:', error);
+      alert(t('admin.drafts.updateNotesError', 'Failed to update draft notes'));
+    }
+  };
+
   // Handle file upload success for normalized interviews
   const handleFileUploadSuccess = async (updatedInterview) => {
     try {
@@ -1172,7 +1261,7 @@ const Sessions = () => {
                                     {t('common.edit', 'Edit')}
                                   </button>
                                   <button
-                                    className="btn btn--secondary btn--xs"
+                                    className="btn btn--danger btn--xs"
                                     onClick={() => handleDeleteInterview(session.id, interview.id)}
                                   >
                                     <Trash size={12} />
@@ -1323,15 +1412,6 @@ const Sessions = () => {
 
                       {/* Actions */}
                       <div className="session-details__actions">
-                        <button 
-                          className="btn btn--primary btn--sm"
-                          onClick={() => navigate(`/admin/drafts/${session.id}`)}
-                        >
-                          <Eye size={16} />
-                          {t('admin.sessions.viewDrafts', 'View Drafts')}
-                        </button>
-
-                        
                         <button className="btn btn--secondary btn--sm">
                           <Edit size={16} />
                           {t('common.edit', 'Edit')}
@@ -1605,77 +1685,19 @@ const Sessions = () => {
       )}
 
       {/* Draft View Modal */}
-      {showDraftViewModal && (
-        <div className="modal-overlay" onClick={handleCloseDraftView}>
-          <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
-            <div className="modal__header">
-              <h3>{t('admin.sessions.draftDetails', 'Draft Details')}</h3>
-              <button className="modal__close" onClick={handleCloseDraftView}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal__content">
-              <div className="draft-details">
-                <div className="draft-details__info">
-                  <h4>{t('admin.sessions.draftInfo', 'Draft Information')}</h4>
-                  <div className="draft-info-grid">
-                    <div className="draft-info-item">
-                      <strong>{t('admin.sessions.draftTitle', 'Title')}:</strong>
-                      <span>{showDraftViewModal.ai_draft?.title}</span>
-                    </div>
-                    <div className="draft-info-item">
-                      <strong>{t('admin.sessions.draftStatus', 'Status')}:</strong>
-                      <span>{showDraftViewModal.ai_draft?.status}</span>
-                    </div>
-                    <div className="draft-info-item">
-                      <strong>{t('admin.sessions.draftVersion', 'Version')}:</strong>
-                      <span>{showDraftViewModal.ai_draft?.version}</span>
-                    </div>
-                    <div className="draft-info-item">
-                      <strong>{t('admin.sessions.createdAt', 'Created At')}:</strong>
-                      <span>{showDraftViewModal.ai_draft?.createdAt ? new Date(showDraftViewModal.ai_draft.createdAt).toLocaleString() : 'N/A'}</span>
-                    </div>
-                  </div>
-                </div>
-                {showDraftViewModal.ai_draft?.content && (
-                  <div className="draft-details__content">
-                    <h4>{t('admin.sessions.draftContent', 'Content')}</h4>
-                    <div className="draft-content">
-                      {showDraftViewModal.ai_draft.content.summary && (
-                        <div className="draft-section">
-                          <h5>{t('admin.sessions.summary', 'Summary')}</h5>
-                          <p>{showDraftViewModal.ai_draft.content.summary}</p>
-                        </div>
-                      )}
-                      {showDraftViewModal.ai_draft.content.sections && Array.isArray(showDraftViewModal.ai_draft.content.sections) && (
-                        <div className="draft-section">
-                          <h5>{t('admin.sessions.sections', 'Sections')}</h5>
-                          {showDraftViewModal.ai_draft.content.sections.map((section, index) => (
-                            <div key={index} className="draft-subsection">
-                              <h6>{section.title}</h6>
-                              <p>{section.content}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {showDraftViewModal.ai_draft.content.keyThemes && Array.isArray(showDraftViewModal.ai_draft.content.keyThemes) && (
-                        <div className="draft-section">
-                          <h5>{t('admin.sessions.keyThemes', 'Key Themes')}</h5>
-                          <ul>
-                            {showDraftViewModal.ai_draft.content.keyThemes.map((theme, index) => (
-                              <li key={index}>{theme}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DraftViewModal
+        isOpen={!!showDraftViewModal}
+        onClose={handleCloseDraftView}
+        draft={showDraftViewModal?.ai_draft}
+        interview={showDraftViewModal}
+        session={sessions.find(s => s.interviews?.some(i => i.id === showDraftViewModal?.id))}
+        onRegenerate={handleRegenerateDraft}
+        onDraftUpdated={() => {
+          // Refresh sessions data after draft actions
+          dispatch(fetchSessions({ page: pagination.current, limit: pagination.pageSize }));
+        }}
+        loading={loading}
+      />
 
       {/* Story View Modal */}
       <StoryViewModal
