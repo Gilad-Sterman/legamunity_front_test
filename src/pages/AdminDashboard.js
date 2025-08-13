@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { Users, Activity, CheckCircle, Clock, FileText, ThumbsUp, TrendingUp, Calendar, BookOpen, Star, Archive, BarChart3 } from 'lucide-react';
+import { Users, Activity, CheckCircle, Clock, FileText, ThumbsUp, TrendingUp, Calendar, BookOpen, Star, BarChart3 } from 'lucide-react';
 import KpiCard from '../components/dashboard/KpiCard';
 import { fetchSessionStats } from '../store/slices/sessionsSliceSupabase';
 
 const AdminDashboard = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const hasFetchedRef = useRef(false);
   
   // Get stats from Redux store
   const { 
@@ -48,8 +49,12 @@ const AdminDashboard = () => {
   
   // Load stats on component mount
   useEffect(() => {
-    dispatch(fetchSessionStats());
-  }, [dispatch]);
+    // Only fetch if we haven't fetched before and we're not already loading
+    if (!hasFetchedRef.current && !loading) {
+      hasFetchedRef.current = true;
+      dispatch(fetchSessionStats());
+    }
+  }, [dispatch, loading]);
 
   return (
     <div className="admin-dashboard-page">

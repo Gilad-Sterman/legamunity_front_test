@@ -1114,7 +1114,14 @@ const Sessions = () => {
                                         </span>
                                         <span className="story-meta__item">
                                           <FileText size={12} />
-                                          {currentStory.total_words} {t('admin.sessions.words', 'words')}
+                                          {(() => {
+                                            // Extract word count from multiple possible sources (backward compatibility)
+                                            const wordCount = currentStory.total_words || 
+                                                             currentStory.metadata?.wordCount || 
+                                                             (typeof currentStory.content === 'string' ? currentStory.content.split(/\s+/).length : 0) || 
+                                                             0;
+                                            return `${wordCount.toLocaleString()} ${t('admin.sessions.words', 'words')}`;
+                                          })()}
                                         </span>
                                         <span className="story-meta__item">
                                           <Clock size={12} />
@@ -1474,7 +1481,7 @@ const Sessions = () => {
       {/* Scheduling Modal */}
       {showSchedulingModal && (
         <div className="modal-overlay" onClick={handleCloseScheduling}>
-          <div className="modal modal--medium" onClick={(e) => e.stopPropagation()}>
+          <div className="modal modal--medium scheduling-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal__header">
               <h3>{t('admin.sessions.interviewScheduling', 'Interview Scheduling')}</h3>
               <button className="modal__close" onClick={handleCloseScheduling}>

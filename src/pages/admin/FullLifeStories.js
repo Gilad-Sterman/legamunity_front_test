@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { 
   Search, 
   Filter, 
@@ -13,11 +13,9 @@ import {
   RefreshCw, 
   StickyNote,
   ChevronUp,
-  ChevronRight,
   Hash,
   Clock,
   Eye,
-  MessageSquare,
   Save
 } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -72,6 +70,30 @@ const FullLifeStories = () => {
           const isRejected = story.review_notes && story.review_notes.includes('Rejected -');
           const actualStatus = isRejected ? 'rejected' : story.status;
           
+          // Handle both old structured format and new string format
+          const isNewFormat = typeof story.content === 'string';
+          const contentData = isNewFormat ? {} : story.content || {};
+          
+          // Extract word count from metadata or calculate from content
+          const wordCount = story.total_words || 
+                           story.metadata?.wordCount || 
+                           (isNewFormat && story.content ? story.content.split(/\s+/).length : 0) || 
+                           0;
+          
+          // Extract chapters from markdown headers if new format
+          const extractChaptersFromMarkdown = (text) => {
+            if (!text || typeof text !== 'string') return [];
+            const headerMatches = text.match(/^##\s+(.+)$/gm);
+            return headerMatches ? headerMatches.map(match => ({ title: match.replace(/^##\s+/, '') })) : [];
+          };
+          
+          // Extract summary from first paragraph if new format
+          const extractSummaryFromMarkdown = (text) => {
+            if (!text || typeof text !== 'string') return '';
+            const paragraphs = text.split('\n\n').filter(p => p.trim() && !p.startsWith('#'));
+            return paragraphs[0] ? paragraphs[0].substring(0, 200) + '...' : '';
+          };
+          
           return {
             id: story.id,
             title: story.title || `${story.sessions?.client_name || 'Untitled'} - Life Story`,
@@ -86,18 +108,21 @@ const FullLifeStories = () => {
           updatedAt: story.updated_at,
           generatedBy: story.generated_by,
           aiModel: story.ai_model,
-          wordCount: story.total_words || 0,
-          totalPages: story.total_pages || 0,
-          estimatedReadingTime: story.estimated_reading_time || 0,
-          chapterCount: story.content?.chapters?.length || 0,
-          processingTime: story.processing_time || 0,
+          wordCount: wordCount,
+          totalPages: story.total_pages || Math.ceil(wordCount / 250) || 0, // Estimate pages
+          estimatedReadingTime: story.estimated_reading_time || Math.ceil(wordCount / 200) || 0, // Estimate reading time
+          chapterCount: isNewFormat ? extractChaptersFromMarkdown(story.content).length : (contentData.chapters?.length || 0),
+          processingTime: story.processing_time || story.metadata?.processingTime || 0,
           content: {
-            summary: story.content?.summary || story.content?.introduction?.summary || story.subtitle || '',
-            chapters: story.content?.chapters || [],
-            keyMoments: story.content?.key_moments || story.content?.keyMoments || [],
-            timeline: story.content?.timeline || [],
-            introduction: story.content?.introduction || null,
-            appendices: story.content?.appendices || null
+            // For new format (string content), extract structured data
+            summary: isNewFormat ? extractSummaryFromMarkdown(story.content) : (contentData.summary || contentData.introduction?.summary || story.subtitle || ''),
+            chapters: isNewFormat ? extractChaptersFromMarkdown(story.content) : (contentData.chapters || []),
+            keyMoments: isNewFormat ? [] : (contentData.key_moments || contentData.keyMoments || []),
+            timeline: isNewFormat ? [] : (contentData.timeline || []),
+            introduction: isNewFormat ? null : (contentData.introduction || null),
+            appendices: isNewFormat ? null : (contentData.appendices || null),
+            // Keep the raw content for display
+            fullText: isNewFormat ? story.content : (contentData.fullText || '')
           },
           generationStats: story.generation_stats || {},
           sourceMetadata: story.source_metadata || {},
@@ -659,13 +684,28 @@ const FullLifeStories = () => {
                 {expandedStory === story.id && (
                   <div className="life-story-card__expanded">
                     <div className="expanded-content">
-                      <h4>{t('admin.lifeStories.chapters', 'Chapters')}</h4>
-                      {story.content.chapters.map((chapter, index) => (
-                        <div key={index} className="chapter-preview">
-                          <h5>{chapter.title}</h5>
-                          <p>{chapter.content.substring(0, 200)}...</p>
+                      {/* Show full text content for new format */}
+                      {story.content.fullText && (
+                        <div className="full-story-content">
+                          <h4>{t('admin.lifeStories.fullStory', 'Full Life Story')}</h4>
+                          <div className="story-text" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                            {story.content.fullText}
+                          </div>
                         </div>
-                      ))}
+                      )}
+
+                      {/* Show chapters for old format */}
+                      {story.content.chapters && story.content.chapters.length > 0 && (
+                        <div className="chapters-preview">
+                          <h4>{t('admin.lifeStories.chapters', 'Chapters')}</h4>
+                          {story.content.chapters.map((chapter, index) => (
+                            <div key={index} className="chapter-preview">
+                              <h5>{chapter.title}</h5>
+                              {chapter.content && <p>{chapter.content.substring(0, 200)}...</p>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                       {story.content.timeline && story.content.timeline.length > 0 && (
                         <div className="timeline-preview">

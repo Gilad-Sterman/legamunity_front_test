@@ -1255,13 +1255,14 @@
 }
 
 // Scheduling modal styles
-.scheduling-info {
+.scheduling-modal {
   .scheduling-display {
     h4 {
       margin-bottom: $spacing-medium;
       color: $text-dark;
     }
   }
+  
 
   .schedule-details {
     display: flex;

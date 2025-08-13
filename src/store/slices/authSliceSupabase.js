@@ -120,7 +120,7 @@ const initialState = {
   user: null,
   token: localStorage.getItem('token'),
   isAuthenticated: !!localStorage.getItem('token'),
-  isLoading: false,
+  isLoading: !!localStorage.getItem('token'), // Set to true if token exists to trigger auth check
   error: null,
   authProvider: getAuthProvider(),
   authConfig: getAuthConfig(),

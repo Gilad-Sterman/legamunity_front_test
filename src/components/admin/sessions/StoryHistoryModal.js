@@ -17,8 +17,13 @@ const StoryHistoryModal = ({ isOpen, onClose, stories, onViewStory }) => {
     return new Date(dateString).toLocaleTimeString();
   };
 
-  const formatWordCount = (count) => {
-    if (!count) return '0';
+  const formatWordCount = (story) => {
+    // Extract word count from multiple possible sources (backward compatibility)
+    const count = story.total_words || 
+                  story.content?.totalWords || 
+                  story.metadata?.wordCount || 
+                  (typeof story.content === 'string' ? story.content.split(/\s+/).length : 0) || 
+                  0;
     return count.toLocaleString();
   };
 
@@ -89,7 +94,7 @@ const StoryHistoryModal = ({ isOpen, onClose, stories, onViewStory }) => {
                           <div className="meta-item">
                             <Hash size={14} />
                             <span>
-                              {formatWordCount(story.total_words || story.content?.totalWords)} {t('admin.sessions.sessionDrafts.words', 'words')}
+                              {formatWordCount(story)} {t('admin.sessions.sessionDrafts.words', 'words')}
                             </span>
                           </div>
                           

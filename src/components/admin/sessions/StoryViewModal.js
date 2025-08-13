@@ -12,8 +12,13 @@ const StoryViewModal = ({ isOpen, onClose, story }) => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const formatWordCount = (count) => {
-    if (!count) return '0';
+  const formatWordCount = (story) => {
+    // Extract word count from multiple possible sources (backward compatibility)
+    const count = story.total_words || 
+                  story.content?.totalWords || 
+                  story.metadata?.wordCount || 
+                  (typeof story.content === 'string' ? story.content.split(/\s+/).length : 0) || 
+                  0;
     return count.toLocaleString();
   };
 
@@ -55,7 +60,7 @@ const StoryViewModal = ({ isOpen, onClose, story }) => {
                   <Hash size={16} />
                   <div>
                     <span className="meta-label">{t('admin.sessions.sessionDrafts.wordCount', 'Word Count')}</span>
-                    <span className="meta-value">{formatWordCount(story.content?.totalWords)}</span>
+                    <span className="meta-value">{formatWordCount(story)}</span>
                   </div>
                 </div>
                 
@@ -71,36 +76,51 @@ const StoryViewModal = ({ isOpen, onClose, story }) => {
 
             {/* Story Content */}
             <div className="story-view__content">
-              {story.content?.summary && (
+              {/* Handle new format (string content) */}
+              {typeof story.content === 'string' && story.content && (
                 <div className="story-section">
-                  <h4>{t('admin.sessions.sessionDrafts.storySummary', 'Summary')}</h4>
-                  <p>{story.content.summary}</p>
-                </div>
-              )}
-
-              {story.content?.sections && story.content.sections.length > 0 && (
-                <div className="story-section">
-                  <h4>{t('admin.sessions.sessionDrafts.storyContent', 'Story Content')}</h4>
-                  <div className="story-sections">
-                    {story.content.sections.map((section, index) => (
-                      <div key={index} className="story-subsection">
-                        <h5>{section.title}</h5>
-                        <p>{section.content}</p>
-                      </div>
-                    ))}
+                  <h4>{t('admin.sessions.sessionDrafts.fullStoryContent', 'Full Life Story')}</h4>
+                  <div className="story-full-text" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                    {story.content}
                   </div>
                 </div>
               )}
 
-              {story.content?.keyThemes && story.content.keyThemes.length > 0 && (
-                <div className="story-section">
-                  <h4>{t('admin.sessions.sessionDrafts.keyThemes', 'Key Themes')}</h4>
-                  <ul className="story-themes">
-                    {story.content.keyThemes.map((theme, index) => (
-                      <li key={index}>{theme}</li>
-                    ))}
-                  </ul>
-                </div>
+              {/* Handle old format (structured content) */}
+              {typeof story.content === 'object' && story.content && (
+                <>
+                  {story.content.summary && (
+                    <div className="story-section">
+                      <h4>{t('admin.sessions.sessionDrafts.storySummary', 'Summary')}</h4>
+                      <p>{story.content.summary}</p>
+                    </div>
+                  )}
+
+                  {story.content.sections && story.content.sections.length > 0 && (
+                    <div className="story-section">
+                      <h4>{t('admin.sessions.sessionDrafts.storyContent', 'Story Content')}</h4>
+                      <div className="story-sections">
+                        {story.content.sections.map((section, index) => (
+                          <div key={index} className="story-subsection">
+                            <h5>{section.title}</h5>
+                            <p>{section.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {story.content.keyThemes && story.content.keyThemes.length > 0 && (
+                    <div className="story-section">
+                      <h4>{t('admin.sessions.sessionDrafts.keyThemes', 'Key Themes')}</h4>
+                      <ul className="story-themes">
+                        {story.content.keyThemes.map((theme, index) => (
+                          <li key={index}>{theme}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

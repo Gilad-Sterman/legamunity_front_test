@@ -295,6 +295,7 @@ class SupabaseSessionsService {
 
   async getSessionStats() {
     try {
+      // console.log('🚀 Frontend: Starting getSessionStats API call...');
       const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       
       const response = await fetch(`${API_BASE_URL}/sessions-supabase/stats`, {
@@ -306,12 +307,19 @@ class SupabaseSessionsService {
       });
 
       const data = await response.json();
+      // console.log('📊 Frontend: Received stats response:', { 
+        // ok: response.ok, 
+        // status: response.status, 
+        // data: data.data,
+        // success: data.success 
+      // });
 
       if (!response.ok) {
-        console.error('Error fetching session stats:', data.message);
+        // console.error('❌ Frontend: Error fetching session stats:', data.message);
         throw new Error(data.message || 'Failed to fetch session statistics');
       }
 
+      // console.log('✅ Frontend: Successfully processed stats:', data.data);
       return {
         success: true,
         data: data.data || {
@@ -323,6 +331,7 @@ class SupabaseSessionsService {
         message: data.message
       };
     } catch (error) {
+      console.error('💥 Frontend: getSessionStats failed:', error.message);
       return {
         success: false,
         error: error.message

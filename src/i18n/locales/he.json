@@ -31,7 +31,7 @@
   "sidebar": {
     "dashboard": "לוח בקרה",
     "users": "משתמשים",
-    "sessions": "סיפורי חיים",
+    "sessions": "פרויקטים",
     "interviews": "ראיונות",
     "admin": "ניהול",
     "adminDashboard": "לוח בקרה למנהל",
@@ -48,15 +48,15 @@
     "searchPlaceholder": "חיפוש סיפורי חיים...",
     "filters": "סינון",
     "sections": {
-      "sessionOverview": "סקירת סיפורי חיים",
+      "sessionOverview": "סקירת פרויקטים",
       "draftManagement": "ניהול טיוטות",
       "interviewProgress": "התקדמות ראיונות",
       "recentActivity": "פעילות אחרונה (7 ימים אחרונים)"
     },
     "kpi": {
-      "totalSessions": "סך הכל סיפורי חיים",
-      "activeSessions": "סיפורי חיים פעילים",
-      "completedSessions": "סיפורי חיים שהושלמו",
+      "totalSessions": "סך הכל פרויקטים",
+      "activeSessions": "פרויקטים פעילים",
+      "completedSessions": "פרויקטים שהושלמו",
       "totalDrafts": "סך הכל טיוטות",
       "draftsAwaitingApproval": "ממתינות לאישור",
       "approvedDrafts": "טיוטות מאושרות",
@@ -70,13 +70,13 @@
       "pendingReview": "ממתינים לבדיקה"
     },
     "sessions": {
-      "title": "ניהול סיפורי חיים",
-      "createNew": "צור סיפור חיים חדש",
-      "createSession": "צור סיפור חיים",
+      "title": "ניהול פרויקטים",
+      "createNew": "צור פרויקט חדש",
+      "createSession": "צור פרויקט",
       "creating": "יוצר...",
-      "search": "חיפוש סיפורי חיים...",
-      "noSessions": "לא נמצאו סיפורי חיים",
-      "noSessionsDesc": "צור את הפגישה הראשונה שלך כדי להתחיל.",
+      "search": "חיפוש פרויקטים...",
+      "noSessions": "לא נמצאו פרויקטים",
+      "noSessionsDesc": "צור את הפרויקט הראשון שלך כדי להתחיל.",
       "clientInfo": "מידע לקוח",
       "collaborators": "משתתפים",
       "viewSchedule": "צפה בלוח הזמנים",
@@ -145,12 +145,13 @@
       "notesCount": "הערות",
       "showing": "מציג",
       "of": "מתוך",
-      "sessions": "סיפורי חיים",
+      "sessions": "פרויקטים",
       "tPriority": "עדיפות",
-      "createModalPlaceholder": "טופס יצירת סיפורי חיים יוטמע כאן.",
-      "active": "סיפורי חיים פעילים",
+      "createModalPlaceholder": "טופס יצירת פרויקטים יוטמע כאן.",
+      "active": "פרויקטים פעילים",
       "viewAll": "הצג הכל",
-      "noActiveSessions": "אין סיפורי חיים פעילים.",
+      "noActiveSessions": "אין פרויקטים פעילים.",
+      "needApprovedDrafts": "נדרשות טיוטות ראיון מאושרות כדי ליצור סיפור חיים מלא",
       "filters": {
         "allStatuses": "כל סטטוס",
         "allInterviewStatuses": "כל סטטוס ראיון",
@@ -165,7 +166,7 @@
         "pending": "בהמתנה",
         "cancelled": "בוטל"
       },
-      "clientStory": "סיפור החיים של {{clientName}}",
+      "clientStory": "הפרוייקט של {{clientName}}",
       "age": "גיל",
       "stages": {
         "scheduled": "מתוזמן",
@@ -295,12 +296,12 @@
         "interview5": "ראיון 5",
         "interviewNotes": "הערות ראיון (אופציונלי)",
         "additionalNotes": "הערות נוספות",
-        "createSession": "צור סיפור חיים"
+        "createSession": "צור פרויקט"
       },
       "sessionDrafts": {
-        "title": "טיוטת סיפור חיים",
+        "title": "טיוטת פרויקט",
         "noDraftFound": "לא נמצאה טיוטה",
-        "noDraftDescription": "לפגישה זו אין עדיין טיוטה. השלם כמה ראיונות כדי ליצור טיוטה.",
+        "noDraftDescription": "לפרויקט זה אין עדיין טיוטה. השלם כמה ראיונות כדי ליצור טיוטה.",
         "version": "גרסה",
         "progress": "התקדמות",
         "summary": "סיכום",
@@ -449,6 +450,7 @@
       "upload": {
         "title": "העלאת קובץ",
         "subtitle": "העלה קובץ ראיון",
+        "processingFile": "מעבד את הראיון שלך",
         "upload": "העלה",
         "uploading": "הועלת",
         "processing": "מעבד",
@@ -457,6 +459,25 @@
         "audioFile": "קובץ אודיו",
         "textFile": "קובץ טקסט",
         "sizeLimit": "גודל קובץ מוגבל 100MB",
+        "steps": {
+          "uploading": "העלאת קובץ",
+          "uploadingDesc": "העברה מאובטחת של הקובץ לשרתים שלנו",
+          "analyzing": "ניתוח תוכן",
+          "analyzingDesc": "בחינת מבנה הקובץ והכנה לעיבוד",
+          "transcribing": "תמלול בינה מלאכותית",
+          "transcribingDesc": "המרת אודיו לטקסט באמצעות מודלי AI מתקדמים",
+          "processing": "עיבוד בינה מלאכותית",
+          "processingDesc": "חילוץ תובנות ויצירת טיוטת סיפור חיים",
+          "finalizing": "סיום",
+          "finalizingDesc": "השלמת העיבוד והכנת התוצאות"
+        },
+        "tips": {
+          "upload": "💡 טיפ: השרתים שלנו משתמשים בהצפנה ברמה ארגונית כדי לשמור על הקבצים שלך",
+          "analyze": "🔍 ידעת? אנחנו יכולים לעבד יותר מ-50 פורמטים שונים של אודיו",
+          "transcribe": "🎯 הבינה המלאכותית שלנו משיגה דיוק של 95%+ בזיהוי דיבור",
+          "process": "🧠 הבינה המלאכותית מזהה רגעי חיים מרכזיים ונושאים בסיפור שלך",
+          "finalize": "✨ כמעט סיימנו! מכינים את טיוטת סיפור החיים האישית שלך"
+        },
         "dropzone": {
           "title": "העלעת קובץ",
           "subtitle": "העלה קובץ ראיון",
@@ -554,7 +575,7 @@
       "selectTime": "אנא בחר שעה"
     },
     "validation": {
-      "sessionRequired": "אנא בחר סשן",
+      "sessionRequired": "אנא בחר פרויקט",
       "userRequired": "אנא בחר משתמש",
       "dateRequired": "אנא בחר תאריך",
       "timeRequired": "אנא בחר שעה",

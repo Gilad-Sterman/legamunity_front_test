@@ -517,17 +517,22 @@ const sessionsSliceSupabase = createSlice({
 
       // Fetch session stats
       .addCase(fetchSessionStats.pending, (state) => {
+        // console.log('🔄 fetchSessionStats.pending - Starting stats fetch...');
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchSessionStats.fulfilled, (state, action) => {
+        // console.log('✅ fetchSessionStats.fulfilled - Stats received:', action.payload);
         state.loading = false;
         state.stats = action.payload;
         state.error = null;
       })
       .addCase(fetchSessionStats.rejected, (state, action) => {
+        // console.log('❌ fetchSessionStats.rejected - Stats fetch failed:', action.payload);
         state.loading = false;
         state.error = action.payload;
+        // Don't reset stats to null, keep previous stats if available
+        // state.stats = null; // Commented out to preserve previous stats
       })
 
       // Upload interview file

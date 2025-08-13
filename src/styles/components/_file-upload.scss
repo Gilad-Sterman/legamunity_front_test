@@ -186,44 +186,215 @@
     }
   }
   
-  // Processing overlay styles
+  // Engaging Processing overlay styles
   &__processing-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba($background-color, 0.9);
+    background-color: rgba($background-color, 0.95);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(5px);
   }
   
   &__processing-content {
     background-color: white;
-    border-radius: $border-radius;
+    border-radius: $border-radius-lg;
     padding: $spacing-xlarge;
-    text-align: center;
     box-shadow: $box-shadow-lg;
-    max-width: 400px;
-    width: 90%;
+    max-width: 600px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
     
-    h3 {
-      margin: $spacing-medium 0 $spacing-small;
-      color: $primary-color;
+    .progress-header {
+      text-align: center;
+      margin-bottom: $spacing-xlarge;
+      
+      h3 {
+        margin: 0 0 $spacing-large;
+        color: $primary-color;
+        font-size: $font-size-xl;
+        font-weight: 600;
+      }
+      
+      .overall-progress {
+        display: flex;
+        align-items: center;
+        gap: $spacing-medium;
+        
+        .progress-bar {
+          flex: 1;
+          height: 8px;
+          background-color: $background-light;
+          border-radius: 4px;
+          overflow: hidden;
+          
+          .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, $primary-color, $primary-light);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            animation: shimmer 2s infinite;
+          }
+        }
+        
+        .progress-text {
+          font-weight: 600;
+          color: $primary-color;
+          min-width: 40px;
+          text-align: right;
+        }
+      }
     }
     
-    p {
-      color: $text-muted;
-      margin: $spacing-small 0 0;
+    .current-step {
+      display: flex;
+      align-items: center;
+      gap: $spacing-large;
+      margin-bottom: $spacing-xlarge;
+      padding: $spacing-large;
+      background-color: $background-light;
+      border-radius: $border-radius;
+      border-left: 4px solid $primary-color;
+      
+      .step-icon-container {
+        .step-icon {
+          color: $primary-color;
+          animation: pulse 2s infinite;
+        }
+      }
+      
+      .step-info {
+        flex: 1;
+        
+        .step-title {
+          margin: 0 0 $spacing-small;
+          color: $text-color;
+          font-size: $font-size-lg;
+          font-weight: 600;
+        }
+        
+        .step-description {
+          margin: 0 0 $spacing-medium;
+          color: $text-muted;
+          line-height: 1.5;
+        }
+        
+        .step-progress {
+          .step-progress-bar {
+            height: 4px;
+            background-color: rgba($primary-color, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            
+            .step-progress-fill {
+              height: 100%;
+              background-color: $primary-color;
+              border-radius: 2px;
+              transition: width 0.1s ease;
+            }
+          }
+        }
+      }
     }
-  }
-  
-  &__processing-spinner {
-    color: $primary-color;
-    animation: spin 1.5s linear infinite;
+    
+    .steps-timeline {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: $spacing-xlarge;
+      padding: 0 $spacing-medium;
+      position: relative;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: $spacing-medium;
+        right: $spacing-medium;
+        height: 2px;
+        background-color: $border-color;
+        z-index: 1;
+      }
+      
+      .timeline-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: $spacing-small;
+        position: relative;
+        z-index: 2;
+        
+        .timeline-step-icon {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background-color: $background-color;
+          border: 2px solid $border-color;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: $text-muted;
+          transition: all 0.3s ease;
+        }
+        
+        .timeline-step-title {
+          font-size: $font-size-xs;
+          color: $text-muted;
+          text-align: center;
+          max-width: 80px;
+          line-height: 1.2;
+        }
+        
+        &.completed {
+          .timeline-step-icon {
+            background-color: $success-color;
+            border-color: $success-color;
+            color: white;
+          }
+          
+          .timeline-step-title {
+            color: $success-color;
+            font-weight: 500;
+          }
+        }
+        
+        &.active {
+          .timeline-step-icon {
+            background-color: $primary-color;
+            border-color: $primary-color;
+            color: white;
+            animation: pulse 2s infinite;
+          }
+          
+          .timeline-step-title {
+            color: $primary-color;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+    
+    .processing-tip {
+      margin-top: $spacing-md;
+      padding: $spacing-sm $spacing-md;
+      background: rgba($primary-color, 0.05);
+      border-radius: 8px;
+      border-left: 4px solid $primary-color;
+
+      .tip-text {
+        margin: 0;
+        font-size: $font-size-sm;
+        color: $text-color;
+        line-height: 1.4;
+        animation: fadeIn 0.5s ease-in;
+        white-space: pre-wrap;
+      }
+    }
   }
 }
 
@@ -233,5 +404,36 @@
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

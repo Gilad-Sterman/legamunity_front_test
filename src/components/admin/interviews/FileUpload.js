@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { Upload, X, FileText, Music, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import { Upload, X, FileText, Music, AlertCircle, CheckCircle, Loader, Brain, Wand2, FileSearch, Sparkles } from 'lucide-react';
 import { uploadInterviewFile } from '../../../store/slices/interviewsSlice';
 
 const FileUpload = ({ interviewId, onClose, onSuccess }) => {
@@ -13,8 +13,53 @@ const FileUpload = ({ interviewId, onClose, onSuccess }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState(null); // 'success', 'error', null
   const [uploadMessage, setUploadMessage] = useState('');
+  const [currentStep, setCurrentStep] = useState(0);
+  const [progress, setProgress] = useState(0);
   
   const fileInputRef = useRef(null);
+
+  // Processing steps configuration (static to avoid useEffect re-runs)
+  const processingStepsConfig = [
+    { id: 'upload', icon: Upload, duration: 2000 },
+    { id: 'analyze', icon: FileSearch, duration: 3000 },
+    { id: 'transcribe', icon: Wand2, duration: 8000 },
+    { id: 'process', icon: Brain, duration: 10000 },
+    { id: 'finalize', icon: Sparkles, duration: 2000 }
+  ];
+
+  // Get localized processing steps
+  const getProcessingSteps = () => [
+    {
+      ...processingStepsConfig[0],
+      title: t('admin.interviews.upload.steps.uploading', 'Uploading File'),
+      description: t('admin.interviews.upload.steps.uploadingDesc', 'Securely transferring your file to our servers'),
+      tip: t('admin.interviews.upload.tips.upload', '💡 Tip: Our servers use enterprise-grade encryption to keep your files secure')
+    },
+    {
+      ...processingStepsConfig[1],
+      title: t('admin.interviews.upload.steps.analyzing', 'Analyzing Content'),
+      description: t('admin.interviews.upload.steps.analyzingDesc', 'Examining file structure and preparing for processing'),
+      tip: t('admin.interviews.upload.tips.analyze', '🔍 Did you know? We can process over 50 different audio formats')
+    },
+    {
+      ...processingStepsConfig[2],
+      title: t('admin.interviews.upload.steps.transcribing', 'AI Transcription'),
+      description: t('admin.interviews.upload.steps.transcribingDesc', 'Converting audio to text using advanced AI models'),
+      tip: t('admin.interviews.upload.tips.transcribe', '🎯 Our AI achieves 95%+ accuracy in speech recognition')
+    },
+    {
+      ...processingStepsConfig[3],
+      title: t('admin.interviews.upload.steps.processing', 'AI Processing'),
+      description: t('admin.interviews.upload.steps.processingDesc', 'Extracting insights and generating life story draft'),
+      tip: t('admin.interviews.upload.tips.process', '🧠 AI is identifying key life moments and themes in your story')
+    },
+    {
+      ...processingStepsConfig[4],
+      title: t('admin.interviews.upload.steps.finalizing', 'Finalizing'),
+      description: t('admin.interviews.upload.steps.finalizingDesc', 'Completing processing and preparing results'),
+      tip: t('admin.interviews.upload.tips.finalize', '✨ Almost done! Preparing your personalized life story draft')
+    }
+  ];
 
   // Supported file types
   const supportedTypes = {
@@ -23,6 +68,53 @@ const FileUpload = ({ interviewId, onClose, onSuccess }) => {
   };
 
   const allSupportedTypes = [...supportedTypes.audio, ...supportedTypes.text];
+
+  // Progress animation effect
+  useEffect(() => {
+    let progressInterval;
+    let stepTimeout;
+
+    if (uploadLoading) {
+      const currentStepData = processingStepsConfig[currentStep];
+      if (!currentStepData) return;
+
+      // Animate progress within current step
+      progressInterval = setInterval(() => {
+        setProgress(prev => {
+          const increment = 100 / (currentStepData.duration / 100);
+          return Math.min(prev + increment, 100);
+        });
+      }, 100);
+
+      // Move to next step after duration
+      stepTimeout = setTimeout(() => {
+        if (currentStep < processingStepsConfig.length - 1) {
+          setCurrentStep(prev => prev + 1);
+          setProgress(0);
+        }
+      }, currentStepData.duration);
+    }
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+      if (stepTimeout) clearTimeout(stepTimeout);
+    };
+  }, [uploadLoading, currentStep]);
+
+  // Reset progress when upload starts
+  useEffect(() => {
+    if (uploadLoading) {
+      setCurrentStep(0);
+      setProgress(0);
+    }
+  }, [uploadLoading]);
+
+  // Calculate overall progress
+  const getOverallProgress = () => {
+    const stepProgress = (currentStep / processingStepsConfig.length) * 100;
+    const currentStepProgress = (progress / processingStepsConfig.length);
+    return Math.min(stepProgress + currentStepProgress, 100);
+  };
 
   // Handle drag events
   const handleDrag = (e) => {
@@ -137,13 +229,65 @@ const FileUpload = ({ interviewId, onClose, onSuccess }) => {
 
   return (
     <>
-      {/* Processing Overlay - Outside the component to ensure it's visible */}
+      {/* Engaging Processing Overlay */}
       {uploadLoading && (
         <div className="file-upload__processing-overlay">
           <div className="file-upload__processing-content">
-            <Loader size={48} className="file-upload__processing-spinner" />
-            <h3>{t('admin.interviews.upload.processingFile', 'Processing file...')}</h3>
-            <p>{t('admin.interviews.upload.processingDescription', 'This may take a few moments depending on file size')}</p>
+            {/* Overall Progress Bar */}
+            <div className="progress-header">
+              <h3>{t('admin.interviews.upload.processingFile', 'Processing Your Interview')}</h3>
+              <div className="overall-progress">
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill" 
+                    style={{ width: `${getOverallProgress()}%` }}
+                  />
+                </div>
+                <span className="progress-text">{Math.round(getOverallProgress())}%</span>
+              </div>
+            </div>
+
+            {/* Current Step Display */}
+            <div className="current-step">
+              <div className="step-icon-container">
+                {React.createElement(getProcessingSteps()[currentStep]?.icon || Loader, {
+                  size: 64,
+                  className: "step-icon animate-pulse"
+                })}
+              </div>
+              <div className="step-info">
+                <h4 className="step-title">{getProcessingSteps()[currentStep]?.title}</h4>
+                <p className="step-description">{getProcessingSteps()[currentStep]?.description}</p>
+                <div className="step-progress">
+                  <div className="step-progress-bar">
+                    <div 
+                      className="step-progress-fill" 
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Steps Timeline */}
+            <div className="steps-timeline">
+              {getProcessingSteps().map((step, index) => (
+                <div 
+                  key={step.id} 
+                  className={`timeline-step ${index <= currentStep ? 'completed' : ''} ${index === currentStep ? 'active' : ''}`}
+                >
+                  <div className="timeline-step-icon">
+                    {React.createElement(step.icon, { size: 16 })}
+                  </div>
+                  <span className="timeline-step-title">{step.title}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Fun Tips */}
+            {/* <div className="processing-tip">
+              <p className="tip-text">{getProcessingSteps()[currentStep]?.tip}</p>
+            </div> */}
           </div>
         </div>
       )}

@@ -1,20 +1,16 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  Target, 
   CheckCircle, 
   Clock, 
   TrendingUp, 
   Calendar, 
-  Users, 
-  Code, 
-  Database,
+  Users,
   Zap,
   AlertCircle,
   Award,
   Rocket,
   Activity,
-  DollarSign,
   Timer,
   Star,
   ArrowUp,
