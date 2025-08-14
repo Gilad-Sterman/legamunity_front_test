@@ -340,6 +340,43 @@ class SupabaseSessionsService {
   }
 
   /**
+   * Regenerate an existing draft with additional notes and instructions
+   */
+  async regenerateDraft(sessionId, draftId, instructions, notes) {
+    try {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/sessions-supabase/${sessionId}/drafts/${draftId}/regenerate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          instructions: instructions || '',
+          notes: notes || []
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to regenerate draft');
+      }
+
+      return {
+        success: true,
+        data: data.data,
+        message: data.message
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
    * Upload interview file with AI processing
    */
   async uploadInterviewFile(interviewId, file) {

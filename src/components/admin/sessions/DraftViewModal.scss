@@ -413,6 +413,25 @@
   animation: spin 1s linear infinite;
 }
 
+// Regeneration indicators
+.regenerated-badge {
+  margin-left: 8px;
+  padding: 2px 6px;
+  background-color: var(--warning-color, #f59e0b);
+  color: white;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.regeneration-instructions {
+  font-style: italic;
+  color: var(--text-muted, #6b7280);
+  font-size: 0.9rem;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);

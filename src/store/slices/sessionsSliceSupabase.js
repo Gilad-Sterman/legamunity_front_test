@@ -243,6 +243,32 @@ export const uploadInterviewFile = createAsyncThunk(
   }
 );
 
+// Async thunk for regenerating draft with notes and instructions
+export const regenerateDraft = createAsyncThunk(
+  'sessionsSupabase/regenerateDraft',
+  async ({ sessionId, draftId, instructions, notes }, { rejectWithValue }) => {
+    try {
+      const result = await supabaseSessionsService.regenerateDraft(sessionId, draftId, instructions, notes);
+
+      if (!result.success) {
+        return rejectWithValue(result.error);
+      }
+
+      return {
+        sessionId,
+        draftId,
+        newDraft: result.data.draft,
+        previousDraftId: result.data.previousDraftId,
+        regenerationType: result.data.regenerationType,
+        version: result.data.version,
+        message: result.message
+      };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // Initial state
 const initialState = {
   sessions: [],
@@ -590,6 +616,23 @@ const sessionsSliceSupabase = createSlice({
       })
       .addCase(uploadInterviewFile.rejected, (state, action) => {
         state.uploadLoading = false;
+        state.error = action.payload;
+      })
+
+      // Regenerate draft
+      .addCase(regenerateDraft.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(regenerateDraft.fulfilled, (state, action) => {
+        state.loading = false;
+        // The regenerate action creates a new draft version
+        // We don't need to update the sessions state since the draft is in a separate table
+        // The parent component will refresh the data after regeneration
+        state.error = null;
+      })
+      .addCase(regenerateDraft.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       });
   }

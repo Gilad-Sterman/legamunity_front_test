@@ -34,7 +34,8 @@ import {
   addInterviewToSession,
   updateSessionScheduling,
   deleteSession,
-  deleteInterview
+  deleteInterview,
+  regenerateDraft
 } from '../../store/slices/sessionsSliceSupabase';
 // Removed interviews slice imports - using sessions API for all interview operations
 import CreateSessionModal from '../../components/admin/sessions/CreateSessionModal';
@@ -693,11 +694,50 @@ const Sessions = () => {
 
   const handleRegenerateDraft = async (draftId, instructions) => {
     try {
-      // TODO: Implement draft regeneration API call
-      console.log('Regenerating draft:', draftId, 'Instructions:', instructions);
-      // await dispatch(regenerateDraft({ draftId, instructions })).unwrap();
+      // Get the current interview and find its session
+      const currentInterview = showDraftViewModal;
+      if (!currentInterview) {
+        throw new Error('Interview information not available');
+      }
+
+      // Find the session that contains this interview
+      const currentSession = sessions.find(s => s.interviews?.some(i => i.id === currentInterview.id));
+      if (!currentSession) {
+        throw new Error('Session information not available');
+      }
+
+      // Extract notes from the current draft being viewed
+      // The showDraftViewModal contains the interview, but we need to find the specific draft
+      const currentDraft = currentSession.interviews
+        .find(i => i.id === currentInterview.id)?.ai_draft;
       
-      // Refresh sessions data
+      const notes = currentDraft?.content?.notes || [];
+      
+      console.log('Draft notes extraction:', {
+        interviewId: currentInterview.id,
+        hasDraft: !!currentDraft,
+        notesFound: notes.length,
+        notes: notes
+      });
+      
+      console.log('Regenerating draft:', {
+        sessionId: currentSession.id,
+        draftId: draftId,
+        instructions: instructions,
+        notesCount: notes.length
+      });
+
+      // Call the regenerate draft Redux action
+      const regenerateResult = await dispatch(regenerateDraft({
+        sessionId: currentSession.id,
+        draftId: draftId,
+        instructions: instructions,
+        notes: notes
+      })).unwrap();
+      
+      console.log('Regenerate result:', regenerateResult);
+      
+      // Refresh sessions data to get the new draft
       await dispatch(fetchSessions({
         page: pagination.currentPage,
         limit: pagination.limit,
@@ -707,10 +747,27 @@ const Sessions = () => {
         status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
       }));
       
-      setShowDraftViewModal(null);
+      // Force refresh the modal with the regenerated draft
+      // The regenerateResult should contain the updated draft data
+      if (regenerateResult?.data?.draft) {
+        // Create updated interview object with the new draft
+        const updatedInterview = {
+          ...currentInterview,
+          ai_draft: regenerateResult.data.draft
+        };
+        
+        // Update modal to show the new regenerated draft immediately
+        setShowDraftViewModal(updatedInterview);
+        alert(t('admin.drafts.regenerateSuccess', 'Draft regenerated successfully! Showing the new version.'));
+      } else {
+        // Fallback: close modal and refresh sessions
+        setShowDraftViewModal(null);
+        alert(t('admin.drafts.regenerateSuccess', 'Draft regenerated successfully! Please reopen to see the new version.'));
+      }
+      
     } catch (error) {
       console.error('Failed to regenerate draft:', error);
-      alert(t('admin.drafts.regenerateError', 'Failed to regenerate draft'));
+      alert(t('admin.drafts.regenerateError', `Failed to regenerate draft: ${error.message || error}`));
     }
   };
 
@@ -1704,6 +1761,7 @@ const Sessions = () => {
           dispatch(fetchSessions({ page: pagination.current, limit: pagination.pageSize }));
         }}
         loading={loading}
+        
       />
 
       {/* Story View Modal */}

@@ -328,8 +328,27 @@ const DraftViewModal = ({
               <div className="info-list">
                 <div className="info-item">
                   <label>{t('admin.sessions.draftVersion', 'Version')}</label>
-                  <span>{draft?.version || 1}</span>
+                  <span>
+                    {draft?.version || 1}
+                    {draft?.content?.metadata?.regenerationType && (
+                      <span className="regenerated-badge">
+                        {t('admin.drafts.regenerated', '(Regenerated)')}
+                      </span>
+                    )}
+                  </span>
                 </div>
+                {draft?.content?.metadata?.regeneratedFrom && (
+                  <div className="info-item">
+                    <label>{t('admin.drafts.regeneratedFrom', 'Regenerated From')}</label>
+                    <span>Version {draft.content.metadata.regeneratedFrom}</span>
+                  </div>
+                )}
+                {draft?.content?.metadata?.adminInstructions && (
+                  <div className="info-item">
+                    <label>{t('admin.drafts.regenerationInstructions', 'Regeneration Instructions')}</label>
+                    <span className="regeneration-instructions">{draft.content.metadata.adminInstructions}</span>
+                  </div>
+                )}
                 <div className="info-item">
                   <label>{t('admin.sessions.createdAt', 'Created At')}</label>
                   <span>{draft?.createdAt ? new Date(draft.createdAt).toLocaleString() : 'N/A'}</span>
@@ -565,7 +584,9 @@ const DraftViewModal = ({
                             <h4>{t('admin.drafts.people', 'People')}</h4>
                             <ul className="verify-list">
                               {draft.content.toVerify.people.map((person, index) => (
-                                <li key={index} className="hebrew-content">{person}</li>
+                                <li key={index} className="hebrew-content">
+                                  {typeof person === 'string' ? person : `${person.name} - ${person.context}`}
+                                </li>
                               ))}
                             </ul>
                           </div>
@@ -575,7 +596,9 @@ const DraftViewModal = ({
                             <h4>{t('admin.drafts.places', 'Places')}</h4>
                             <ul className="verify-list">
                               {draft.content.toVerify.places.map((place, index) => (
-                                <li key={index} className="hebrew-content">{place}</li>
+                                <li key={index} className="hebrew-content">
+                                  {typeof place === 'string' ? place : `${place.name} - ${place.location || place.context}`}
+                                </li>
                               ))}
                             </ul>
                           </div>
@@ -585,7 +608,9 @@ const DraftViewModal = ({
                             <h4>{t('admin.drafts.organizations', 'Organizations')}</h4>
                             <ul className="verify-list">
                               {draft.content.toVerify.organizations.map((org, index) => (
-                                <li key={index} className="hebrew-content">{org}</li>
+                                <li key={index} className="hebrew-content">
+                                  {typeof org === 'string' ? org : `${org.name} - ${org.context}`}
+                                </li>
                               ))}
                             </ul>
                           </div>
@@ -595,7 +620,9 @@ const DraftViewModal = ({
                             <h4>{t('admin.drafts.dates', 'Dates')}</h4>
                             <ul className="verify-list">
                               {draft.content.toVerify.dates.map((date, index) => (
-                                <li key={index} className="hebrew-content">{date}</li>
+                                <li key={index} className="hebrew-content">
+                                  {typeof date === 'string' ? date : `${date.date} - ${date.context}`}
+                                </li>
                               ))}
                             </ul>
                           </div>
