@@ -713,19 +713,19 @@ const Sessions = () => {
       
       const notes = currentDraft?.content?.notes || [];
       
-      console.log('Draft notes extraction:', {
-        interviewId: currentInterview.id,
-        hasDraft: !!currentDraft,
-        notesFound: notes.length,
-        notes: notes
-      });
+      // console.log('Draft notes extraction:', {
+      //   interviewId: currentInterview.id,
+      //   hasDraft: !!currentDraft,
+      //   notesFound: notes.length,
+      //   notes: notes
+      // });
       
-      console.log('Regenerating draft:', {
-        sessionId: currentSession.id,
-        draftId: draftId,
-        instructions: instructions,
-        notesCount: notes.length
-      });
+      // console.log('Regenerating draft:', {
+      //   sessionId: currentSession.id,
+      //   draftId: draftId,
+      //   instructions: instructions,
+      //   notesCount: notes.length
+      // });
 
       // Call the regenerate draft Redux action
       const regenerateResult = await dispatch(regenerateDraft({
@@ -735,7 +735,7 @@ const Sessions = () => {
         notes: notes
       })).unwrap();
       
-      console.log('Regenerate result:', regenerateResult);
+      // console.log('Regenerate result:', regenerateResult);
       
       // Refresh sessions data to get the new draft
       await dispatch(fetchSessions({
