@@ -263,7 +263,7 @@
 
     .notes-actions {
       display: flex;
-      gap: 0.5rem;
+      gap: $spacing-small;
     }
   }
 }
@@ -296,54 +296,129 @@
 }
 
 // Notes Section
-.notes-textarea {
-  width: 100%;
-  min-height: 120px;
-  padding: 0.75rem;
-  border: 1px solid $border-color;
-  border-radius: $border-radius;
-  font-family: inherit;
-  font-size: 0.9rem;
-  resize: vertical;
-  background: $background-color;
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: $spacing-medium;
 
-  &:focus {
-    outline: none;
-    border-color: $primary-color;
-    box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+  .no-notes {
+    padding: $spacing-medium;
+    text-align: center;
+    color: $text-muted;
+    font-style: italic;
+    background: $background-light;
+    border-radius: $border-radius-sm;
+    border: 1px dashed $border-color;
   }
 }
 
-.notes-display {
-  padding: $spacing-medium;
-  background-color: $background-light;
-  border-radius: $border-radius-sm;
+.note-item {
+  background: $background-light;
   border: 1px solid $border-color;
-  min-height: 100px;
-  white-space: pre-wrap;
-  font-size: $font-size-sm;
-  line-height: 1.5;
-  color: $text-color;
+  border-radius: $border-radius-sm;
+  padding: $spacing-small $spacing-medium;
+  transition: all 0.2s ease;
 
-  .notes-disabled-info,
-  .notes-info {
-    margin-top: $spacing-small;
-    padding-top: $spacing-small;
-    border-top: 1px solid $border-color;
+  &:hover {
+    border-color: $primary-color;
+    box-shadow: 0 2px 4px rgba($primary-color, 0.1);
+  }
 
-    small {
+  .note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xs;
+    padding-bottom: $spacing-xs;
+    border-bottom: 1px solid $border-color;
+
+    .note-author {
+      font-weight: 600;
+      font-size: $font-size-xs;
+      color: $primary-color;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .note-date {
+      font-size: $font-size-xs;
       color: $text-muted;
-      font-style: italic;
     }
   }
 
-  .notes-info small {
-    color: $info-color;
+  .note-content {
+    font-size: $font-size-sm;
+    line-height: 1.5;
+    color: $text-color;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+.add-note-form {
+  margin-top: $spacing-medium;
+  padding-top: $spacing-medium;
+  border-top: 1px solid $border-color;
+
+  .notes-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: $spacing-small;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    font-family: inherit;
+    font-size: $font-size-sm;
+    resize: vertical;
+    background: $background-color;
+    margin-bottom: $spacing-small;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+    }
   }
 
-  &:empty {
+  .notes-actions {
+    display: flex;
+    gap: $spacing-small;
+    justify-content: flex-end;
+  }
+}
+
+.notes-disabled-info,
+.notes-info {
+  margin-top: $spacing-small;
+  padding: $spacing-small;
+  background: $background-light;
+  border-radius: $border-radius-sm;
+  border: 1px solid $border-color;
+
+  small {
     color: $text-muted;
     font-style: italic;
+    font-size: $font-size-xs;
+  }
+}
+
+.notes-info small {
+  color: $info-color;
+}
+
+// Spinning animation for loading states
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -429,6 +504,93 @@
   font-size: 0.875rem;
   font-weight: 500;
   border: 1px solid $primary-color;
+}
+
+// Follow-ups Section
+.follow-ups-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
+}
+
+.follow-up-item {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-small;
+  padding: $spacing-medium;
+  background: $background-light;
+  border-radius: $border-radius;
+  border-left: 3px solid $info-color;
+
+  .follow-up-number {
+    background: $info-color;
+    color: white;
+    font-weight: 600;
+    font-size: $font-size-sm;
+    padding: 0.25rem 0.5rem;
+    border-radius: $border-radius-sm;
+    min-width: 1.5rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .follow-up-text {
+    flex: 1;
+    font-size: $font-size-base;
+    line-height: 1.6;
+    color: $text-color;
+  }
+}
+
+// To-Verify Section
+.to-verify-table {
+  background: $background-light;
+  border-radius: $border-radius;
+  padding: $spacing-large;
+  border: 1px solid $border-color;
+
+  .table-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $spacing-lg;
+  }
+
+  .table-column {
+    h4 {
+      color: $primary-color;
+      font-size: $font-size-base;
+      font-weight: 600;
+      margin: 0 0 $spacing-medium 0;
+      padding-bottom: $spacing-small;
+      border-bottom: 2px solid $primary-color;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .verify-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-small;
+
+      li {
+        background: white;
+        padding: $spacing-small $spacing-medium;
+        border-radius: $border-radius-sm;
+        border: 1px solid $border-color;
+        font-size: $font-size-sm;
+        color: $text-color;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: rgba($primary-color, 0.05);
+          border-color: $primary-color;
+        }
+      }
+    }
+  }
 }
 
 .modal__header-content {
@@ -719,4 +881,47 @@
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+// Expandable section styles
+.expandable-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-medium;
+  
+  h3 {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .expand-toggle {
+    display: flex;
+    align-items: center;
+    gap: $spacing-small;
+    font-size: $font-size-sm;
+    color: $text-color;
+    transition: color 0.2s ease;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: $spacing-small;
+    border-radius: $border-radius-sm;
+    
+    &:hover {
+      color: $primary-color;
+      background: rgba($primary-color, 0.1);
+    }
+    
+    svg {
+      transition: transform 0.2s ease;
+    }
+  }
+}
+
+.section-header {
+  border-bottom: 2px solid $border-color;
+  padding-bottom: $spacing-small;
+  margin-bottom: $spacing-medium;
 }

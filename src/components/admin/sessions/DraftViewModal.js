@@ -12,6 +12,8 @@ import {
   Save,
   Edit3,
   Hash,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { addNoteToDraft, updateDraftStageSupabase } from '../../../store/slices/draftsSlice';
 
@@ -29,19 +31,24 @@ const DraftViewModal = ({
   const dispatch = useDispatch();
   
   // Local state for notes editing
-  const [notes, setNotes] = useState('');
+  const [newNoteContent, setNewNoteContent] = useState('');
   const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [localDraft, setLocalDraft] = useState(null);
+  const [isSavingNote, setIsSavingNote] = useState(false);
   const [regenerateReason, setRegenerateReason] = useState('');
   const [showRegenerateForm, setShowRegenerateForm] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionForm, setShowRejectionForm] = useState(false);
+  
+  // State for expandable sections
+  const [sectionsExpanded, setSectionsExpanded] = useState(false); // Initially minimized
+  const [followUpsExpanded, setFollowUpsExpanded] = useState(true); // Initially expanded
 
-  // Initialize notes when modal opens
+  // Initialize state when modal opens
   useEffect(() => {
     if (isOpen && draft) {
-      // Get notes from content.notes array and join them
-      const notesText = draft?.content?.notes?.map(note => note.content || note).join('\n') || '';
-      setNotes(notesText);
+      setLocalDraft(draft);
+      setNewNoteContent('');
       setIsEditingNotes(false);
       setShowRegenerateForm(false);
       setShowRejectionForm(false);
@@ -50,28 +57,57 @@ const DraftViewModal = ({
     }
   }, [isOpen, draft]);
 
+  // Update local draft when parent draft changes
+  useEffect(() => {
+    if (draft) {
+      setLocalDraft(draft);
+    }
+  }, [draft]);
+
   if (!isOpen || !draft) return null;
 
   const handleSaveNotes = async () => {
-    if (!notes.trim() || !draft?.id || !session?.id) return;
+    if (!newNoteContent.trim() || !draft?.id || !session?.id || isSavingNote) return;
+    
+    setIsSavingNote(true);
     
     try {
-      await dispatch(addNoteToDraft({
+      const result = await dispatch(addNoteToDraft({
         sessionId: session.id,
         draftId: draft.id,
-        content: notes.trim(),
+        content: newNoteContent.trim(),
         author: 'Admin User' // In production, get from auth state
       })).unwrap();
+      
+      // Update local draft immediately with the new note
+      const newNote = {
+        id: Date.now().toString(),
+        content: newNoteContent.trim(),
+        author: 'Admin User',
+        createdAt: new Date().toISOString(),
+        timestamp: new Date().toLocaleString()
+      };
+      
+      setLocalDraft(prevDraft => ({
+        ...prevDraft,
+        content: {
+          ...prevDraft.content,
+          notes: [newNote, ...(prevDraft.content?.notes || [])]
+        }
+      }));
       
       // Refresh parent state
       if (onDraftUpdated) {
         onDraftUpdated();
       }
       
+      setNewNoteContent('');
       setIsEditingNotes(false);
     } catch (error) {
       console.error('Failed to save notes:', error);
       alert(t('admin.drafts.updateNotesError', 'Failed to update draft notes'));
+    } finally {
+      setIsSavingNote(false);
     }
   };
 
@@ -181,8 +217,7 @@ const DraftViewModal = ({
   const rejectionMetadata = draft?.content?.rejection_metadata;
   
   // Get notes from content.notes array
-  const draftNotes = draft?.content?.notes || [];
-  const hasNewNotes = draftNotes.length > 0;
+  const hasNewNotes = localDraft?.content?.notes && localDraft.content.notes.length > 0;
   
   const canApprove = !isFinalized;
   const canReject = !isFinalized;
@@ -223,13 +258,13 @@ const DraftViewModal = ({
                 {t('admin.drafts.reject', 'Reject')}
               </button>
             )}
-            {canRegenerate && (
+            {hasNewNotes && canRegenerate && (
               <button 
-                className="btn btn--warning"
+                className="btn btn--warning btn--sm"
                 onClick={() => setShowRegenerateForm(true)}
                 disabled={loading}
               >
-                <RefreshCw size={16} />
+                <RefreshCw size={14} />
                 {t('admin.drafts.regenerate', 'Regenerate')}
               </button>
             )}
@@ -247,9 +282,9 @@ const DraftViewModal = ({
               <div className={`sidebar-section approval-section ${draftStatus === 'approved' ? 'approval-section--approved' : 'approval-section--rejected'}`}>
                 <h4>
                   {draftStatus === 'approved' ? (
-                    <><CheckCircle size={16} /> {t('admin.sessions.sessionDrafts.approvalInfo', 'Approval Info')}</>
+                    <><CheckCircle size={16} /> {t('admin.drafts.approvalInfo', 'Approval Info')}</>
                   ) : (
-                    <><XCircle size={16} /> {t('admin.sessions.sessionDrafts.rejectionInfo', 'Rejection Info')}</>
+                    <><XCircle size={16} /> {t('admin.drafts.rejectionInfo', 'Rejection Info')}</>
                   )}
                 </h4>
                 <div className="info-list">
@@ -300,15 +335,15 @@ const DraftViewModal = ({
                   <span>{draft?.createdAt ? new Date(draft.createdAt).toLocaleString() : 'N/A'}</span>
                 </div>
                 <div className="info-item">
-                  <label>{t('admin.sessions.wordCount', 'Word Count')}</label>
+                  <label>{t('admin.drafts.wordCount', 'Word Count')}</label>
                   <span>{draft?.content?.metadata?.wordCount || 0}</span>
                 </div>
                 <div className="info-item">
-                  <label>{t('admin.sessions.readingTime', 'Reading Time')}</label>
+                  <label>{t('admin.drafts.readingTime', 'Reading Time')}</label>
                   <span>{draft?.content?.metadata?.estimatedReadingTime || 'N/A'}</span>
                 </div>
                 <div className="info-item">
-                  <label>{t('admin.sessions.aiModel', 'AI Model')}</label>
+                  <label>{t('admin.drafts.aiModel', 'AI Model')}</label>
                   <span>{draft?.content?.metadata?.aiModel || 'N/A'}</span>
                 </div>
               </div>
@@ -343,57 +378,89 @@ const DraftViewModal = ({
                   <MessageSquare size={16} />
                   {t('admin.drafts.notes', 'Notes')}
                 </h4>
-                {!isEditingNotes && canEditNotes ? (
+                {canEditNotes && (
                   <button 
                     className="btn btn--ghost btn--sm"
-                    onClick={() => setIsEditingNotes(true)}
+                    onClick={() => setIsEditingNotes(!isEditingNotes)}
                   >
                     <Edit3 size={14} />
-                    {t('common.edit', 'Edit')}
+                    {isEditingNotes ? t('common.cancel', 'Cancel') : t('admin.drafts.addNote', 'Add Note')}
                   </button>
-                ) : isEditingNotes ? (
+                )}
+              </div>
+              
+              {/* Add New Note Form */}
+              {isEditingNotes && canEditNotes && (
+                <div className="add-note-form">
+                  <textarea
+                    className="notes-textarea"
+                    value={newNoteContent}
+                    onChange={(e) => setNewNoteContent(e.target.value)}
+                    placeholder={t('admin.drafts.notesPlaceholder', 'Add notes about this draft...')}
+                    rows={4}
+                  />
                   <div className="notes-actions">
                     <button 
                       className="btn btn--success btn--sm"
                       onClick={handleSaveNotes}
-                      disabled={loading}
+                      disabled={isSavingNote || !newNoteContent.trim()}
                     >
-                      <Save size={14} />
-                      {t('common.save', 'Save')}
+                      {isSavingNote ? (
+                        <>
+                          <RefreshCw size={14} className="spinning" />
+                          {t('common.saving', 'Saving...')}
+                        </>
+                      ) : (
+                        <>
+                          <Save size={14} />
+                          {t('common.save', 'Save')}
+                        </>
+                      )}
                     </button>
                     <button 
                       className="btn btn--ghost btn--sm"
                       onClick={() => {
                         setIsEditingNotes(false);
-                        setNotes(draft?.notes || '');
+                        setNewNoteContent('');
                       }}
                     >
                       <X size={14} />
+                      {t('common.cancel', 'Cancel')}
                     </button>
                   </div>
-                ) : null}
+                </div>
+              )}
+              
+              {/* Existing Notes Display */}
+              <div className="notes-list">
+                {localDraft?.content?.notes && localDraft.content.notes.length > 0 ? (
+                  localDraft.content.notes.map((note, index) => (
+                    <div key={note.id || index} className="note-item">
+                      <div className="note-header">
+                        <span className="note-author">{note.author || 'Admin User'}</span>
+                        <span className="note-date">
+                          {note.timestamp || (note.createdAt ? new Date(note.createdAt).toLocaleString() : new Date().toLocaleString())}
+                        </span>
+                      </div>
+                      <div className="note-content">{note.content || note}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-notes">
+                    <small>{t('admin.drafts.noNotes', 'No notes added yet')}</small>
+                  </div>
+                )}
               </div>
-              {isEditingNotes && canEditNotes ? (
-                <textarea
-                  className="notes-textarea"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder={t('admin.drafts.notesPlaceholder', 'Add notes about this draft...')}
-                  rows={6}
-                />
-              ) : (
-                <div className="notes-display">
-                  {notes || t('admin.drafts.noNotes', 'No notes added yet')}
-                  {!canEditNotes && (
-                    <div className="notes-disabled-info">
-                      <small>{t('admin.drafts.notesDisabled', 'Notes cannot be edited for approved/rejected drafts')}</small>
-                    </div>
-                  )}
-                  {canEditNotes && !hasNewNotes && (
-                    <div className="notes-info">
-                      <small>{t('admin.drafts.addNotesToRegenerate', 'Add notes to enable draft regeneration')}</small>
-                    </div>
-                  )}
+              
+              {/* Info Messages */}
+              {!canEditNotes && (
+                <div className="notes-disabled-info">
+                  <small>{t('admin.drafts.notesDisabled', 'Notes cannot be edited for approved/rejected drafts')}</small>
+                </div>
+              )}
+              {canEditNotes && (!localDraft?.content?.notes || localDraft.content.notes.length === 0) && !isEditingNotes && (
+                <div className="notes-info">
+                  <small>{t('admin.drafts.addNotesToRegenerate', 'Add notes to enable draft regeneration')}</small>
                 </div>
               )}
             </div>
@@ -412,15 +479,6 @@ const DraftViewModal = ({
                   </div>
                 )}
                 
-                {draft.content.sections && (
-                  <div className="content-section">
-                    <h3>{t('admin.sessions.sections', 'Sections')}</h3>
-                    <div className="sections-grid">
-                      {renderSections()}
-                    </div>
-                  </div>
-                )}
-                
                 {draft.content.keyThemes && Array.isArray(draft.content.keyThemes) && draft.content.keyThemes.length > 0 && (
                   <div className="content-section">
                     <h3>{t('admin.sessions.keyThemes', 'Key Themes')}</h3>
@@ -428,6 +486,121 @@ const DraftViewModal = ({
                       {draft.content.keyThemes.map((theme, index) => (
                         <span key={index} className="theme-tag">{theme}</span>
                       ))}
+                    </div>
+                  </div>
+                )}
+                
+                {draft.content.sections && (
+                  <div className="content-section">
+                    <div className="section-header expandable-header">
+                      <h3>{t('admin.sessions.sections', 'Sections')}</h3>
+                      <button 
+                        className="btn btn--ghost btn--sm expand-toggle"
+                        onClick={() => setSectionsExpanded(!sectionsExpanded)}
+                      >
+                        {sectionsExpanded ? (
+                          <>
+                            <ChevronUp size={16} />
+                            {t('admin.drafts.showLess', 'Show Less')}
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown size={16} />
+                            {t('admin.drafts.showMore', 'Show More')}
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    {sectionsExpanded && (
+                      <div className="sections-grid">
+                        {renderSections()}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {draft.content.followUps && Array.isArray(draft.content.followUps) && draft.content.followUps.length > 0 && (
+                  <div className="content-section">
+                    <div className="section-header expandable-header">
+                      <h3>{t('admin.drafts.followUps', 'Follow-up Questions')}</h3>
+                      <button 
+                        className="btn btn--ghost btn--sm expand-toggle"
+                        onClick={() => setFollowUpsExpanded(!followUpsExpanded)}
+                      >
+                        {followUpsExpanded ? (
+                          <>
+                            <ChevronUp size={16} />
+                            {t('admin.drafts.showLess', 'Show Less')}
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown size={16} />
+                            {t('admin.drafts.showMore', 'Show More')}
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    {followUpsExpanded && (
+                      <div className="follow-ups-list">
+                        {draft.content.followUps.map((question, index) => (
+                          <div key={index} className="follow-up-item">
+                            <span className="follow-up-number">{index + 1}.</span>
+                            <span className="follow-up-text hebrew-content">{question}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {draft.content.toVerify && Object.keys(draft.content.toVerify).some(key => 
+                  Array.isArray(draft.content.toVerify[key]) && draft.content.toVerify[key].length > 0
+                ) && (
+                  <div className="content-section">
+                    <h3>{t('admin.drafts.toVerify', 'Information to Verify')}</h3>
+                    <div className="to-verify-table">
+                      <div className="table-grid">
+                        {draft.content.toVerify.people && draft.content.toVerify.people.length > 0 && (
+                          <div className="table-column">
+                            <h4>{t('admin.drafts.people', 'People')}</h4>
+                            <ul className="verify-list">
+                              {draft.content.toVerify.people.map((person, index) => (
+                                <li key={index} className="hebrew-content">{person}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {draft.content.toVerify.places && draft.content.toVerify.places.length > 0 && (
+                          <div className="table-column">
+                            <h4>{t('admin.drafts.places', 'Places')}</h4>
+                            <ul className="verify-list">
+                              {draft.content.toVerify.places.map((place, index) => (
+                                <li key={index} className="hebrew-content">{place}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {draft.content.toVerify.organizations && draft.content.toVerify.organizations.length > 0 && (
+                          <div className="table-column">
+                            <h4>{t('admin.drafts.organizations', 'Organizations')}</h4>
+                            <ul className="verify-list">
+                              {draft.content.toVerify.organizations.map((org, index) => (
+                                <li key={index} className="hebrew-content">{org}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {draft.content.toVerify.dates && draft.content.toVerify.dates.length > 0 && (
+                          <div className="table-column">
+                            <h4>{t('admin.drafts.dates', 'Dates')}</h4>
+                            <ul className="verify-list">
+                              {draft.content.toVerify.dates.map((date, index) => (
+                                <li key={index} className="hebrew-content">{date}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}

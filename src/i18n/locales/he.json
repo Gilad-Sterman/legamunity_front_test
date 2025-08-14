@@ -23,7 +23,8 @@
     "cancel": "בטל",
     "save": "שמור",
     "approve": "אשר",
-    "reject": "דחה"
+    "reject": "דחה",
+    "saving": "שומר..."
   },
   "navbar": {
     "brand": "לגמיוניטי"
@@ -73,6 +74,9 @@
       "title": "ניהול פרויקטים",
       "createNew": "צור פרויקט חדש",
       "createSession": "צור פרויקט",
+      "sessionInfo": "מידע פרויקט",
+      "clientName": "שם לקוח",
+      "interviewDate": "תאריך ראיון",
       "creating": "יוצר...",
       "search": "חיפוש פרויקטים...",
       "noSessions": "לא נמצאו פרויקטים",
@@ -192,9 +196,19 @@
         "draftVersion": "גרסה",
         "createdAt": "נוצר ב",
         "draftContent": "תוכן",
-        "summary": "סיכום",
-        "sections": "חלקים",
-        "keyThemes": "נושאים מרכזיים"
+        "summary": "תקציר",
+        "sections": "פרקים",
+        "keyThemes": "נושאים מרכזיים",
+        "followUps": "שאלות המשך",
+        "toVerify": "מידע לאימות",
+        "people": "אנשים",
+        "places": "מקומות",
+        "organizations": "ארגונים",
+        "dates": "תאריכים",
+        "expand": "הרחב",
+        "collapse": "כווץ",
+        "showMore": "הצג עוד",
+        "showLess": "הצג פחות"
       },
       "form": {
         "clientInfo": "מידע לקוח",
@@ -497,6 +511,40 @@
           "step4": "ראיון מושלם"
         }
       }
+    },
+    "drafts": {
+      "status": {
+        "first_draft": "טיוטה ראשונית",
+        "under_review": " תחת ביקורת",
+        "pending_approval": "ממתין לאישור",
+        "approved": "מאושר",
+        "rejected": "נדחה"
+      },
+      "approve": "אישור",
+      "reject": "דחייה",
+      "regenerate": "צור מחדש",
+      "approvalInfo": "מידע אישור",
+      "rejectionInfo": "מידע דחייה",
+      "wordCount": "מספר מילים",
+      "readingTime": "זמן קריאה",
+      "aiModel": "מודל AI",
+      "notes": "הערות",
+      "editNotes": "עריכת הערות",
+      "addNote": "הוסף הערה",
+      "saveNotes": "שמירת הערות",
+      "cancelNotes": "ביטול העריכה",
+      "notesPlaceholder": "הערות נוספות לטיוטה...",
+      "noNotes": "אין הערות",
+      "notesDisabled": "לא ניתן לערוך עבור טיוטות מאושרות או נדחות",
+      "addNotesToRegenerate": "הוסף הערות כדי לאפשר יצירה מחדש",
+      "toVerify": "מידע לאמת",
+      "followUps": "שאלות נוספות",
+      "showMore": "הצג עוד",
+      "showLess": "הצג פחות",
+      "people": "אנשים",
+      "places": "מקומות",
+      "organizations": "ארגונים",
+      "dates": "תאריכים"
     }
   },
   "table": {
