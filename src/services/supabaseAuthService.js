@@ -12,6 +12,13 @@ const handleResponse = async (response) => {
   const data = await response.json();
   
   if (!response.ok) {
+    // Handle token refresh scenarios
+    if (data.needsRefresh) {
+      const error = new Error(data.error || data.message || 'Token needs refresh');
+      error.needsRefresh = true;
+      throw error;
+    }
+    
     throw new Error(data.error || data.message || 'Something went wrong');
   }
   
@@ -113,6 +120,17 @@ export const getCurrentUser = async () => {
     
     return data;
   } catch (error) {
+    // Handle token refresh scenarios
+    if (error.needsRefresh) {
+      console.log('🔄 Token needs refresh, redirecting to login...');
+      localStorage.removeItem('token');
+      localStorage.removeItem('authProvider');
+      
+      // Redirect to login page
+      window.location.href = '/login';
+      return;
+    }
+    
     // If token verification fails, clear it from storage
     localStorage.removeItem('token');
     localStorage.removeItem('authProvider');

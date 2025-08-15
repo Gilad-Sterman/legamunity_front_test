@@ -38,6 +38,8 @@ const FullLifeStories = () => {
   const [editingNotes, setEditingNotes] = useState(null);
   const [notesText, setNotesText] = useState('');
   const [actionLoading, setActionLoading] = useState({});
+  const [regenerationProcessing, setRegenerationProcessing] = useState(null);
+  const [regenerationStep, setRegenerationStep] = useState(0);
 
   // Load life stories on component mount
   useEffect(() => {
@@ -96,7 +98,21 @@ const FullLifeStories = () => {
           
           return {
             id: story.id,
-            title: story.title || `${story.sessions?.client_name || 'Untitled'} - Life Story`,
+            title: (() => {
+              // Try to extract title from content.fullText first line if it's a markdown header
+              if (story.content?.fullText) {
+                const firstLine = story.content.fullText.split('\n')[0].trim();
+                if (firstLine.startsWith('# ')) {
+                  return firstLine.substring(2).trim();
+                }
+              }
+              // Fallback to story.title if available and not generic
+              if (story.title && story.title !== 'Generated Life Story') {
+                return story.title;
+              }
+              // Final fallback
+              return `${story.sessions?.client_name || 'Untitled'} - Life Story`;
+            })(),
             subtitle: story.subtitle,
             sessionId: story.session_id,
             participantName: story.sessions?.client_name || 'Unknown',
@@ -113,6 +129,13 @@ const FullLifeStories = () => {
           estimatedReadingTime: story.estimated_reading_time || Math.ceil(wordCount / 200) || 0, // Estimate reading time
           chapterCount: isNewFormat ? extractChaptersFromMarkdown(story.content).length : (contentData.chapters?.length || 0),
           processingTime: story.processing_time || story.metadata?.processingTime || 0,
+          // Session statistics for indicators - get from sourceMetadata
+          sessionStats: {
+            totalInterviews: story.source_metadata?.totalInterviews || story.sourceMetadata?.totalInterviews || 0,
+            completedInterviews: story.source_metadata?.totalInterviews || story.sourceMetadata?.totalInterviews || 0,
+            totalDrafts: story.source_metadata?.approvedDrafts || story.sourceMetadata?.approvedDrafts || 0,
+            approvedDrafts: story.source_metadata?.approvedDrafts || story.sourceMetadata?.approvedDrafts || 0
+          },
           content: {
             // For new format (string content), extract structured data
             summary: isNewFormat ? extractSummaryFromMarkdown(story.content) : (contentData.summary || contentData.introduction?.summary || story.subtitle || ''),
@@ -291,15 +314,37 @@ const FullLifeStories = () => {
   };
 
   const handleRegenerate = async (storyId) => {
+    // Start regeneration processing modal
+    setRegenerationProcessing(storyId);
+    setRegenerationStep(0);
     setActionLoading(prev => ({ ...prev, [storyId]: 'regenerating' }));
+    
     try {
+      // Simulate processing steps
+      const steps = [
+        { text: t('admin.lifeStories.regeneration.analyzingNotes', 'Analyzing notes and feedback...'), duration: 1500 },
+        { text: t('admin.lifeStories.regeneration.aiProcessing', 'AI processing and content generation...'), duration: 3000 },
+        { text: t('admin.lifeStories.regeneration.enhancingContent', 'Enhancing content structure...'), duration: 2000 },
+        { text: t('admin.lifeStories.regeneration.finalizingDraft', 'Finalizing new version...'), duration: 1000 }
+      ];
+
+      // Process each step with delay
+      for (let i = 0; i < steps.length; i++) {
+        setRegenerationStep(i);
+        await new Promise(resolve => setTimeout(resolve, steps[i].duration));
+      }
+
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/admin/full-life-stories/${storyId}/regenerate`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          regenerationType: 'notes_based',
+          includeAllNotes: true
+        })
       });
 
       if (!response.ok) {
@@ -309,6 +354,10 @@ const FullLifeStories = () => {
       const data = await response.json();
       
       if (data.success) {
+        // Complete final step
+        setRegenerationStep(steps.length - 1);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         // Refresh the life stories list
         await fetchLifeStories();
       } else {
@@ -319,6 +368,8 @@ const FullLifeStories = () => {
       setError('Failed to regenerate life story');
     } finally {
       setActionLoading(prev => ({ ...prev, [storyId]: null }));
+      setRegenerationProcessing(null);
+      setRegenerationStep(0);
     }
   };
 
@@ -334,13 +385,31 @@ const FullLifeStories = () => {
 
     // Check if any notes were added after the story was generated
     const storyGeneratedAt = new Date(story.createdAt);
-    const hasNewNotes = story.notes.some(note => {
+    
+    // Filter out regeneration notes (notes that mention "Regenerated from version")
+    const userNotes = story.notes.filter(note => 
+      !note.text.includes('Regenerated from version')
+    );
+    
+    if (userNotes.length === 0) {
+      return false; // Only regeneration notes exist, no user feedback
+    }
+    
+    // Check if any user notes were added after the story was generated
+    const hasNewUserNotes = userNotes.some(note => {
       const noteCreatedAt = new Date(note.createdAt);
       return noteCreatedAt > storyGeneratedAt;
     });
 
-    return hasNewNotes;
+    return hasNewUserNotes;
   };
+
+  const getRegenerationSteps = () => [
+    { text: t('admin.lifeStories.regeneration.analyzingNotes', 'Analyzing notes and feedback...'), icon: 'search' },
+    { text: t('admin.lifeStories.regeneration.aiProcessing', 'AI processing and content generation...'), icon: 'brain' },
+    { text: t('admin.lifeStories.regeneration.enhancingContent', 'Enhancing content structure...'), icon: 'edit' },
+    { text: t('admin.lifeStories.regeneration.finalizingDraft', 'Finalizing new version...'), icon: 'check' }
+  ];
 
   const handleAddNote = async (storyId) => {
     if (!notesText.trim()) return;
@@ -465,7 +534,7 @@ const FullLifeStories = () => {
               onClick={() => setShowFilters(!showFilters)}
             >
               <Filter size={16} />
-              {t('common.filters', 'Filters')}
+              {t('admin.lifeStories.filters', 'Filters')}
               <ChevronDown 
                 size={16} 
                 className={`chevron ${showFilters ? 'chevron--up' : ''}`} 
@@ -479,22 +548,22 @@ const FullLifeStories = () => {
           <div className="filters-panel">
             <div className="filters-panel__content">
               <div className="filter-group">
-                <label className="filter-label">{t('common.status', 'Status')}</label>
+                <label className="filter-label">{t('admin.lifeStories.status', 'Status')}</label>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="filter-select"
                 >
                   <option value="all">{t('common.all', 'All')}</option>
-                  <option value="generated">{t('admin.lifeStories.status.generated', 'Generated')}</option>
-                  <option value="approved">{t('admin.lifeStories.status.approved', 'Approved')}</option>
-                  <option value="rejected">{t('admin.lifeStories.status.rejected', 'Rejected')}</option>
-                  <option value="archived">{t('admin.lifeStories.status.archived', 'Archived')}</option>
+                  <option value="generated">{t('admin.lifeStories.statuss.generated', 'Generated')}</option>
+                  <option value="approved">{t('admin.lifeStories.statuss.approved', 'Approved')}</option>
+                  <option value="rejected">{t('admin.lifeStories.statuss.rejected', 'Rejected')}</option>
+                  <option value="archived">{t('admin.lifeStories.statuss.archived', 'Archived')}</option>
                 </select>
               </div>
 
               <div className="filter-group">
-                <label className="filter-label">{t('common.sortBy', 'Sort By')}</label>
+                <label className="filter-label">{t('admin.lifeStories.sortBy', 'Sort By')}</label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -599,6 +668,32 @@ const FullLifeStories = () => {
                         </span>
                       )}
                     </div>
+                    
+                    {/* Session Statistics Indicators */}
+                    <div className="life-story-card__indicators">
+                      <div className="indicator-group">
+                        <span className="indicator-label">{t('admin.sessions.lifeStories.interviews', 'Interviews')}:</span>
+                        <span className="indicator-value">
+                          {story.sessionStats.completedInterviews}/{story.sessionStats.totalInterviews}
+                        </span>
+                        <span className={`indicator-status ${
+                          story.sessionStats.completedInterviews === story.sessionStats.totalInterviews ? 'complete' : 'incomplete'
+                        }`}>
+                          {story.sessionStats.completedInterviews === story.sessionStats.totalInterviews ? '✓' : '○'}
+                        </span>
+                      </div>
+                      <div className="indicator-group">
+                        <span className="indicator-label">{t('admin.sessions.lifeStories.drafts', 'Drafts')}:</span>
+                        <span className="indicator-value">
+                          {story.sessionStats.approvedDrafts}/{story.sessionStats.totalDrafts}
+                        </span>
+                        <span className={`indicator-status ${
+                          story.sessionStats.approvedDrafts > 0 ? 'approved' : 'pending'
+                        }`}>
+                          {story.sessionStats.approvedDrafts > 0 ? '✓' : '○'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                   <div className="life-story-card__status">
                     {getStatusBadge(story.status)}
@@ -622,7 +717,7 @@ const FullLifeStories = () => {
                     onClick={() => setExpandedStory(expandedStory === story.id ? null : story.id)}
                   >
                     <Eye size={16} />
-                    {expandedStory === story.id ? t('common.hide', 'Hide') : t('common.view', 'View')}
+                    {expandedStory === story.id ? t('admin.sessions.lifeStories.hide', 'Hide') : t('admin.sessions.lifeStories.view', 'View')}
                     {expandedStory === story.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </button>
 
@@ -667,7 +762,7 @@ const FullLifeStories = () => {
                       ) : (
                         <RefreshCw size={16} />
                       )}
-                      {t('admin.lifeStories.regenerate', 'Regenerate')}
+                      {t('admin.sessions.lifeStories.regenerate', 'Regenerate')}
                     </button>
                   )}
 
@@ -676,7 +771,7 @@ const FullLifeStories = () => {
                     onClick={() => setEditingNotes(editingNotes === story.id ? null : story.id)}
                   >
                     <StickyNote size={16} />
-                    {t('admin.lifeStories.notes', 'Notes')} ({story.notes.length})
+                    {t('admin.sessions.lifeStories.notes', 'Notes')} ({story.notes.length})
                   </button>
                 </div>
 
@@ -777,6 +872,64 @@ const FullLifeStories = () => {
             ))
           )}
         </div>
+
+        {/* Regeneration Processing Modal */}
+        {regenerationProcessing && (
+          <div className="regeneration-processing-overlay">
+            <div className="regeneration-processing-modal">
+              <div className="regeneration-processing-content">
+                <div className="regeneration-processing-header">
+                  <RefreshCw className="regeneration-processing-icon spin" size={32} />
+                  <h3>{t('admin.lifeStories.regeneration.title', 'Regenerating Life Story')}</h3>
+                  <p>{t('admin.lifeStories.regeneration.subtitle', 'Creating new version with your feedback...')}</p>
+                </div>
+
+                <div className="regeneration-processing-steps">
+                  {getRegenerationSteps().map((step, index) => {
+                    const isActive = index === regenerationStep;
+                    const isCompleted = index < regenerationStep;
+                    const stepIcon = step.icon === 'search' ? Search : 
+                                   step.icon === 'brain' ? RefreshCw : 
+                                   step.icon === 'edit' ? StickyNote : CheckCircle;
+                    const StepIcon = stepIcon;
+
+                    return (
+                      <div key={index} className={`regeneration-step ${
+                        isActive ? 'regeneration-step--active' : 
+                        isCompleted ? 'regeneration-step--completed' : 'regeneration-step--pending'
+                      }`}>
+                        <div className="regeneration-step-icon">
+                          <StepIcon size={16} className={isActive ? 'spin' : ''} />
+                        </div>
+                        <div className="regeneration-step-content">
+                          <span className="regeneration-step-text">{step.text}</span>
+                          {isActive && (
+                            <div className="regeneration-step-progress">
+                              <div className="regeneration-progress-bar">
+                                <div className="regeneration-progress-fill"></div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        {isCompleted && (
+                          <div className="regeneration-step-check">
+                            <CheckCircle size={14} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="regeneration-processing-footer">
+                  <p className="regeneration-processing-note">
+                    {t('admin.lifeStories.regeneration.note', 'This process may take a few minutes. Please do not close this window.')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

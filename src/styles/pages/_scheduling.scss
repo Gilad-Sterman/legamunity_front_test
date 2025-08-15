@@ -333,6 +333,36 @@
       transform: translateY(0);
     }
   }
+  
+  &--warning {
+    background: $warning-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken($warning-color, 10%);
+      transform: translateY(-1px);
+      box-shadow: $box-shadow-md;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  }
+
+  &--success {
+    background: $success-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken($success-color, 10%);
+      transform: translateY(-1px);
+      box-shadow: $box-shadow-md;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  }
 }
 
 // Admin page title with icon

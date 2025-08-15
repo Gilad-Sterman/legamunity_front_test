@@ -2,6 +2,7 @@
   "common": {
     "login": "התחברות",
     "logout": "התנתקות",
+    "none": "אין",
     "notifications": "התראות",
     "search": "חיפוש...",
     "language": "שפה",
@@ -52,7 +53,8 @@
       "sessionOverview": "סקירת פרויקטים",
       "draftManagement": "ניהול טיוטות",
       "interviewProgress": "התקדמות ראיונות",
-      "recentActivity": "פעילות אחרונה (7 ימים אחרונים)"
+      "recentActivity": "פעילות אחרונה (7 ימים אחרונים)",
+      "lifeStoriesOverview": "סקירת סיפורי חיים"
     },
     "kpi": {
       "totalSessions": "סך הכל פרויקטים",
@@ -68,7 +70,13 @@
       "recentInterviews": "ראיונות אחרונים",
       "recentDrafts": "טיוטות אחרונות",
       "cqsAverage": "CQS ממוצע",
-      "pendingReview": "ממתינים לבדיקה"
+      "pendingReview": "ממתינים לבדיקה",
+      "totalLifeStories": "סך הכל סיפורי חיים",
+      "generatedLifeStories": "סיפורי חיים שנוצרו",
+      "approvedLifeStories": "סיפורי חיים מאושרים",
+      "rejectedLifeStories": "סיפורי חיים שנדחו",
+      "avgWordsPerStory": "ממוצע מילים/סיפור",
+      "totalStoryWords": "סך הכל מילים בסיפורי חיים"
     },
     "sessions": {
       "title": "ניהול פרויקטים",
@@ -82,6 +90,8 @@
       "noSessions": "לא נמצאו פרויקטים",
       "noSessionsDesc": "צור את הפרויקט הראשון שלך כדי להתחיל.",
       "clientInfo": "מידע לקוח",
+      "storyComplete": "הושלם",
+      "hasAccessibilityNeeds": "דרישות נגישות",
       "collaborators": "משתתפים",
       "viewSchedule": "צפה בלוח הזמנים",
       "setSchedule": "הגדר לוח זמנים",
@@ -401,7 +411,11 @@
         "totalStories": "סך הכל סיפורים",
         "pendingApproval": "ממתינים לאישור",
         "approved": "מאושרים",
+        "interviews": "ראיונות",
+        "drafts": "טיוטות",
         "avgWordCount": "ממוצע מילים",
+        "view": "צפה",
+        "hide": "הסתר",
         "noStories": "לא נמצאו סיפורי חיים",
         "noStoriesDesc": "סיפורי חיים יופיעו כאן לאחר יצירתם מטיוטות מאושרות.",
         "participantName": "שם משתתף",
@@ -458,6 +472,15 @@
         "standard": "רגיל",
         "urgent": "דחוף",
         "memorial": "זיכרון"
+      },
+      "languages": {  
+        "he": "עברית",  
+        "en": "אנגלית",
+        "hebrew": "עברית",
+        "english": "אנגלית",  
+        "Hebrew": "עברית",
+        "English": "אנגלית",  
+        "other": "אחר"
       }
     },
     "interviews": {
@@ -522,7 +545,12 @@
       },
       "approve": "אישור",
       "reject": "דחייה",
+      "rejectionReasonPrompt": "אנא ספק את טענת הדחייה",
+      "rejectionReasonPlaceholder": "הוספת סיבת הדחייה...",
       "regenerate": "צור מחדש",
+      "regenerateDraft": "צור מחדש",
+      "regeneratePrompt": "ניתן להזין הוראות ספציפיות",
+      "regeneratePlaceholder": "הוסף הערות או משוב לשיפור הטיוטה...",
       "approvalInfo": "מידע אישור",
       "rejectionInfo": "מידע דחייה",
       "wordCount": "מספר מילים",
@@ -545,6 +573,36 @@
       "places": "מקומות",
       "organizations": "ארגונים",
       "dates": "תאריכים"
+    },
+    "lifeStories": {
+      "title": "סיפורי חיים מלאים",
+      "subtitle": "סקירת סיפורי חיים מלאים",
+      "searchPlaceholder": "חיפוש לפי שם או כותרת...",
+      "status": "סטטוס",
+      "sortBy": "מיון לפי",
+      "statuss": {
+        "generated": "Generated",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "archived": "Archived"
+      },
+      "regeneration": {
+        "title": "יצירה מחדש של סיפור חיים",
+        "subtitle": "יצירת גרסה חדשה של סיפור החיים על בסיס ההערות שהוספת.",
+        "description": "יצירה מחדש תיצור גרסה חדשה של סיפור החיים על בסיס ההערות שהוספת.",
+        "notesRequired": "נדרשות הערות כדי ליצור מחדש",
+        "notesPlaceholder": "הוסף הערות או משוב לשיפור הסיפור...",
+        "regenerating": "יוצר מחדש...",
+        "processingMessage": "מעבד את ההערות ויוצר גרסה חדשה של סיפור החיים...",
+        "confirm": "יצור מחדש",
+        "cancel": "בטל",
+        "processing": "מעבד",
+        "analyzingNotes": "ניתוח הערות",
+        "aiProcessing": "מעבד",
+        "enhancingContent": "הוספת תוכן",
+        "finalizingDraft": "סיום",
+        "note": "תהליך זה עשוי לקחת כמה דקות. אנא אל תסגור את החלון הזה."
+      }
     }
   },
   "table": {

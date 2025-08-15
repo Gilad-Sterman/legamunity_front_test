@@ -737,32 +737,33 @@ const Sessions = () => {
       
       // console.log('Regenerate result:', regenerateResult);
       
-      // Refresh sessions data to get the new draft
-      await dispatch(fetchSessions({
+      // Note: Sessions will be refreshed in the modal update logic below
+      
+      // Always refresh sessions data first to get the latest draft
+      const updatedSessions = await dispatch(fetchSessions({
         page: pagination.currentPage,
         limit: pagination.limit,
         search: filters.search,
         sortBy: filters.sortBy,
         sortOrder: filters.sortOrder,
         status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
-      }));
+      })).unwrap();
       
-      // Force refresh the modal with the regenerated draft
-      // The regenerateResult should contain the updated draft data
-      if (regenerateResult?.data?.draft) {
-        // Create updated interview object with the new draft
-        const updatedInterview = {
-          ...currentInterview,
-          ai_draft: regenerateResult.data.draft
-        };
-        
-        // Update modal to show the new regenerated draft immediately
-        setShowDraftViewModal(updatedInterview);
-        alert(t('admin.drafts.regenerateSuccess', 'Draft regenerated successfully! Showing the new version.'));
+      // Find the updated interview with the new draft
+      const updatedSession = updatedSessions.sessions?.find(s => s.id === currentSession.id);
+      const updatedInterview = updatedSession?.interviews?.find(i => i.id === currentInterview.id);
+      
+      // Regeneration completed successfully
+      
+      if (updatedInterview) {
+        // Force update modal with the refreshed interview data
+        setShowDraftViewModal(null); // Clear first
+        setTimeout(() => {
+          setShowDraftViewModal(updatedInterview); // Then set with new data
+        }, 100);
       } else {
-        // Fallback: close modal and refresh sessions
-        setShowDraftViewModal(null);
-        alert(t('admin.drafts.regenerateSuccess', 'Draft regenerated successfully! Please reopen to see the new version.'));
+        console.warn('Could not find updated interview after regeneration');
+        setShowDraftViewModal(currentInterview);
       }
       
     } catch (error) {
@@ -920,22 +921,6 @@ const Sessions = () => {
             />
           </div>
 
-          {/* <div className="sessions-filters__status">
-            <Filter size={20} />
-            <select
-              value={selectedStatus}
-              onChange={(e) => handleStatusFilter(e.target.value)}
-              className="sessions-filters__status-select"
-            >
-              <option value="all">{t('admin.sessions.filters.allStatuses', 'All Statuses')}</option>
-              <option value="scheduled">{getTranslatedStatus('scheduled')}</option>
-              <option value="active">{getTranslatedStatus('active')}</option>
-              <option value="pending_review">{getTranslatedStatus('pending_review')}</option>
-              <option value="completed">{getTranslatedStatus('completed')}</option>
-              <option value="cancelled">{getTranslatedStatus('cancelled')}</option>
-            </select>
-          </div> */}
-
           <div className="sessions-filters__interview-status">
             <Filter size={20} />
             <select
@@ -1084,16 +1069,17 @@ const Sessions = () => {
                         <h4>{t('admin.sessions.clientInfo', 'Client Information')}</h4>
                         <div className="client-info">
                           <div className="client-info__item">
-                            <strong>{t('admin.sessions.language', 'Language')}:</strong> {session.preferences?.preferred_language}
+                            <strong>{t('admin.sessions.language', 'Language')}:</strong> {t(`admin.sessions.languages.${session.preferences?.preferred_language}`)}
                           </div>
                           <div className="client-info__item">
                             <strong>{t('admin.sessions.specialRequirements', 'Special Requirements')}:</strong> {session.preferences?.special_requirements || t('common.none', 'None')}
                           </div>
                           <div className="client-info__item">
-                            <strong>{t('admin.sessions.focusAreas', 'Focus Areas')}:</strong> {session.preferences?.story_preferences?.focus_areas?.join(', ') || t('common.none', 'None')}
+                            <strong>{t('admin.sessions.focusAreas', 'Focus Areas')}:</strong> 
+                            {session.preferences?.story_preferences?.focus_areas?.length > 0 ? session.preferences?.story_preferences?.focus_areas?.map(focusArea => t(`admin.sessions.form.focusAreas.${focusArea}`) + ', ') : t('common.none', 'None')}
                           </div>
                           <div className="client-info__item">
-                            <strong>{t('admin.sessions.tonePreference', 'Tone Preference')}:</strong> {session.preferences?.story_preferences?.tone_preference || t('common.notSet', 'Not set')}
+                            <strong>{t('admin.sessions.tonePreference', 'Tone Preference')}:</strong> {t(`admin.sessions.form.tonePreferences.${session.preferences?.story_preferences?.tone_preference}`) || t('common.notSet', 'Not set')}
                           </div>
                         </div>
                       </div>

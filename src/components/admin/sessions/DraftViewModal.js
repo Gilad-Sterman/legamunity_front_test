@@ -14,6 +14,11 @@ import {
   Hash,
   ChevronDown,
   ChevronUp,
+  Brain,
+  Wand2,
+  FileSearch,
+  Sparkles,
+  Loader
 } from 'lucide-react';
 import { addNoteToDraft, updateDraftStageSupabase } from '../../../store/slices/draftsSlice';
 
@@ -39,10 +44,23 @@ const DraftViewModal = ({
   const [showRegenerateForm, setShowRegenerateForm] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionForm, setShowRejectionForm] = useState(false);
+  const [hasBeenRegenerated, setHasBeenRegenerated] = useState(false);
+  const [notesAddedSinceRegeneration, setNotesAddedSinceRegeneration] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [regenerationStep, setRegenerationStep] = useState(0);
+  const [regenerationProgress, setRegenerationProgress] = useState(0);
   
   // State for expandable sections
   const [sectionsExpanded, setSectionsExpanded] = useState(false); // Initially minimized
   const [followUpsExpanded, setFollowUpsExpanded] = useState(true); // Initially expanded
+
+  // Regeneration processing steps
+  const regenerationSteps = [
+    { id: 'analyze', icon: FileSearch, title: t('admin.drafts.regeneration.analyzing', 'Analyzing Notes'), duration: 3000 },
+    { id: 'process', icon: Brain, title: t('admin.drafts.regeneration.processing', 'AI Processing'), duration: 12000 },
+    { id: 'enhance', icon: Wand2, title: t('admin.drafts.regeneration.enhancing', 'Enhancing Content'), duration: 8000 },
+    { id: 'finalize', icon: Sparkles, title: t('admin.drafts.regeneration.finalizing', 'Finalizing Draft'), duration: 2000 }
+  ];
 
   // Initialize state when modal opens
   useEffect(() => {
@@ -54,6 +72,10 @@ const DraftViewModal = ({
       setShowRejectionForm(false);
       setRegenerateReason('');
       setRejectionReason('');
+      // Check if this draft has been regenerated
+      const isRegenerated = !!draft?.content?.metadata?.regenerationType;
+      setHasBeenRegenerated(isRegenerated);
+      setNotesAddedSinceRegeneration(false);
     }
   }, [isOpen, draft]);
 
@@ -61,8 +83,56 @@ const DraftViewModal = ({
   useEffect(() => {
     if (draft) {
       setLocalDraft(draft);
+      // Reset regeneration state when new draft is received
+      const isRegenerated = !!draft?.content?.metadata?.regenerationType;
+      setHasBeenRegenerated(isRegenerated);
+      // Reset notes flag when we get a regenerated draft
+      if (isRegenerated) {
+        setNotesAddedSinceRegeneration(false);
+        // Stop regeneration loading when new draft arrives
+        setIsRegenerating(false);
+      }
     }
   }, [draft]);
+
+  // Regeneration progress animation
+  useEffect(() => {
+    let progressInterval;
+    let stepTimeout;
+
+    if (isRegenerating) {
+      const currentStepData = regenerationSteps[regenerationStep];
+      if (!currentStepData) return;
+
+      // Animate progress within current step
+      progressInterval = setInterval(() => {
+        setRegenerationProgress(prev => {
+          const increment = 100 / (currentStepData.duration / 100);
+          return Math.min(prev + increment, 100);
+        });
+      }, 100);
+
+      // Move to next step after duration
+      stepTimeout = setTimeout(() => {
+        if (regenerationStep < regenerationSteps.length - 1) {
+          setRegenerationStep(prev => prev + 1);
+          setRegenerationProgress(0);
+        }
+      }, currentStepData.duration);
+    }
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+      if (stepTimeout) clearTimeout(stepTimeout);
+    };
+  }, [isRegenerating, regenerationStep, regenerationSteps]);
+
+  // Calculate overall regeneration progress
+  const getOverallRegenerationProgress = () => {
+    const stepProgress = (regenerationStep / regenerationSteps.length) * 100;
+    const currentStepProgress = (regenerationProgress / regenerationSteps.length);
+    return Math.min(stepProgress + currentStepProgress, 100);
+  };
 
   if (!isOpen || !draft) return null;
 
@@ -100,6 +170,9 @@ const DraftViewModal = ({
       if (onDraftUpdated) {
         onDraftUpdated();
       }
+      
+      // Mark that notes have been added since regeneration
+      setNotesAddedSinceRegeneration(true);
       
       setNewNoteContent('');
       setIsEditingNotes(false);
@@ -166,10 +239,16 @@ const DraftViewModal = ({
 
   const handleRegenerate = () => {
     if (onRegenerate) {
+      setIsRegenerating(true);
+      setRegenerationStep(0);
+      setRegenerationProgress(0);
       onRegenerate(draft.id, regenerateReason);
     }
     setShowRegenerateForm(false);
     setRegenerateReason('');
+    // Mark that regeneration has occurred and reset notes flag
+    setHasBeenRegenerated(true);
+    setNotesAddedSinceRegeneration(false);
   };
 
   const renderSections = () => {
@@ -221,11 +300,70 @@ const DraftViewModal = ({
   
   const canApprove = !isFinalized;
   const canReject = !isFinalized;
-  const canRegenerate = hasNewNotes && !isFinalized; // Only if has notes and not finalized
+  // Can regenerate if: has notes AND not finalized AND (not regenerated OR notes added since regeneration)
+  const canRegenerate = hasNewNotes && !isFinalized && (!hasBeenRegenerated || notesAddedSinceRegeneration);
   const canEditNotes = !isFinalized;
 
   return (
-    <div className="draft-modal-overlay" onClick={onClose}>
+    <>
+      {/* Regeneration Processing Overlay */}
+      {isRegenerating && (
+        <div className="draft-modal__regeneration-overlay">
+          <div className="draft-modal__regeneration-content">
+            {/* Overall Progress */}
+            <div className="regeneration-header">
+              <h3>{t('admin.drafts.regeneration.title', 'Regenerating Draft')}</h3>
+              <div className="regeneration-overall-progress">
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill" 
+                    style={{ width: `${getOverallRegenerationProgress()}%` }}
+                  />
+                </div>
+                <span className="progress-text">{Math.round(getOverallRegenerationProgress())}%</span>
+              </div>
+            </div>
+
+            {/* Current Step */}
+            <div className="regeneration-current-step">
+              <div className="step-icon-container">
+                {React.createElement(regenerationSteps[regenerationStep]?.icon || Loader, {
+                  size: 64,
+                  className: "step-icon animate-pulse"
+                })}
+              </div>
+              <div className="step-info">
+                <h4 className="step-title">{regenerationSteps[regenerationStep]?.title}</h4>
+                <div className="step-progress">
+                  <div className="step-progress-bar">
+                    <div 
+                      className="step-progress-fill" 
+                      style={{ width: `${regenerationProgress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Steps Timeline */}
+            <div className="regeneration-steps-timeline">
+              {regenerationSteps.map((step, index) => (
+                <div 
+                  key={step.id} 
+                  className={`timeline-step ${index <= regenerationStep ? 'completed' : ''} ${index === regenerationStep ? 'active' : ''}`}
+                >
+                  <div className="timeline-step-icon">
+                    {React.createElement(step.icon, { size: 16 })}
+                  </div>
+                  <span className="timeline-step-title">{step.title}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="draft-modal-overlay" onClick={onClose}>
       <div className="draft-modal" onClick={(e) => e.stopPropagation()}>
         <div className="draft-modal__header">
           <div className="draft-modal__title">
@@ -453,7 +591,7 @@ const DraftViewModal = ({
               {/* Existing Notes Display */}
               <div className="notes-list">
                 {localDraft?.content?.notes && localDraft.content.notes.length > 0 ? (
-                  localDraft.content.notes.map((note, index) => (
+                  localDraft.content?.notes.map((note, index) => (
                     <div key={note.id || index} className="note-item">
                       <div className="note-header">
                         <span className="note-author">{note.author || 'Admin User'}</span>
@@ -641,7 +779,7 @@ const DraftViewModal = ({
           <div className="form-overlay">
             <div className="form-modal">
               <div className="form-header">
-                <h4>{t('admin.drafts.rejectDraft', 'Reject Draft')}</h4>
+                <h4>{t('admin.drafts.reject', 'Reject Draft')}</h4>
                 <button 
                   className="btn btn--ghost btn--sm"
                   onClick={() => {
@@ -670,7 +808,7 @@ const DraftViewModal = ({
                   disabled={!rejectionReason.trim() || loading}
                 >
                   <XCircle size={16} />
-                  {t('admin.drafts.confirmReject', 'Confirm Rejection')}
+                  {t('admin.drafts.reject', 'Confirm Rejection')}
                 </button>
                 <button 
                   className="btn btn--secondary"
@@ -720,7 +858,7 @@ const DraftViewModal = ({
                   disabled={loading}
                 >
                   <RefreshCw size={16} />
-                  {t('admin.drafts.confirmRegenerate', 'Regenerate Draft')}
+                  {t('admin.drafts.regenerateDraft', 'Regenerate Draft')}
                 </button>
                 <button 
                   className="btn btn--secondary"
@@ -737,6 +875,7 @@ const DraftViewModal = ({
         )}
       </div>
     </div>
+    </>
   );
 };
 
