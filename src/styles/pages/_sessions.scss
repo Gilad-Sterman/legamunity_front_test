@@ -391,7 +391,7 @@
 
   &__info {
     display: flex;
-    gap: $spacing-xs;
+    gap: $spacing-medium;
     align-items: center;
     flex: 1;
   }
@@ -403,6 +403,14 @@
     flex-wrap: wrap;
   }
 
+  &__index {
+    background-color: $primary-color;
+    color: white;
+    border-radius: $border-radius-sm;
+    padding: $spacing-xs $spacing-small;
+    font-weight: 600;
+  }
+  
   &__name {
     font-weight: 600;
     color: $text-dark;
@@ -493,9 +501,6 @@
   }
 
   // Enhanced draft status styling
-  &__meta--draft {
-    margin-top: $spacing-small;
-  }
 
   &__draft-status {
     display: flex;
@@ -1203,6 +1208,7 @@
     border: 1px solid $border-color;
     border-radius: $border-radius-sm;
     font-size: $font-size-sm;
+    max-width: 300px;
 
     &:focus {
       outline: none;

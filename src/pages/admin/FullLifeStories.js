@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Search, 
   Filter, 
@@ -24,6 +25,7 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 const FullLifeStories = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   // State management
   const [lifeStories, setLifeStories] = useState([]);
@@ -45,6 +47,44 @@ const FullLifeStories = () => {
   useEffect(() => {
     fetchLifeStories();
   }, []);
+
+  // Handle URL parameters for story highlighting
+  useEffect(() => {
+    const storyId = searchParams.get('storyId');
+    const sessionId = searchParams.get('sessionId');
+    
+    if (storyId && lifeStories.length > 0) {
+      // Find the story by ID
+      const targetStory = lifeStories.find(story => story.id === storyId);
+      
+      if (targetStory) {
+        // Expand the story automatically
+        setExpandedStory(storyId);
+        
+        // Scroll to the story after a short delay to ensure DOM is ready
+        setTimeout(() => {
+          const storyElement = document.querySelector(`[data-story-id="${storyId}"]`);
+          if (storyElement) {
+            // Scroll with offset to keep header visible
+            storyElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
+            // Add offset to account for header height
+            window.scrollBy(0, -100);
+            // Add a highlight effect
+            storyElement.classList.add('story-highlighted');
+            setTimeout(() => {
+              storyElement.classList.remove('story-highlighted');
+            }, 5000);
+          }
+        }, 100);
+        
+        // Clear the URL parameters after handling them
+        setSearchParams({});
+      }
+    }
+  }, [lifeStories, searchParams, setSearchParams]);
 
   const fetchLifeStories = async () => {
     try {
@@ -634,7 +674,7 @@ const FullLifeStories = () => {
             </div>
           ) : (
             filteredAndSortedStories.map(story => (
-              <div key={story.id} className="life-story-card">
+              <div key={story.id} className="life-story-card" data-story-id={story.id}>
                 <div className="life-story-card__header">
                   <div className="life-story-card__info">
                     <h3 className="life-story-card__title">{story.title}</h3>

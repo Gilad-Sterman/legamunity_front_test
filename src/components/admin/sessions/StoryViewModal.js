@@ -1,9 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, FileText, Calendar, User, Hash } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, FileText, Calendar, User, Hash, ExternalLink } from 'lucide-react';
 
 const StoryViewModal = ({ isOpen, onClose, story }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   if (!isOpen || !story) return null;
 
@@ -22,6 +24,12 @@ const StoryViewModal = ({ isOpen, onClose, story }) => {
     return count.toLocaleString();
   };
 
+  const handleSeeFullDetails = () => {
+    // Navigate to full life stories page with the story ID as a parameter
+    navigate(`/admin/full-life-stories?storyId=${story.id}&sessionId=${story.session_id}`);
+    onClose(); // Close the modal
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal modal--large story-view-modal">
@@ -30,9 +38,18 @@ const StoryViewModal = ({ isOpen, onClose, story }) => {
             <FileText size={20} />
             {t('admin.sessions.sessionDrafts.storyDetails', 'Full Life Story')}
           </h2>
-          <button className="modal__close" onClick={onClose}>
-            <X size={20} />
-          </button>
+          <div className="modal__header-actions">
+            <button 
+              className="btn btn--primary btn--sm"
+              onClick={handleSeeFullDetails}
+            >
+              <ExternalLink size={16} />
+              {t('admin.sessions.seeFullDetails', 'See Full Details')}
+            </button>
+            <button className="modal__close" onClick={onClose}>
+              <X size={20} />
+            </button>
+          </div>
         </div>
         
         <div className="modal__content">

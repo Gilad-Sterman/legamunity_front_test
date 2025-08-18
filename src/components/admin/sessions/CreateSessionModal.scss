@@ -383,17 +383,17 @@
 }
 
 // RTL support
-[dir="rtl"] {
-  .create-session-form {
-    .form-section__title,
-    .form-label {
-      svg {
-        order: 1;
-      }
-    }
+// [dir="rtl"] {
+//   .create-session-form {
+//     .form-section__title,
+//     .form-label {
+//       // svg {
+//       //   order: 1;
+//       // }
+//     }
     
-    .form-section__header {
-      flex-direction: row-reverse;
-    }
-  }
-}
+//     // .form-section__header {
+//     //   flex-direction: row-reverse;
+//     // }
+//   }
+// }

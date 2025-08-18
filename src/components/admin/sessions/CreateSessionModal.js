@@ -36,6 +36,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     // Section 1: Client Information (including primary contact)
     client_name: '',
+    client_date_of_birth: '',
     client_age: '',
     client_contact: {
       phone: '',
@@ -49,18 +50,23 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
       email: ''
     },
 
-    // Section 2: Session Configuration (including accessibility)
-    session_type: 'Life Story Creation',
-    status: 'scheduled',
+    // Primary Contact (Optional)
+    primary_contact_enabled: false,
+
+    // Section 2: Session Configuration (including accessibility) - Optional
+    session_config_enabled: false,
+    accessibility_enabled: false,
+    session_type: 'life_story',
+    status: '',
     priority_level: 'standard',
-    preferred_language: 'English',
+    preferred_language: 'english',
     story_preferences: {
       focus_areas: [],
-      tone_preference: 'nostalgic',
+      tone_preference: '',
       special_topics: '',
-      target_length: 'medium',
-      include_photos: true,
-      family_tree_integration: true
+      target_length: '',
+      include_photos: false,
+      family_tree_integration: false
     },
     accessibility_needs: '',
     special_requirements: '',
@@ -69,10 +75,10 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
     // Section 3: Interview Scheduling (optional)
     interview_scheduling: {
       enabled: false,
-      day_of_week: 'monday',
-      time: '10:00',
-      duration: 90,
-      location: 'client_home'
+      day_of_week: '',
+      time: '',
+      duration: '',
+      location: ''
     }
   });
 
@@ -113,6 +119,37 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
     'memorial'
   ];
 
+  // Calculate age from date of birth
+  const calculateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return '';
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // Handle date of birth change and auto-calculate age
+  const handleDateOfBirthChange = (dateOfBirth) => {
+    const age = calculateAge(dateOfBirth);
+    setFormData(prev => ({
+      ...prev,
+      client_date_of_birth: dateOfBirth,
+      client_age: age
+    }));
+
+    // Clear error for date of birth field
+    if (formErrors.client_date_of_birth) {
+      setFormErrors(prev => ({
+        ...prev,
+        client_date_of_birth: null
+      }));
+    }
+  };
+
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -120,6 +157,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
       setFormData({
         // Section 1: Client Information (including primary contact)
         client_name: '',
+        client_date_of_birth: '',
         client_age: '',
         client_contact: {
           phone: '',
@@ -133,18 +171,23 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
           email: ''
         },
 
-        // Section 2: Session Configuration (including accessibility)
-        session_type: 'Life Story Creation',
-        status: 'scheduled',
-        priority_level: 'standard',
-        preferred_language: 'English',
+        // Primary Contact (Optional)
+        primary_contact_enabled: false,
+
+        // Section 2: Session Configuration (including accessibility) - Optional
+        session_config_enabled: false,
+        accessibility_enabled: false,
+        session_type: '',
+        status: '',
+        priority_level: '',
+        preferred_language: '',
         story_preferences: {
           focus_areas: [],
-          tone_preference: 'nostalgic',
+          tone_preference: '',
           special_topics: '',
-          target_length: 'medium',
-          include_photos: true,
-          family_tree_integration: true
+          target_length: '',
+          include_photos: false,
+          family_tree_integration: false
         },
         accessibility_needs: '',
         special_requirements: '',
@@ -153,10 +196,10 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
         // Section 3: Interview Scheduling (optional)
         interview_scheduling: {
           enabled: false,
-          day_of_week: 'monday',
-          time: '10:00',
-          duration: 90,
-          location: 'client_home'
+          day_of_week: '',
+          time: '',
+          duration: '',
+          location: ''
         },
 
         // Friends for interviews (kept for compatibility)
@@ -273,27 +316,28 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
           errors.client_name = t('admin.sessions.validation.clientNameRequired', 'Client name is required');
         }
 
-        if (!formData.client_age || formData.client_age < 1 || formData.client_age > 120) {
-          errors.client_age = t('admin.sessions.validation.clientAgeRequired', 'Valid client age is required');
+        if (!formData.client_date_of_birth) {
+          errors.client_date_of_birth = t('admin.sessions.validation.clientDateOfBirthRequired', 'Date of birth is required');
         }
 
         if (!formData.client_contact.email.trim()) {
           errors.client_email = t('admin.sessions.validation.clientEmailRequired', 'Client email is required');
         }
 
-        if (!formData.primary_contact.name.trim()) {
-          errors.primary_contact_name = t('admin.sessions.validation.primaryContactRequired', 'Primary contact name is required');
-        }
+        // Primary contact validation only if enabled
+        if (formData.primary_contact_enabled) {
+          if (!formData.primary_contact.name.trim()) {
+            errors.primary_contact_name = t('admin.sessions.validation.primaryContactRequired', 'Primary contact name is required');
+          }
 
-        if (!formData.primary_contact.phone.trim()) {
-          errors.primary_contact_phone = t('admin.sessions.validation.primaryContactPhoneRequired', 'Primary contact phone is required');
+          if (!formData.primary_contact.phone.trim()) {
+            errors.primary_contact_phone = t('admin.sessions.validation.primaryContactPhoneRequired', 'Primary contact phone is required');
+          }
         }
         break;
 
-      case 2: // Session Configuration & Story Preferences
-        if (formData.story_preferences.focus_areas.length === 0) {
-          errors.focus_areas = t('admin.sessions.validation.focusAreasRequired', 'At least one focus area is required');
-        }
+      case 2: // Session Configuration & Story Preferences (Optional)
+        // No required fields in this step - all optional
         break;
 
       case 3: // Interview Scheduling & Additional Notes (optional)
@@ -317,27 +361,26 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
       errors.client_name = t('admin.sessions.validation.clientNameRequired', 'Client name is required');
     }
 
-    if (!formData.client_age || formData.client_age < 1 || formData.client_age > 120) {
-      errors.client_age = t('admin.sessions.validation.clientAgeRequired', 'Valid client age is required');
+    if (!formData.client_date_of_birth) {
+      errors.client_date_of_birth = t('admin.sessions.validation.clientDateOfBirthRequired', 'Date of birth is required');
     }
 
     if (!formData.client_contact.email.trim()) {
       errors.client_email = t('admin.sessions.validation.clientEmailRequired', 'Client email is required');
     }
 
-    // Primary contact validation (simplified)
-    if (!formData.primary_contact.name.trim()) {
-      errors.primary_contact_name = t('admin.sessions.validation.primaryContactRequired', 'Primary contact name is required');
+    // Primary contact validation only if enabled
+    if (formData.primary_contact_enabled) {
+      if (!formData.primary_contact.name.trim()) {
+        errors.primary_contact_name = t('admin.sessions.validation.primaryContactRequired', 'Primary contact name is required');
+      }
+
+      if (!formData.primary_contact.phone.trim()) {
+        errors.primary_contact_phone = t('admin.sessions.validation.primaryContactPhoneRequired', 'Primary contact phone is required');
+      }
     }
 
-    if (!formData.primary_contact.phone.trim()) {
-      errors.primary_contact_phone = t('admin.sessions.validation.primaryContactPhoneRequired', 'Primary contact phone is required');
-    }
-
-    // Section 2: Story preferences validation
-    if (formData.story_preferences.focus_areas.length === 0) {
-      errors.focus_areas = t('admin.sessions.validation.focusAreasRequired', 'At least one focus area is required');
-    }
+    // Section 2: Story preferences validation (Optional - removed requirements)
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -417,7 +460,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
       // CLEANUP: Removed debug console.log statements
 
       await dispatch(createSession(sessionData)).unwrap();
-      
+
       // Refresh sessions list to show newly created session with interviews immediately
       const { fetchSessions } = await import('../../../store/slices/sessionsSliceSupabase');
       dispatch(fetchSessions({
@@ -427,7 +470,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
         sortBy: 'created_at',
         sortOrder: 'desc'
       }));
-      
+
       onClose();
     } catch (error) {
       console.error('Failed to create session:', error);
@@ -467,7 +510,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                 <div className="form-section">
                   <h3 className="form-section__title">
                     <User size={20} />
-                    {t('admin.sessions.clientInfo', 'Client Information')}
+                    <span>{t('admin.sessions.clientInfo', 'Client Information')}</span>
                   </h3>
 
                   <div className="form-row form-row--three-cols">
@@ -490,20 +533,22 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
 
                     <div className="form-group">
                       <label className="form-label">
-                        {t('admin.sessions.form.clientAge', 'Client Age')} *
+                        {t('admin.sessions.form.clientDateOfBirth', 'Date of Birth')} *
                       </label>
                       <input
-                        type="number"
-                        value={formData.client_age}
-                        onChange={(e) => handleFieldChange('client_age', e.target.value)}
-                        className={`form-input ${formErrors.client_age ? 'form-input--error' : ''}`}
-                        placeholder="75"
-                        min="1"
-                        max="120"
+                        type="date"
+                        value={formData.client_date_of_birth}
+                        onChange={(e) => handleDateOfBirthChange(e.target.value)}
+                        className={`form-input ${formErrors.client_date_of_birth ? 'form-input--error' : ''}`}
                         required
                       />
-                      {formErrors.client_age && (
-                        <span className="form-error">{formErrors.client_age}</span>
+                      {formErrors.client_date_of_birth && (
+                        <span className="form-error">{formErrors.client_date_of_birth}</span>
+                      )}
+                      {formData.client_age && (
+                        <div className="form-helper-text">
+                          {t('admin.sessions.form.calculatedAge', 'Age')}: {formData.client_age} {t('admin.sessions.form.years', 'years')}
+                        </div>
                       )}
                     </div>
 
@@ -541,7 +586,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                       />
                     </div>
 
-                    <div className="form-group">
+                    {/* <div className="form-group">
                       <label className="form-label">
                         <Home size={16} />
                         {t('admin.sessions.form.clientAddress', 'Client Address')}
@@ -553,86 +598,100 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                         placeholder={t('admin.sessions.form.clientAddressPlaceholder', 'Enter client address')}
                         rows={2}
                       />
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
                 <div className="form-section">
-                  <h3 className="form-section__title">
-                    <Users size={20} />
-                    {t('admin.sessions.form.primaryContact', 'Primary Contact')}
-                  </h3>
-
-                  <div className="form-row form-row--three-cols">
-                    <div className="form-group">
-                      <label className="form-label">
-                        {t('admin.sessions.form.contactName', 'Name')} *
-                      </label>
+                  <div className="form-section__header">
+                    <h3 className="form-section__title">
+                      <Users size={20} />
+                      {t('admin.sessions.form.primaryContact', 'Primary Contact (Optional)')}
+                    </h3>
+                    <label className="checkbox-item">
                       <input
-                        type="text"
-                        value={formData.primary_contact.name}
-                        onChange={(e) => handleNestedFieldChange('primary_contact', 'name', e.target.value)}
-                        className={`form-input ${formErrors.primary_contact_name ? 'form-input--error' : ''}`}
-                        placeholder={t('admin.sessions.form.contactNamePlaceholder', 'Enter contact name')}
-                        required
+                        type="checkbox"
+                        checked={formData.primary_contact_enabled}
+                        onChange={(e) => handleFieldChange('primary_contact_enabled', e.target.checked)}
                       />
-                      {formErrors.primary_contact_name && (
-                        <span className="form-error">{formErrors.primary_contact_name}</span>
-                      )}
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">
-                        <Phone size={16} />
-                        {t('admin.sessions.form.contactPhone', 'Phone')} *
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.primary_contact.phone}
-                        onChange={(e) => handleNestedFieldChange('primary_contact', 'phone', e.target.value)}
-                        className={`form-input ${formErrors.primary_contact_phone ? 'form-input--error' : ''}`}
-                        placeholder="+1 (555) 123-4567"
-                        required
-                      />
-                      {formErrors.primary_contact_phone && (
-                        <span className="form-error">{formErrors.primary_contact_phone}</span>
-                      )}
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">
-                        {t('admin.sessions.form.relationship', 'Relationship')}
-                      </label>
-                      <select
-                        value={formData.primary_contact.relationship}
-                        onChange={(e) => handleNestedFieldChange('primary_contact', 'relationship', e.target.value)}
-                        className="form-input"
-                      >
-                        <option value="">{t('admin.sessions.form.selectRelationship', 'Select relationship')}</option>
-                        <option value="spouse">{t('admin.sessions.form.relationships.spouse', 'Spouse')}</option>
-                        <option value="child">{t('admin.sessions.form.relationships.child', 'Child')}</option>
-                        <option value="grandchild">{t('admin.sessions.form.relationships.grandchild', 'Grandchild')}</option>
-                        <option value="sibling">{t('admin.sessions.form.relationships.sibling', 'Sibling')}</option>
-                        <option value="other_family">{t('admin.sessions.form.relationships.otherFamily', 'Other Family')}</option>
-                      </select>
-                    </div>
+                      <span>{t('admin.sessions.form.enablePrimaryContact', 'Add primary contact information')}</span>
+                    </label>
                   </div>
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label">
-                        <Mail size={16} />
-                        {t('admin.sessions.form.contactEmail', 'Email')}
-                      </label>
-                      <input
-                        type="email"
-                        value={formData.primary_contact.email}
-                        onChange={(e) => handleNestedFieldChange('primary_contact', 'email', e.target.value)}
-                        className="form-input"
-                        placeholder="contact@example.com"
-                      />
-                    </div>
-                  </div>
+                  {formData.primary_contact_enabled && (
+                    <>
+                      <div className="form-row form-row--three-cols">
+                        <div className="form-group">
+                          <label className="form-label">
+                            {t('admin.sessions.form.contactName', 'Name')} *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.primary_contact.name}
+                            onChange={(e) => handleNestedFieldChange('primary_contact', 'name', e.target.value)}
+                            className={`form-input ${formErrors.primary_contact_name ? 'form-input--error' : ''}`}
+                            placeholder={t('admin.sessions.form.contactNamePlaceholder', 'Enter contact name')}
+                            required
+                          />
+                          {formErrors.primary_contact_name && (
+                            <span className="form-error">{formErrors.primary_contact_name}</span>
+                          )}
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">
+                            <Phone size={16} />
+                            {t('admin.sessions.form.contactPhone', 'Phone')} *
+                          </label>
+                          <input
+                            type="tel"
+                            value={formData.primary_contact.phone}
+                            onChange={(e) => handleNestedFieldChange('primary_contact', 'phone', e.target.value)}
+                            className={`form-input ${formErrors.primary_contact_phone ? 'form-input--error' : ''}`}
+                            placeholder="+1 (555) 123-4567"
+                            required
+                          />
+                          {formErrors.primary_contact_phone && (
+                            <span className="form-error">{formErrors.primary_contact_phone}</span>
+                          )}
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">
+                            {t('admin.sessions.form.relationship', 'Relationship')}
+                          </label>
+                          <select
+                            value={formData.primary_contact.relationship}
+                            onChange={(e) => handleNestedFieldChange('primary_contact', 'relationship', e.target.value)}
+                            className="form-input"
+                          >
+                            <option value="">{t('admin.sessions.form.selectRelationship', 'Select relationship')}</option>
+                            <option value="spouse">{t('admin.sessions.form.relationships.spouse', 'Spouse')}</option>
+                            <option value="child">{t('admin.sessions.form.relationships.child', 'Child')}</option>
+                            <option value="grandchild">{t('admin.sessions.form.relationships.grandchild', 'Grandchild')}</option>
+                            <option value="sibling">{t('admin.sessions.form.relationships.sibling', 'Sibling')}</option>
+                            <option value="other_family">{t('admin.sessions.form.relationships.otherFamily', 'Other Family')}</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label className="form-label">
+                            <Mail size={16} />
+                            {t('admin.sessions.form.contactEmail', 'Email')}
+                          </label>
+                          <input
+                            type="email"
+                            value={formData.primary_contact.email}
+                            onChange={(e) => handleNestedFieldChange('primary_contact', 'email', e.target.value)}
+                            className="form-input"
+                            placeholder="contact@example.com"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </>
             )}
@@ -640,156 +699,155 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
             {/* Step 2: Session Configuration & Story Preferences */}
             {currentStep === 2 && (
               <>
-
-
                 <div className="form-section">
-                  <h3 className="form-section__title">
-                    <FileText size={20} />
-                    {t('admin.sessions.form.sessionConfig', 'Session Configuration')}
-                  </h3>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label">
-                        {t('admin.sessions.form.priority', 'Priority Level')}
-                      </label>
-                      <select
-                        value={formData.priority_level}
-                        onChange={(e) => handleFieldChange('priority_level', e.target.value)}
-                        className="form-input"
-                      >
-                        {priorityLevels.map(priority => (
-                          <option key={priority} value={priority}>
-                            {t(`admin.sessions.priorities.${priority}`, priority)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">
-                        {t('admin.sessions.form.language', 'Preferred Language')}
-                      </label>
-                      <select
-                        value={formData.preferred_language}
-                        onChange={(e) => handleFieldChange('preferred_language', e.target.value)}
-                        className="form-input"
-                      >
-                        <option value="English">{t('admin.sessions.form.languages.english', 'English')}</option>
-                        <option value="Hebrew">{t('admin.sessions.form.languages.hebrew', 'Hebrew')}</option>
-                        <option value="Other">{t('admin.sessions.form.languages.other', 'Other')}</option>
-                      </select>
-                    </div>
+                  <div className="form-section__header">
+                    <h3 className="form-section__title">
+                      <Settings size={20} />
+                      {t('admin.sessions.form.sessionConfig', 'Session Configuration (Optional)')}
+                    </h3>
+                    <label className="checkbox-item">
+                      <input
+                        type="checkbox"
+                        checked={formData.session_config_enabled}
+                        onChange={(e) => handleFieldChange('session_config_enabled', e.target.checked)}
+                      />
+                      <span>{t('admin.sessions.form.enableSessionConfig', 'Configure session preferences')}</span>
+                    </label>
                   </div>
 
-                  <h3 className="form-section__title">
-                    <Heart size={20} />
-                    {t('admin.sessions.form.storyPreferences', 'Story Preferences')}
-                  </h3>
-
-                  <div className="form-group">
-                    <label className="form-label">
-                      {t('admin.sessions.form.focusArea', 'Focus Areas')} *
-                    </label>
-                    <div className="checkbox-grid">
-                      {focusAreas.map(area => (
-                        <label key={area} className="checkbox-item">
-                          <input
-                            type="checkbox"
-                            checked={formData.story_preferences.focus_areas.includes(area)}
-                            onChange={(e) => handleFocusAreaChange(area, e.target.checked)}
-                          />
-                          <span>{t(`admin.sessions.form.focusAreas.${area}`, area.replace('_', ' '))}</span>
+                  {formData.session_config_enabled && (
+                    <>
+                      <h3 className="form-section__title">
+                        <Heart size={20} />
+                        {t('admin.sessions.form.storyPreferences', 'Story Preferences')}
+                      </h3>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label className="form-label">
+                            {t('admin.sessions.form.language', 'Preferred Language')}
+                          </label>
+                          <select
+                            value={formData.preferred_language}
+                            onChange={(e) => handleFieldChange('preferred_language', e.target.value)}
+                            className="form-input"
+                          >
+                            <option value="English">{t('admin.sessions.form.languages.english', 'English')}</option>
+                            <option value="Hebrew">{t('admin.sessions.form.languages.hebrew', 'Hebrew')}</option>
+                            <option value="Other">{t('admin.sessions.form.languages.other', 'Other')}</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">
+                            {t('admin.sessions.form.priority', 'Priority Level')}
+                          </label>
+                          <select
+                            value={formData.priority_level}
+                            onChange={(e) => handleFieldChange('priority_level', e.target.value)}
+                            className="form-input"
+                          >
+                            {priorityLevels.map(priority => (
+                              <option key={priority} value={priority}>
+                                {t(`admin.sessions.priorities.${priority}`, priority)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      {/* <div className="form-group">
+                        <label className="form-label">
+                          {t('admin.sessions.form.focusArea', 'Focus Areas')}
                         </label>
-                      ))}
-                    </div>
-                    {formErrors.focus_areas && (
-                      <span className="form-error">{formErrors.focus_areas}</span>
-                    )}
-                  </div>
+                        <div className="checkbox-grid">
+                          {focusAreas.map(area => (
+                            <label key={area} className="checkbox-item">
+                              <input
+                                type="checkbox"
+                                checked={formData.story_preferences.focus_areas.includes(area)}
+                                onChange={(e) => handleFocusAreaChange(area, e.target.checked)}
+                              />
+                              <span>{t(`admin.sessions.form.focusAreas.${area}`, area.replace('_', ' '))}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div> */}
+                      {/* <div className="form-row">
+                        <div className="form-group">
+                          <label className="form-label">
+                            {t('admin.sessions.form.tonePreference', 'Tone Preference')}
+                          </label>
+                          <select
+                            value={formData.story_preferences.tone_preference}
+                            onChange={(e) => handleNestedFieldChange('story_preferences', 'tone_preference', e.target.value)}
+                            className="form-input"
+                          >
+                            {tonePreferences.map(tone => (
+                              <option key={tone} value={tone}>
+                                {t(`admin.sessions.form.tonePreferences.${tone}`, tone)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label">
-                        {t('admin.sessions.form.tonePreference', 'Tone Preference')}
-                      </label>
-                      <select
-                        value={formData.story_preferences.tone_preference}
-                        onChange={(e) => handleNestedFieldChange('story_preferences', 'tone_preference', e.target.value)}
-                        className="form-input"
-                      >
-                        {tonePreferences.map(tone => (
-                          <option key={tone} value={tone}>
-                            {t(`admin.sessions.form.tonePreferences.${tone}`, tone)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                        <div className="form-group">
+                          <label className="form-label">
+                            {t('admin.sessions.form.targetLength', 'Target Length')}
+                          </label>
+                          <select
+                            value={formData.story_preferences.target_length}
+                            onChange={(e) => handleNestedFieldChange('story_preferences', 'target_length', e.target.value)}
+                            className="form-input"
+                          >
+                            <option value="short">{t('admin.sessions.form.targetLengths.short', 'Short (10-20 pages)')}</option>
+                            <option value="medium">{t('admin.sessions.form.targetLengths.medium', 'Medium (30-50 pages)')}</option>
+                            <option value="long">{t('admin.sessions.form.targetLengths.long', 'Long (60+ pages)')}</option>
+                          </select>
+                        </div>
+                      </div> */}
+                      <div className="form-group">
+                        <label className="form-label">
+                          {t('admin.sessions.form.specialTopics', 'Special Topics')}
+                        </label>
+                        <textarea
+                          value={formData.story_preferences.special_topics}
+                          onChange={(e) => handleNestedFieldChange('story_preferences', 'special_topics', e.target.value)}
+                          className="form-textarea"
+                          placeholder={t('admin.sessions.form.specialTopicsPlaceholder', 'Any specific topics or themes to focus on...')}
+                          rows={2}
+                        />
+                      </div>
+                      {/* Accessibility & Special Requirements */}
+                      {/* <div className="form-subsection">
+                        <h4>{t('admin.sessions.form.accessibilityRequirements', 'Accessibility & Special Requirements')}</h4>
+                        <div className="form-group">
+                          <label className="form-label">
+                            {t('admin.sessions.form.accessibilityNeeds', 'Accessibility Needs')}
+                          </label>
+                          <textarea
+                            value={formData.accessibility_needs}
+                            onChange={(e) => handleFieldChange('accessibility_needs', e.target.value)}
+                            className="form-textarea"
+                            placeholder={t('admin.sessions.form.accessibilityPlaceholder', 'Hearing aids, wheelchair access, large print, etc.')}
+                            rows={2}
+                          />
+                        </div>
 
-                    <div className="form-group">
-                      <label className="form-label">
-                        {t('admin.sessions.form.targetLength', 'Target Length')}
-                      </label>
-                      <select
-                        value={formData.story_preferences.target_length}
-                        onChange={(e) => handleNestedFieldChange('story_preferences', 'target_length', e.target.value)}
-                        className="form-input"
-                      >
-                        <option value="short">{t('admin.sessions.form.targetLengths.short', 'Short (10-20 pages)')}</option>
-                        <option value="medium">{t('admin.sessions.form.targetLengths.medium', 'Medium (30-50 pages)')}</option>
-                        <option value="long">{t('admin.sessions.form.targetLengths.long', 'Long (60+ pages)')}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">
-                      {t('admin.sessions.form.specialTopics', 'Special Topics')}
-                    </label>
-                    <textarea
-                      value={formData.story_preferences.special_topics}
-                      onChange={(e) => handleNestedFieldChange('story_preferences', 'special_topics', e.target.value)}
-                      className="form-textarea"
-                      placeholder={t('admin.sessions.form.specialTopicsPlaceholder', 'Any specific topics or themes to focus on...')}
-                      rows={2}
-                    />
-                  </div>
-
-                  {/* Accessibility & Special Requirements */}
-                  <div className="form-subsection">
-                    <h4>{t('admin.sessions.form.accessibilityRequirements', 'Accessibility & Special Requirements')}</h4>
-                    <div className="form-group">
-                      <label className="form-label">
-                        {t('admin.sessions.form.accessibilityNeeds', 'Accessibility Needs')}
-                      </label>
-                      <textarea
-                        value={formData.accessibility_needs}
-                        onChange={(e) => handleFieldChange('accessibility_needs', e.target.value)}
-                        className="form-textarea"
-                        placeholder={t('admin.sessions.form.accessibilityPlaceholder', 'Hearing aids, wheelchair access, large print, etc.')}
-                        rows={2}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">
-                        {t('admin.sessions.form.specialRequirements', 'Special Requirements')}
-                      </label>
-                      <textarea
-                        value={formData.special_requirements}
-                        onChange={(e) => handleFieldChange('special_requirements', e.target.value)}
-                        className="form-textarea"
-                        placeholder={t('admin.sessions.form.specialRequirementsPlaceholder', 'Medical considerations, comfort needs, etc.')}
-                        rows={2}
-                      />
-                    </div>
-                  </div>
+                        <div className="form-group">
+                          <label className="form-label">
+                            {t('admin.sessions.form.specialRequirements', 'Special Requirements')}
+                          </label>
+                          <textarea
+                            value={formData.special_requirements}
+                            onChange={(e) => handleFieldChange('special_requirements', e.target.value)}
+                            className="form-textarea"
+                            placeholder={t('admin.sessions.form.specialRequirementsPlaceholder', 'Medical considerations, comfort needs, etc.')}
+                            rows={2}
+                          />
+                        </div>
+                      </div> */}
+                    </>
+                  )}
                 </div>
-              </>
-            )}
-
-            {/* Step 3: Interview Scheduling & Additional Notes */}
-            {currentStep === 3 && (
-              <>
+                {/* Interview Scheduling Section - Moved from Step 3 */}
                 <div className="form-section">
                   <div className="form-section__header">
                     <h3 className="form-section__title">
@@ -849,9 +907,10 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                           </label>
                           <select
                             value={formData.interview_scheduling.duration}
-                            onChange={(e) => handleNestedFieldChange('interview_scheduling', 'duration', parseInt(e.target.value))}
+                            onChange={(e) => handleNestedFieldChange('interview_scheduling', 'duration', e.target.value ? parseInt(e.target.value) : '')}
                             className="form-input"
                           >
+                            <option value="">{t('admin.sessions.selectDuration', 'Select duration')}</option>
                             <option value={60}>60 minutes</option>
                             <option value={90}>90 minutes</option>
                             <option value={120}>120 minutes</option>
@@ -879,37 +938,57 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                   )}
                 </div>
 
+              </>
+            )}
+
+            {/* Step 3: Accessibility, Special Requirements & Additional Notes */}
+            {currentStep === 3 && (
+              <>
                 <div className="form-section">
-                  <h3 className="form-section__title">
-                    <AlertCircle size={20} />
-                    {t('admin.sessions.form.accessibilityRequirements', 'Accessibility & Special Requirements')}
-                  </h3>
-
-                  <div className="form-group">
-                    <label className="form-label">
-                      {t('admin.sessions.form.accessibilityNeeds', 'Accessibility Needs')}
+                  <div className="form-section__header">
+                    <h3 className="form-section__title">
+                      <AlertCircle size={20} />
+                      {t('admin.sessions.form.accessibilityRequirements', 'Accessibility & Special Requirements (Optional)')}
+                    </h3>
+                    <label className="checkbox-item">
+                      <input
+                        type="checkbox"
+                        checked={formData.accessibility_enabled}
+                        onChange={(e) => handleFieldChange('accessibility_enabled', e.target.checked)}
+                      />
+                      <span>{t('admin.sessions.form.enableAccessibility', 'Add accessibility and special requirements')}</span>
                     </label>
-                    <textarea
-                      value={formData.accessibility_needs}
-                      onChange={(e) => handleFieldChange('accessibility_needs', e.target.value)}
-                      className="form-textarea"
-                      placeholder={t('admin.sessions.form.accessibilityPlaceholder', 'e.g., Hearing aid user, wheelchair accessible, large print materials...')}
-                      rows={2}
-                    />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">
-                      {t('admin.sessions.form.specialRequirements', 'Special Requirements')}
-                    </label>
-                    <textarea
-                      value={formData.special_requirements}
-                      onChange={(e) => handleFieldChange('special_requirements', e.target.value)}
-                      className="form-textarea"
-                      placeholder={t('admin.sessions.form.specialRequirementsPlaceholder', 'e.g., Prefers morning sessions, needs breaks every 30 minutes...')}
-                      rows={2}
-                    />
-                  </div>
+                  {formData.accessibility_enabled && (
+                    <>
+                      <div className="form-group">
+                        <label className="form-label">
+                          {t('admin.sessions.form.accessibilityNeeds', 'Accessibility Needs')}
+                        </label>
+                        <textarea
+                          value={formData.accessibility_needs}
+                          onChange={(e) => handleFieldChange('accessibility_needs', e.target.value)}
+                          className="form-textarea"
+                          placeholder={t('admin.sessions.form.accessibilityPlaceholder', 'e.g., Hearing aid user, wheelchair accessible, large print materials...')}
+                          rows={2}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">
+                          {t('admin.sessions.form.specialRequirements', 'Special Requirements')}
+                        </label>
+                        <textarea
+                          value={formData.special_requirements}
+                          onChange={(e) => handleFieldChange('special_requirements', e.target.value)}
+                          className="form-textarea"
+                          placeholder={t('admin.sessions.form.specialRequirementsPlaceholder', 'e.g., Prefers morning sessions, needs breaks every 30 minutes...')}
+                          rows={2}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="form-section">

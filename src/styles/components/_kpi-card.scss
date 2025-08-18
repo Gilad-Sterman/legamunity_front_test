@@ -200,6 +200,16 @@
       color: #5b21b6;
     }
   }
+  
+  &--red {
+    border-left-color: #f43f5e;
+    .kpi-card__icon {
+      color: #f43f5e;
+    }
+    .kpi-card__value {
+      color: #e11d48;
+    }
+  }
 }
 
 @keyframes loading {

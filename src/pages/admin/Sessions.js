@@ -2,19 +2,19 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 // import { useNavigate } from 'react-router-dom';
-import { 
-  Users, 
-  Calendar, 
-  Clock,  
-  Edit, 
-  Trash, 
-  Plus, 
-  Search, 
-  Filter, 
-  X, 
-  Upload, 
-  FileText, 
-  CheckCircle, 
+import {
+  Users,
+  Calendar,
+  Clock,
+  Edit,
+  Trash,
+  Plus,
+  Search,
+  Filter,
+  X,
+  Upload,
+  FileText,
+  CheckCircle,
   AlertTriangle,
   Eye,
   ChevronDown,
@@ -22,7 +22,9 @@ import {
   MessageSquare,
   User,
   AlertCircle,
-  Trash2
+  Trash2,
+  AudioWaveform,
+  AudioLines
 } from 'lucide-react';
 import {
   fetchSessions,
@@ -94,34 +96,34 @@ const Sessions = () => {
     // Priority: normalized interviews from session data > legacy interviews > empty array
     const normalizedInterviews = session.interviews; // From sessions API
     const legacyInterviews = session.preferences?.interviews;
-    
+
     return normalizedInterviews || legacyInterviews || [];
   };
 
   // Helper function to check if session has approved drafts
   const hasApprovedDrafts = (session) => {
     const interviews = getSessionInterviews(session);
-    
+
     // STRICT: Only consider drafts that are explicitly marked as "approved"
     const hasApproved = interviews.some(interview => {
       const draft = interview.ai_draft;
-      
+
       if (!draft) return false;
-      
+
       // Check for explicit approval in multiple possible locations
       const stage = draft?.metadata?.stage || draft?.stage;
-      
+
       // Only return true if explicitly approved (not just completed)
       return stage === 'approved';
     });
-    
+
     return hasApproved;
   };
 
   // Helper function to check if session data has changed since last story generation
   const hasSessionDataChanged = (session, lastStory) => {
     if (!lastStory) return true; // No previous story, allow generation
-    
+
     const interviews = getSessionInterviews(session);
     const currentApprovedDrafts = interviews.filter(interview => {
       const draft = interview.ai_draft;
@@ -129,14 +131,14 @@ const Sessions = () => {
       const stage = draft?.metadata?.stage || draft?.stage;
       return stage === 'approved';
     }).length;
-    
+
     // Get metadata from last story generation (stored in sourceMetadata by backend)
     const lastMetadata = lastStory.source_metadata || lastStory.sourceMetadata || {};
     const lastApprovedDrafts = lastMetadata.approvedDrafts || 0;
-    
+
     // Only check if approved drafts count has changed
     const draftsChanged = currentApprovedDrafts !== lastApprovedDrafts;
-    
+
     return draftsChanged;
   };
 
@@ -144,14 +146,14 @@ const Sessions = () => {
   const shouldAllowStoryGeneration = (session) => {
     const hasApproved = hasApprovedDrafts(session);
     if (!hasApproved) return false;
-    
+
     // Get the latest story for this session
     const stories = sessionStories[session.id];
     const latestStory = stories && stories.length > 0 ? stories[0] : null;
-    
+
     // Check if data has changed since last generation
     const dataChanged = hasSessionDataChanged(session, latestStory);
-    
+
     return dataChanged;
   };
 
@@ -159,7 +161,7 @@ const Sessions = () => {
   const handleGenerateFullStory = async (sessionId) => {
     try {
       setGeneratingStory(sessionId);
-      
+
       // Call backend API to generate full life story
       const response = await fetch(`/api/sessions-supabase/${sessionId}/generate-full-story`, {
         method: 'POST',
@@ -174,27 +176,27 @@ const Sessions = () => {
       }
 
       const result = await response.json();
-      
+
       // Show success message
       alert(t('admin.sessions.storyGeneratedSuccess', 'Full life story generated successfully!'));
-      
+
       // Clear cached story data for this session to force refresh
       setSessionStories(prev => {
         const updated = { ...prev };
         delete updated[sessionId];
         return updated;
       });
-      
+
       // Clear loading state for this session
       setLoadingStories(prev => {
         const updated = { ...prev };
         delete updated[sessionId];
         return updated;
       });
-      
+
       // Immediately fetch the updated stories for this session
       fetchSessionStories(sessionId);
-      
+
       // Refresh sessions to show updated data
       dispatch(fetchSessions({
         page: pagination.currentPage,
@@ -203,7 +205,7 @@ const Sessions = () => {
         sortBy: filters.sortBy,
         sortOrder: filters.sortOrder
       }));
-      
+
     } catch (error) {
       console.error('Error generating full life story:', error);
       alert(t('admin.sessions.storyGenerationError', 'Failed to generate full life story. Please try again.'));
@@ -219,7 +221,7 @@ const Sessions = () => {
     }
 
     setLoadingStories(prev => ({ ...prev, [sessionId]: true }));
-    
+
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/sessions-supabase/${sessionId}/full-stories`, {
@@ -231,9 +233,9 @@ const Sessions = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setSessionStories(prev => ({ 
-          ...prev, 
-          [sessionId]: data.success ? data.data : [] 
+        setSessionStories(prev => ({
+          ...prev,
+          [sessionId]: data.success ? data.data : []
         }));
       } else {
         console.error('Failed to fetch session stories:', response.statusText);
@@ -322,22 +324,22 @@ const Sessions = () => {
           if (!hasMatchingInterview) return false;
         }
       }
-      
+
       // Search filter for client name and main contact
       if (filters.search && filters.search.trim() !== '') {
         const searchTerm = filters.search.toLowerCase().trim();
-        
+
         // Get client name (first_name and last_name)
         const clientName = session.client_name.toLowerCase() || '';
         const clientEmail = session.client_email.toLowerCase() || '';
-        
+
         // Get main contact information
         const mainContact = session.client_contact || {};
-        
+
         // Check if search term matches any of these fields
         const matchesClientName = clientName.includes(searchTerm);
         const matchesClientEmail = clientEmail.includes(searchTerm);
-        
+
         // Return false if no match found
         if (!matchesClientName && !matchesClientEmail) {
           return false;
@@ -401,7 +403,7 @@ const Sessions = () => {
     // Get name from content.name (normalized) or interview.name (legacy) or notes field
     const interviewName = interview.content?.name || interview.name || interview.notes || `Interview ${interview.id}`;
     const isFriendInterview = interview.content?.isFriendInterview || interview.isFriendInterview || false;
-    
+
     setEditInterviewName(interviewName);
     setEditInterviewIsFriend(isFriendInterview);
   };
@@ -455,8 +457,13 @@ const Sessions = () => {
     const scheduling = session?.preferences?.interview_scheduling || session?.interview_scheduling;
     const hasSchedule = scheduling?.enabled;
 
+    // Calculate the next interview number
+    const existingInterviews = getSessionInterviews(session);
+    const nextInterviewNumber = existingInterviews.length + 1;
+
     const newInterviewData = {
       type: 'life_story',
+      name: `${t('admin.sessions.newInterview', 'New Interview')} ${nextInterviewNumber}`,
       notes: '',
       status: hasSchedule ? 'scheduled' : 'pending',
       duration: hasSchedule ? (scheduling.duration || 90) : 90,
@@ -467,7 +474,7 @@ const Sessions = () => {
     try {
       // Use sessions slice interview creation
       await dispatch(addInterviewToSession({ sessionId, interviewData: newInterviewData })).unwrap();
-      
+
       // Refresh sessions data to show updated interview count and metrics
       await dispatch(fetchSessions({
         page: pagination.currentPage,
@@ -490,7 +497,7 @@ const Sessions = () => {
     try {
       // Use sessions slice interview deletion
       await dispatch(deleteInterview({ sessionId, interviewId })).unwrap();
-      
+
       // Refresh sessions data to show updated interview count and metrics
       await dispatch(fetchSessions({
         page: pagination.currentPage,
@@ -615,13 +622,13 @@ const Sessions = () => {
     // Create a normalized interview object for the modal
     const fileData = interview.file_upload || interview.content?.file_upload;
     const transcription = interview.transcription || interview.content?.transcription;
-    
+
     const modalData = {
       ...interview,
       file_upload: fileData,
       transcription: transcription
     };
-    
+
     setShowFileViewModal(modalData);
   };
 
@@ -632,12 +639,12 @@ const Sessions = () => {
   const handleShowDraftView = (interview) => {
     // Create a normalized interview object for the modal
     const draftData = interview.ai_draft || interview.content?.ai_draft;
-    
+
     const modalData = {
       ...interview,
       ai_draft: draftData
     };
-    
+
     setShowDraftViewModal(modalData);
   };
 
@@ -651,7 +658,7 @@ const Sessions = () => {
       // TODO: Implement draft approval API call
       console.log('Approving draft:', draftId);
       // await dispatch(approveDraft({ draftId })).unwrap();
-      
+
       // Refresh sessions data
       await dispatch(fetchSessions({
         page: pagination.currentPage,
@@ -661,7 +668,7 @@ const Sessions = () => {
         sortOrder: filters.sortOrder,
         status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
       }));
-      
+
       setShowDraftViewModal(null);
     } catch (error) {
       console.error('Failed to approve draft:', error);
@@ -674,7 +681,7 @@ const Sessions = () => {
       // TODO: Implement draft rejection API call
       console.log('Rejecting draft:', draftId, 'Reason:', reason);
       // await dispatch(rejectDraft({ draftId, reason })).unwrap();
-      
+
       // Refresh sessions data
       await dispatch(fetchSessions({
         page: pagination.currentPage,
@@ -684,7 +691,7 @@ const Sessions = () => {
         sortOrder: filters.sortOrder,
         status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
       }));
-      
+
       setShowDraftViewModal(null);
     } catch (error) {
       console.error('Failed to reject draft:', error);
@@ -710,16 +717,16 @@ const Sessions = () => {
       // The showDraftViewModal contains the interview, but we need to find the specific draft
       const currentDraft = currentSession.interviews
         .find(i => i.id === currentInterview.id)?.ai_draft;
-      
+
       const notes = currentDraft?.content?.notes || [];
-      
+
       // console.log('Draft notes extraction:', {
       //   interviewId: currentInterview.id,
       //   hasDraft: !!currentDraft,
       //   notesFound: notes.length,
       //   notes: notes
       // });
-      
+
       // console.log('Regenerating draft:', {
       //   sessionId: currentSession.id,
       //   draftId: draftId,
@@ -734,11 +741,11 @@ const Sessions = () => {
         instructions: instructions,
         notes: notes
       })).unwrap();
-      
+
       // console.log('Regenerate result:', regenerateResult);
-      
+
       // Note: Sessions will be refreshed in the modal update logic below
-      
+
       // Always refresh sessions data first to get the latest draft
       const updatedSessions = await dispatch(fetchSessions({
         page: pagination.currentPage,
@@ -748,13 +755,13 @@ const Sessions = () => {
         sortOrder: filters.sortOrder,
         status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
       })).unwrap();
-      
+
       // Find the updated interview with the new draft
       const updatedSession = updatedSessions.sessions?.find(s => s.id === currentSession.id);
       const updatedInterview = updatedSession?.interviews?.find(i => i.id === currentInterview.id);
-      
+
       // Regeneration completed successfully
-      
+
       if (updatedInterview) {
         // Force update modal with the refreshed interview data
         setShowDraftViewModal(null); // Clear first
@@ -765,7 +772,7 @@ const Sessions = () => {
         console.warn('Could not find updated interview after regeneration');
         setShowDraftViewModal(currentInterview);
       }
-      
+
     } catch (error) {
       console.error('Failed to regenerate draft:', error);
       alert(t('admin.drafts.regenerateError', `Failed to regenerate draft: ${error.message || error}`));
@@ -777,7 +784,7 @@ const Sessions = () => {
       // TODO: Implement draft notes update API call
       console.log('Updating draft notes:', draftId, 'Notes:', notes);
       // await dispatch(updateDraftNotes({ draftId, notes })).unwrap();
-      
+
       // Refresh sessions data
       await dispatch(fetchSessions({
         page: pagination.currentPage,
@@ -798,7 +805,7 @@ const Sessions = () => {
     try {
       // Close the file upload modal first
       setShowFileUploadModal(null);
-      
+
       // Refresh sessions data to show updated completion percentage and metrics
       await dispatch(fetchSessions({
         page: pagination.currentPage,
@@ -935,7 +942,7 @@ const Sessions = () => {
             </select>
           </div>
 
-          <div className="sessions-filters__priority">
+          {/* <div className="sessions-filters__priority">
             <Filter size={20} />
             <select
               value={selectedPriority}
@@ -947,7 +954,7 @@ const Sessions = () => {
               <option value="urgent">{getTranslatedPriority('urgent')}</option>
               <option value="memorial">{getTranslatedPriority('memorial')}</option>
             </select>
-          </div>
+          </div> */}
 
           <button
             className="btn btn--secondary"
@@ -1000,8 +1007,6 @@ const Sessions = () => {
                           <h3 className="session-card__client-name">
                             {t('admin.sessions.clientStory', { clientName: session.client_name })}
                           </h3>
-                          <p className="session-card__client-email">{session.client_email || session.preferences?.client_contact?.email}</p>
-                          <p className="session-card__client-age">{t('admin.sessions.age')}: {session.client_age}</p>
                         </div>
                       </div>
 
@@ -1010,42 +1015,17 @@ const Sessions = () => {
                           {getTranslatedStatus(session.status)}
                         </span> */}
 
-                        <span className={getPriorityClass(session.preferences?.priority_level || 'standard')}>
-                          {getTranslatedPriority(session.preferences?.priority_level || 'standard')}
-                        </span>
 
-                        <div className="session-card__date">
+                        {/* <div className="session-card__date">
                           <Clock size={16} />
                           <span>{formatDate(session.created_at)}</span>
-                        </div>
+                        </div> */}
 
                         <div className="session-card__stats">
                           <div className="session-card__stat">
                             <Users size={16} />
-                            <span>{session.preferences?.primary_contact?.name || session.preferences?.family_contact_details?.primary_contact?.name || 'No contact'}</span>
-                          </div>
-
-                          <div className="session-card__stat">
-                            <FileText size={16} />
-                            <span>{session.totalInterviews || getSessionInterviews(session).length} {t('admin.sessions.interviews', 'interviews')}</span>
-                          </div>
-
-                          <div className="session-card__stat">
-                            <FileText size={16} />
-                            <span>{session.completionPercentage || 0}% {t('admin.sessions.storyComplete', 'complete')}</span>
-                          </div>
-
-                          <div className="session-card__stat">
-                            <Users size={16} />
                             <span>{session.completedInterviews || 0}/{session.totalInterviews || getSessionInterviews(session).length} {t('admin.sessions.completed', 'completed')}</span>
                           </div>
-
-                          {(session.preferences?.accessibility_needs || session.preferences?.special_requirements) && (
-                            <div className="session-card__stat session-card__stat--accessibility">
-                              <AlertCircle size={16} />
-                              <span>{t('admin.sessions.hasAccessibilityNeeds', 'Special needs')}</span>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -1069,150 +1049,82 @@ const Sessions = () => {
                         <h4>{t('admin.sessions.clientInfo', 'Client Information')}</h4>
                         <div className="client-info">
                           <div className="client-info__item">
-                            <strong>{t('admin.sessions.language', 'Language')}:</strong> {t(`admin.sessions.languages.${session.preferences?.preferred_language}`)}
+                            <strong>{t('admin.sessions.form.clientName', 'Client Name')}:</strong> {session.client_name}
                           </div>
                           <div className="client-info__item">
-                            <strong>{t('admin.sessions.specialRequirements', 'Special Requirements')}:</strong> {session.preferences?.special_requirements || t('common.none', 'None')}
+                            <strong>{t('admin.sessions.form.clientEmail', 'Email')}:</strong> {session.client_email || session.preferences?.client_contact?.email || t('common.notProvided', 'Not provided')}
                           </div>
                           <div className="client-info__item">
-                            <strong>{t('admin.sessions.focusAreas', 'Focus Areas')}:</strong> 
-                            {session.preferences?.story_preferences?.focus_areas?.length > 0 ? session.preferences?.story_preferences?.focus_areas?.map(focusArea => t(`admin.sessions.form.focusAreas.${focusArea}`) + ', ') : t('common.none', 'None')}
+                            <strong>{t('admin.sessions.age', 'Age')}:</strong> {session.client_age || t('common.notProvided', 'Not provided')}
                           </div>
-                          <div className="client-info__item">
-                            <strong>{t('admin.sessions.tonePreference', 'Tone Preference')}:</strong> {t(`admin.sessions.form.tonePreferences.${session.preferences?.story_preferences?.tone_preference}`) || t('common.notSet', 'Not set')}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Full Life Story Section */}
-                      <div className="session-details__section session-details__section--story">
-                        <div className="session-details__section-header">
-                          <h4 className="section-title">
-                            <FileText size={18} />
-                            {t('admin.sessions.sessionDrafts.fullLifeStory', 'Full Life Story')}
-                          </h4>
-                        </div>
-                        
-                        <div className="session-story">
-                          {/* Generate Button - Show based on approved drafts and data changes */}
-                          {hasApprovedDrafts(session) && (
-                            <div className="story-generate">
-                              <button 
-                                className="btn btn--success story-generate__btn"
-                                onClick={() => handleGenerateFullStory(session.id)}
-                                disabled={generatingStory === session.id || !shouldAllowStoryGeneration(session)}
-                              >
-                                {generatingStory === session.id ? (
-                                  <>
-                                    <div className="spinner spinner--sm" />
-                                    {t('admin.sessions.sessionDrafts.generatingStory', 'Generating Story...')}
-                                  </>
-                                ) : (
-                                  <>
-                                    <FileText size={16} />
-                                    {t('admin.sessions.sessionDrafts.generateFullStory', 'Generate Full Life Story')}
-                                  </>
-                                )}
-                              </button>
-                              <p className="story-generate__description">
-                                {shouldAllowStoryGeneration(session) ? (
-                                  t('admin.sessions.sessionDrafts.generateDescription', 'Generate a comprehensive life story from all approved interview drafts')
-                                ) : (
-                                  t('admin.sessions.sessionDrafts.noChangesDetected', 'No changes detected since last generation. Complete more interviews or approve additional drafts to generate a new version.')
-                                )}
-                              </p>
+                          {session.preferences?.preferred_language && (
+                            <div className="client-info__item">
+                              <strong>{t('admin.sessions.language', 'Language')}:</strong> {t(`admin.sessions.languages.${session.preferences.preferred_language}`)}
                             </div>
                           )}
-
-                          {/* Story Display - Show if stories exist */}
-                          {(() => {
-                            // Check if we need to load stories for this session
-                            if (!sessionStories[session.id] && !loadingStories[session.id]) {
-                              fetchSessionStories(session.id);
-                            }
-                            
-                            const stories = sessionStories[session.id];
-                            const currentStory = getCurrentStory(session.id);
-                            
-                            if (loadingStories[session.id]) {
-                              return (
-                                <div className="story-loading">
-                                  <div className="spinner spinner--sm" />
-                                  <span>{t('admin.sessions.sessionDrafts.loadingStories', 'Loading stories...')}</span>
-                                </div>
-                              );
-                            }
-                            
-                            if (currentStory) {
-                              return (
-                                <div className="story-display">
-                                  <div className="story-current">
-                                    <div className="story-current__info">
-                                      <h5 className="story-current__title">
-                                        {currentStory.title || t('admin.sessions.sessionDrafts.generatedStory', 'Generated Story')}
-                                      </h5>
-                                      <div className="story-current__meta">
-                                        <span className="story-meta__item">
-                                          <span className="story-version-badge">v{currentStory.version}</span>
-                                        </span>
-                                        <span className="story-meta__item">
-                                          <FileText size={12} />
-                                          {(() => {
-                                            // Extract word count from multiple possible sources (backward compatibility)
-                                            const wordCount = currentStory.total_words || 
-                                                             currentStory.metadata?.wordCount || 
-                                                             (typeof currentStory.content === 'string' ? currentStory.content.split(/\s+/).length : 0) || 
-                                                             0;
-                                            return `${wordCount.toLocaleString()} ${t('admin.sessions.words', 'words')}`;
-                                          })()}
-                                        </span>
-                                        <span className="story-meta__item">
-                                          <Clock size={12} />
-                                          {new Date(currentStory.generated_at).toLocaleDateString()}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <div className="story-current__actions">
-                                      <button 
-                                        className="btn btn--primary btn--sm"
-                                        onClick={() => handleViewStory(currentStory)}
-                                      >
-                                        <Eye size={14} />
-                                        {t('admin.sessions.sessionDrafts.viewStory', 'View Story')}
-                                      </button>
-                                      
-                                      {stories && stories.length > 1 && (
-                                        <button 
-                                          className="btn btn--outline btn--sm"
-                                          onClick={() => handleViewStoryHistory(session.id)}
-                                        >
-                                          <Clock size={14} />
-                                          {t('admin.sessions.sessionDrafts.storyHistory', 'History')} ({stories.length})
-                                        </button>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            
-                            if (!hasApprovedDrafts(session)) {
-                              return (
-                                <div className="story-placeholder">
-                                  <div className="story-placeholder__icon">
-                                    <AlertTriangle size={24} />
-                                  </div>
-                                  <p className="story-placeholder__text">
-                                    {t('admin.sessions.needApprovedDrafts', 'Approved interview drafts are required to generate a full life story')}
-                                  </p>
-                                </div>
-                              );
-                            }
-                            
-                            return null;
-                          })()}
                         </div>
                       </div>
+
+                      {/* Primary Contact - Only show if exists */}
+                      {(session.preferences?.primary_contact?.name || session.preferences?.family_contact_details?.primary_contact?.name) && (
+                        <div className="session-details__section">
+                          <h4>{t('admin.sessions.form.primaryContact1', 'Primary Contact')}</h4>
+                          <div className="client-info">
+                            <div className="client-info__item">
+                              <strong>{t('admin.sessions.form.contactName', 'Contact Name')}:</strong> {session.preferences?.primary_contact?.name || session.preferences?.family_contact_details?.primary_contact?.name}
+                            </div>
+                            {(session.preferences?.primary_contact?.phone || session.preferences?.family_contact_details?.primary_contact?.phone) && (
+                              <div className="client-info__item">
+                                <strong>{t('admin.sessions.form.contactPhone', 'Contact Phone')}:</strong> {session.preferences?.primary_contact?.phone || session.preferences?.family_contact_details?.primary_contact?.phone}
+                              </div>
+                            )}
+                            {(session.preferences?.primary_contact?.relationship || session.preferences?.family_contact_details?.primary_contact?.relationship) && (
+                              <div className="client-info__item">
+                                <strong>{t('admin.sessions.form.contactRelationship', 'Relationship')}:</strong> {t(`admin.sessions.form.relationships.${session.preferences?.primary_contact?.relationship || session.preferences?.family_contact_details?.primary_contact?.relationship}`)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Story Preferences - Only show if exists */}
+                      {(session.preferences?.story_preferences?.focus_areas?.length > 0 || session.preferences?.story_preferences?.tone_preference) && (
+                        <div className="session-details__section">
+                          <h4>{t('admin.sessions.form.storyPreferences', 'Story Preferences')}</h4>
+                          <div className="client-info">
+                            {session.preferences?.story_preferences?.focus_areas?.length > 0 && (
+                              <div className="client-info__item">
+                                <strong>{t('admin.sessions.focusAreas', 'Focus Areas')}:</strong>
+                                {session.preferences.story_preferences.focus_areas.map(focusArea => t(`admin.sessions.form.focusAreas.${focusArea}`)).join(', ')}
+                              </div>
+                            )}
+                            {session.preferences?.story_preferences?.tone_preference && (
+                              <div className="client-info__item">
+                                <strong>{t('admin.sessions.tonePreference', 'Tone Preference')}:</strong> {t(`admin.sessions.form.tonePreferences.${session.preferences.story_preferences.tone_preference}`)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Special Requirements & Accessibility - Only show if exists */}
+                      {(session.preferences?.special_requirements || session.preferences?.accessibility_needs) && (
+                        <div className="session-details__section">
+                          <h4>{t('admin.sessions.specialRequirements', 'Special Requirements')}</h4>
+                          <div className="client-info">
+                            {session.preferences?.special_requirements && (
+                              <div className="client-info__item">
+                                <strong>{t('admin.sessions.form.specialRequirements', 'Special Requirements')}:</strong> {session.preferences.special_requirements}
+                              </div>
+                            )}
+                            {session.preferences?.accessibility_needs && (
+                              <div className="client-info__item">
+                                <strong>{t('admin.sessions.form.accessibilityNeeds', 'Accessibility Needs')}:</strong> {session.preferences.accessibility_needs}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Interviews */}
                       <div className="session-details__section">
@@ -1220,7 +1132,8 @@ const Sessions = () => {
                           <h4>{t('admin.sessions.interviews', 'Interviews')}</h4>
                           <button
                             className="btn btn--secondary btn--sm"
-                            onClick={() => handleShowScheduling(session.id)}
+                            // onClick={() => handleShowScheduling(session.id)}
+                            title={t('common.notIncludedInPhase1', 'Not Included in Phase 1')}
                           >
                             <Calendar size={16} />
                             {session.preferences?.interview_scheduling?.enabled ?
@@ -1231,51 +1144,59 @@ const Sessions = () => {
                         </div>
 
                         <div className="session-interviews">
-                          {getSessionInterviews(session).map((interview) => (
+                          {getSessionInterviews(session).map((interview, index) => (
                             <div key={interview.id} className="interview">
                               <div className="interview__header">
                                 <div className="interview__info">
                                   {editingInterview?.sessionId === session.id && editingInterview?.interviewId === interview.id ? (
-                                    <div className="interview__edit">
-                                      <div className="interview__edit-form">
-                                        <input
-                                          type="text"
-                                          value={editInterviewName}
-                                          onChange={(e) => setEditInterviewName(e.target.value)}
-                                          className="interview__name-input"
-                                          onKeyPress={(e) => e.key === 'Enter' && handleSaveInterviewName()}
-                                          placeholder={t('admin.sessions.interviewNamePlaceholder', 'Interview name')}
-                                          autoFocus
-                                        />
-                                        <label className="interview__friend-checkbox">
+                                    <>
+                                      <div className="interview__index">
+                                        {index + 1}
+                                      </div>
+                                      <div className="interview__edit">
+                                        <div className="interview__edit-form">
                                           <input
-                                            type="checkbox"
-                                            checked={editInterviewIsFriend}
-                                            onChange={(e) => setEditInterviewIsFriend(e.target.checked)}
+                                            type="text"
+                                            value={editInterviewName}
+                                            onChange={(e) => setEditInterviewName(e.target.value)}
+                                            className="interview__name-input"
+                                            onKeyPress={(e) => e.key === 'Enter' && handleSaveInterviewName()}
+                                            placeholder={t('admin.sessions.interviewNamePlaceholder', 'Interview name')}
+                                            autoFocus
                                           />
-                                          <span className="interview__friend-label">
-                                            <Users size={14} />
-                                            {t('admin.sessions.friendInterview', 'Friend Interview')}
-                                          </span>
-                                        </label>
+                                          <label className="interview__friend-checkbox">
+                                            <input
+                                              type="checkbox"
+                                              checked={editInterviewIsFriend}
+                                              onChange={(e) => setEditInterviewIsFriend(e.target.checked)}
+                                            />
+                                            <span className="interview__friend-label">
+                                              <Users size={14} />
+                                              {t('admin.sessions.friendInterview', 'Friend Interview')}
+                                            </span>
+                                          </label>
+                                        </div>
+                                        <div className="interview__edit-actions">
+                                          <button
+                                            className="btn btn--primary btn--xs"
+                                            onClick={handleSaveInterviewName}
+                                          >
+                                            {t('common.save', 'Save')}
+                                          </button>
+                                          <button
+                                            className="btn btn--secondary btn--xs"
+                                            onClick={handleCancelEditInterview}
+                                          >
+                                            {t('common.cancel', 'Cancel')}
+                                          </button>
+                                        </div>
                                       </div>
-                                      <div className="interview__edit-actions">
-                                        <button
-                                          className="btn btn--primary btn--xs"
-                                          onClick={handleSaveInterviewName}
-                                        >
-                                          {t('common.save', 'Save')}
-                                        </button>
-                                        <button
-                                          className="btn btn--secondary btn--xs"
-                                          onClick={handleCancelEditInterview}
-                                        >
-                                          {t('common.cancel', 'Cancel')}
-                                        </button>
-                                      </div>
-                                    </div>
+                                    </>
                                   ) : (
                                     <>
+                                      <div className="interview__index">
+                                        {index + 1}
+                                      </div>
                                       <div className="interview__name-container">
                                         <span className="interview__name">
                                           {interview.content?.name || interview.name || interview.notes || `Interview ${interview.id}`}
@@ -1336,7 +1257,7 @@ const Sessions = () => {
                                         onClick={() => handleShowFileView(interview)}
                                         title={t('admin.sessions.viewFile', 'View uploaded file')}
                                       >
-                                        <FileText size={14} />
+                                        <AudioLines size={14} />
                                         <span className="interview__draft-text">{t('admin.sessions.fileUploaded', 'File uploaded')}</span>
                                       </button>
                                     </div>
@@ -1349,7 +1270,7 @@ const Sessions = () => {
                                       const draft = interview.ai_draft || interview.content?.ai_draft || (interview.drafts && interview.drafts[0]);
                                       const draftStage = draft?.stage || 'first_draft';
                                       const notesCount = draft?.content?.notes ? draft.content.notes.length : 0;
-                                      
+
                                       // Determine status icon and color
                                       let statusIcon, statusColor, statusText;
                                       switch (draftStage) {
@@ -1371,9 +1292,9 @@ const Sessions = () => {
                                         default:
                                           statusIcon = <FileText size={14} />;
                                           statusColor = 'info';
-                                          statusText = t('admin.sessions.draftGenerated', 'Draft Generated');
+                                          statusText = t('admin.sessions.draftGenerated', 'Draft Generated - Pending Review');
                                       }
-                                      
+
                                       return (
                                         <div className="interview__draft-status">
                                           <button
@@ -1396,9 +1317,9 @@ const Sessions = () => {
                                   </div>
                                 )}
                               </div>
-                              {interview.notes && (
+                              {/* {interview.notes && (
                                 <p className="interview__notes">{interview.notes}</p>
-                              )}
+                              )} */}
                             </div>
                           ))}
 
@@ -1416,7 +1337,7 @@ const Sessions = () => {
                       </div>
 
                       {/* Metadata */}
-                      <div className="session-details__section">
+                      {/* <div className="session-details__section">
                         <h4>{t('admin.sessions.metadata', 'Session Info')}</h4>
                         <div className="session-metadata">
                           <div className="metadata-item">
@@ -1458,17 +1379,147 @@ const Sessions = () => {
                             </span>
                           </div>
                         </div>
+                      </div> */}
+
+                      {/* Full Life Story Section */}
+                      <div className="session-details__section session-details__section--story">
+                        <div className="session-details__section-header">
+                          <h4 className="section-title">
+                            <FileText size={18} />
+                            {t('admin.sessions.sessionDrafts.fullLifeStory', 'Full Life Story')}
+                          </h4>
+                        </div>
+
+                        <div className="session-story">
+                          {/* Generate Button - Show based on approved drafts and data changes */}
+                          {hasApprovedDrafts(session) && (
+                            <div className="story-generate">
+                              <button
+                                className="btn btn--success story-generate__btn"
+                                onClick={() => handleGenerateFullStory(session.id)}
+                                disabled={generatingStory === session.id || !shouldAllowStoryGeneration(session)}
+                              >
+                                {generatingStory === session.id ? (
+                                  <>
+                                    <div className="spinner spinner--sm" />
+                                    {t('admin.sessions.sessionDrafts.generatingStory', 'Generating Story...')}
+                                  </>
+                                ) : (
+                                  <>
+                                    <FileText size={16} />
+                                    {t('admin.sessions.sessionDrafts.generateFullStory', 'Generate Full Life Story')}
+                                  </>
+                                )}
+                              </button>
+                              <p className="story-generate__description">
+                                {shouldAllowStoryGeneration(session) ? (
+                                  t('admin.sessions.sessionDrafts.generateDescription', 'Generate a comprehensive life story from all approved interview drafts')
+                                ) : (
+                                  t('admin.sessions.sessionDrafts.noChangesDetected', 'No changes detected since last generation. Complete more interviews or approve additional drafts to generate a new version.')
+                                )}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Story Display - Show if stories exist */}
+                          {(() => {
+                            // Check if we need to load stories for this session
+                            if (!sessionStories[session.id] && !loadingStories[session.id]) {
+                              fetchSessionStories(session.id);
+                            }
+
+                            const stories = sessionStories[session.id];
+                            const currentStory = getCurrentStory(session.id);
+
+                            if (loadingStories[session.id]) {
+                              return (
+                                <div className="story-loading">
+                                  <div className="spinner spinner--sm" />
+                                  <span>{t('admin.sessions.sessionDrafts.loadingStories', 'Loading stories...')}</span>
+                                </div>
+                              );
+                            }
+
+                            if (currentStory) {
+                              return (
+                                <div className="story-display">
+                                  <div className="story-current">
+                                    <div className="story-current__info">
+                                      <h5 className="story-current__title">
+                                        {currentStory.title || t('admin.sessions.generatedStory', 'Generated Story')}
+                                      </h5>
+                                      <div className="story-current__meta">
+                                        <span className="story-meta__item">
+                                          <span className="story-version-badge">v{currentStory.version}</span>
+                                        </span>
+                                        <span className="story-meta__item">
+                                          <FileText size={12} />
+                                          {(() => {
+                                            // Extract word count from multiple possible sources (backward compatibility)
+                                            const wordCount = currentStory.total_words ||
+                                              currentStory.metadata?.wordCount ||
+                                              (typeof currentStory.content === 'string' ? currentStory.content.split(/\s+/).length : 0) ||
+                                              0;
+                                            return `${wordCount.toLocaleString()} ${t('admin.sessions.words', 'words')}`;
+                                          })()}
+                                        </span>
+                                        <span className="story-meta__item">
+                                          <Clock size={12} />
+                                          {new Date(currentStory.generated_at).toLocaleDateString()}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="story-current__actions">
+                                      <button
+                                        className="btn btn--primary btn--sm"
+                                        onClick={() => handleViewStory(currentStory)}
+                                      >
+                                        <Eye size={14} />
+                                        {t('admin.sessions.sessionDrafts.viewStory', 'View Story')}
+                                      </button>
+
+                                      {/* {stories && stories.length > 1 && (
+                                        <button
+                                          className="btn btn--outline btn--sm"
+                                          onClick={() => handleViewStoryHistory(session.id)}
+                                        >
+                                          <Clock size={14} />
+                                          {t('admin.sessions.sessionDrafts.storyHistory', 'History')} ({stories.length})
+                                        </button>
+                                      )} */}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            if (!hasApprovedDrafts(session)) {
+                              return (
+                                <div className="story-placeholder">
+                                  <div className="story-placeholder__icon">
+                                    <AlertTriangle size={24} />
+                                  </div>
+                                  <p className="story-placeholder__text">
+                                    {t('admin.sessions.needApprovedDrafts', 'Approved interview drafts are required to generate a full life story')}
+                                  </p>
+                                </div>
+                              );
+                            }
+
+                            return null;
+                          })()}
+                        </div>
                       </div>
 
                       {/* Actions */}
                       <div className="session-details__actions">
                         <button className="btn btn--secondary btn--sm">
                           <Edit size={16} />
-                          {t('common.edit', 'Edit')}
+                          {t('admin.sessions.edit', 'Edit')}
                         </button>
                         <button className="btn btn--danger btn--sm" onClick={() => handleDeleteSession(session.id)}>
                           <Trash2 size={16} />
-                          {t('common.delete', 'Delete')}
+                          {t('admin.sessions.delete', 'Delete')}
                         </button>
                       </div>
                     </div>
@@ -1747,7 +1798,7 @@ const Sessions = () => {
           dispatch(fetchSessions({ page: pagination.current, limit: pagination.pageSize }));
         }}
         loading={loading}
-        
+
       />
 
       {/* Story View Modal */}

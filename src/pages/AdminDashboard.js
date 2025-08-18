@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { Users, Activity, CheckCircle, Clock, FileText, ThumbsUp, TrendingUp, Calendar, BookOpen, Star, BarChart3 } from 'lucide-react';
+import { Users, Activity, CheckCircle, BookOpen, Star, BarChart3, Award } from 'lucide-react';
 import KpiCard from '../components/dashboard/KpiCard';
 import { fetchSessionStats } from '../store/slices/sessionsSliceSupabase';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const hasFetchedRef = useRef(false);
   
   // Get stats from Redux store
@@ -22,29 +24,16 @@ const AdminDashboard = () => {
     totalSessions: stats?.totalSessions?.toString() || '0',
     activeSessions: stats?.activeSessions?.toString() || '0',
     completedSessions: stats?.completedSessions?.toString() || '0',
-    
-    // Draft metrics
-    totalDrafts: stats?.totalDrafts?.toString() || '0',
-    draftsAwaitingApproval: stats?.draftsAwaitingApproval?.toString() || '0',
-    approvedDrafts: stats?.approvedDrafts?.toString() || '0',
-    draftApprovalRate: stats?.draftApprovalRate ? `${stats.draftApprovalRate}%` : '0%',
-    
-    // Interview metrics
-    totalInterviews: stats?.totalInterviews?.toString() || '0',
-    completedInterviews: stats?.completedInterviews?.toString() || '0',
-    interviewCompletionRate: stats?.interviewCompletionRate ? `${stats.interviewCompletionRate}%` : '0%',
-    
-    // Recent activity
-    recentInterviews: stats?.recentInterviews?.toString() || '0',
-    recentDrafts: stats?.recentDrafts?.toString() || '0',
+
+    //rejected drafts
+    rejectedDrafts: stats?.rejectedDrafts?.toString() || '0',
     
     // Life Story metrics
     totalLifeStories: stats?.totalLifeStories?.toString() || '0',
+    uniqueSessionLifeStories: stats?.uniqueSessionLifeStories?.toString() || '0',
     generatedLifeStories: stats?.generatedLifeStories?.toString() || '0',
     approvedLifeStories: stats?.approvedLifeStories?.toString() || '0',
-    rejectedLifeStories: stats?.rejectedLifeStories?.toString() || '0',
-    avgWordsPerStory: stats?.avgWordsPerStory?.toString() || '0',
-    totalStoryWords: stats?.totalStoryWords?.toString() || '0'
+    avgWordsPerStory: stats?.avgWordsPerStory?.toString() || '0'
   };
   
   // Load stats on component mount
@@ -55,6 +44,8 @@ const AdminDashboard = () => {
       dispatch(fetchSessionStats());
     }
   }, [dispatch, loading]);
+
+  console.log(stats);
 
   return (
     <div className="admin-dashboard-page">
@@ -68,6 +59,7 @@ const AdminDashboard = () => {
       {/* Core Session Metrics */}
       <section className="admin-dashboard-page__section">
         <h2 className="admin-dashboard-page__section-title">{t('admin.sections.sessionOverview', 'Session Overview')}</h2>
+        <button className="admin-dashboard-page__button" onClick={() => navigate('/admin/sessions')}>{t('admin.buttons.viewSessions', 'View All Sessions')}</button>
         <div className="admin-dashboard-page__kpi-grid">
           <KpiCard 
             title={t('admin.kpi.totalSessions')} 
@@ -93,72 +85,11 @@ const AdminDashboard = () => {
         </div>
       </section>
 
-      {/* Draft Management Metrics */}
-      <section className="admin-dashboard-page__section">
-        <h2 className="admin-dashboard-page__section-title">{t('admin.sections.draftManagement', 'Draft Management')}</h2>
-        <div className="admin-dashboard-page__kpi-grid">
-          <KpiCard 
-            title={t('admin.kpi.totalDrafts', 'Total Drafts')} 
-            value={kpis.totalDrafts} 
-            icon={FileText} 
-            loading={loading}
-            color="indigo"
-          />
-          <KpiCard 
-            title={t('admin.kpi.draftsAwaitingApproval', 'Awaiting Approval')} 
-            value={kpis.draftsAwaitingApproval} 
-            icon={Clock} 
-            loading={loading}
-            color="yellow"
-          />
-          <KpiCard 
-            title={t('admin.kpi.approvedDrafts', 'Approved Drafts')} 
-            value={kpis.approvedDrafts} 
-            icon={ThumbsUp} 
-            loading={loading}
-            color="green"
-          />
-          <KpiCard 
-            title={t('admin.kpi.draftApprovalRate', 'Approval Rate')} 
-            value={kpis.draftApprovalRate} 
-            icon={TrendingUp} 
-            loading={loading}
-            color="emerald"
-          />
-        </div>
-      </section>
-
-      {/* Interview Progress Metrics */}
-      <section className="admin-dashboard-page__section">
-        <h2 className="admin-dashboard-page__section-title">{t('admin.sections.interviewProgress', 'Interview Progress')}</h2>
-        <div className="admin-dashboard-page__kpi-grid">
-          <KpiCard 
-            title={t('admin.kpi.totalInterviews', 'Total Interviews')} 
-            value={kpis.totalInterviews} 
-            icon={Users} 
-            loading={loading}
-            color="cyan"
-          />
-          <KpiCard 
-            title={t('admin.kpi.completedInterviews', 'Completed Interviews')} 
-            value={kpis.completedInterviews} 
-            icon={CheckCircle} 
-            loading={loading}
-            color="teal"
-          />
-          <KpiCard 
-            title={t('admin.kpi.interviewCompletionRate', 'Completion Rate')} 
-            value={kpis.interviewCompletionRate} 
-            icon={TrendingUp} 
-            loading={loading}
-            color="lime"
-          />
-        </div>
-      </section>
 
       {/* Life Stories Overview */}
       <section className="admin-dashboard-page__section">
         <h2 className="admin-dashboard-page__section-title">{t('admin.sections.lifeStoriesOverview', 'Life Stories Overview')}</h2>
+        <button className="admin-dashboard-page__button" onClick={() => navigate('/admin/full-life-stories')}>{t('admin.buttons.viewLifeStories', 'View All Life Stories')}</button>
         <div className="admin-dashboard-page__kpi-grid">
           <KpiCard 
             title={t('admin.kpi.totalLifeStories', 'Total Life Stories')} 
@@ -170,7 +101,7 @@ const AdminDashboard = () => {
           <KpiCard 
             title={t('admin.kpi.generatedLifeStories', 'Generated Stories')} 
             value={kpis.generatedLifeStories} 
-            icon={FileText} 
+            icon={Activity} 
             loading={loading}
             color="blue"
           />
@@ -181,36 +112,23 @@ const AdminDashboard = () => {
             loading={loading}
             color="green"
           />
+        </div>
+      </section>
+
+      {/* Rejected Drafts */}
+      <section className="admin-dashboard-page__section">
+        <h2 className="admin-dashboard-page__section-title">{t('admin.sections.rejectedDrafts', 'Rejected Drafts')}</h2>
+        <div className="admin-dashboard-page__kpi-grid">
           <KpiCard 
-            title={t('admin.kpi.avgWordsPerStory', 'Avg Words/Story')} 
-            value={kpis.avgWordsPerStory} 
-            icon={BarChart3} 
+            title={t('admin.kpi.rejectedDrafts', 'Rejected Drafts')} 
+            value={kpis.rejectedDrafts} 
+            icon={Star} 
             loading={loading}
-            color="orange"
+            color="red"
           />
         </div>
       </section>
 
-      {/* Recent Activity */}
-      <section className="admin-dashboard-page__section">
-        <h2 className="admin-dashboard-page__section-title">{t('admin.sections.recentActivity', 'Recent Activity (Last 7 Days)')}</h2>
-        <div className="admin-dashboard-page__kpi-grid admin-dashboard-page__kpi-grid--two-col">
-          <KpiCard 
-            title={t('admin.kpi.recentInterviews', 'Recent Interviews')} 
-            value={kpis.recentInterviews} 
-            icon={Calendar} 
-            loading={loading}
-            color="rose"
-          />
-          <KpiCard 
-            title={t('admin.kpi.recentDrafts', 'Recent Drafts')} 
-            value={kpis.recentDrafts} 
-            icon={FileText} 
-            loading={loading}
-            color="violet"
-          />
-        </div>
-      </section>
     </div>
   );
 };

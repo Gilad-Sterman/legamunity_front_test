@@ -25,7 +25,8 @@
     "save": "שמור",
     "approve": "אשר",
     "reject": "דחה",
-    "saving": "שומר..."
+    "saving": "שומר...",
+    "notIncludedInPhase1": "לא נכלל בפיתוח שלב זה"
   },
   "navbar": {
     "brand": "לגמיוניטי"
@@ -49,12 +50,17 @@
     "dashboardSubtitle": "סקירה כללית של פעילות המערכת וביצועים",
     "searchPlaceholder": "חיפוש סיפורי חיים...",
     "filters": "סינון",
+    "buttons": {
+      "viewSessions": "הצגת כל הפרויקטים",
+      "viewLifeStories": "הצגת כל סיפורי החיים"
+    },
     "sections": {
       "sessionOverview": "סקירת פרויקטים",
       "draftManagement": "ניהול טיוטות",
       "interviewProgress": "התקדמות ראיונות",
       "recentActivity": "פעילות אחרונה (7 ימים אחרונים)",
-      "lifeStoriesOverview": "סקירת סיפורי חיים"
+      "lifeStoriesOverview": "סקירת סיפורי חיים",
+      "rejectedDrafts": "טיוטות שנדחו"
     },
     "kpi": {
       "totalSessions": "סך הכל פרויקטים",
@@ -76,6 +82,7 @@
       "approvedLifeStories": "סיפורי חיים מאושרים",
       "rejectedLifeStories": "סיפורי חיים שנדחו",
       "avgWordsPerStory": "ממוצע מילים/סיפור",
+      "rejectedDrafts": "טיוטות שנדחו",
       "totalStoryWords": "סך הכל מילים בסיפורי חיים"
     },
     "sessions": {
@@ -152,13 +159,18 @@
       "viewDetails": "צפה בפרטים",
       "viewFile": "צפה בקובץ",
       "fileUploaded": "קובץ הועלה",
-      "draftGenerated": "טיוטה נוצרה",
+      "draftGenerated": "טיוטה נוצרה - ממתין לבדיקה",
       "draftApproved": "טיוטה אושרה",
       "draftRejected": "טיוטה נדחתה",
       "draftPendingReview": "ממתינה לבדיקה",
       "notesCount": "הערות",
       "showing": "מציג",
       "of": "מתוך",
+      "addInterview": "הוספת ראיון",
+      "newInterview": "ראיון חדש",
+      "seeFullDetails": "צפה בפרטים מלאים",
+      "edit": "עריכת הפרוייקט",
+      "delete": "מחיקת הפרוייקט",
       "sessions": "פרויקטים",
       "tPriority": "עדיפות",
       "createModalPlaceholder": "טופס יצירת פרויקטים יוטמע כאן.",
@@ -225,14 +237,17 @@
         "clientName": "שם לקוח",
         "clientNamePlaceholder": "הכנס שם לקוח",
         "clientAge": "גיל לקוח",
+        "clientDateOfBirth": "תאריך לידה",
         "clientAgePlaceholder": "הכנס גיל לקוח",
-        "clientEmail": "אימייל לקוח",
+        "clientEmail": "אימייל",
         "clientEmailPlaceholder": "הכנס אימייל לקוח",
         "clientPhone": "טלפון לקוח",
         "clientPhonePlaceholder": "הכנס טלפון לקוח",
         "clientAddress": "כתובת לקוח",
         "clientAddressPlaceholder": "הכנס כתובת לקוח",
-        "primaryContact": "איש קשר ראשי",
+        "primaryContact": "איש קשר ראשי (אופציונלי)",
+        "primaryContact1": "איש קשר ראשי",
+        "enablePrimaryContact": "הוספת מידע איש קשר ראשי",
         "contactName": "שם איש קשר ראשי",
         "contactNamePlaceholder": "הכנס שם איש קשר ראשי",
         "contactPhone": "טלפון איש קשר ראשי",
@@ -240,6 +255,7 @@
         "contactEmail": "אימייל איש קשר ראשי",
         "contactEmailPlaceholder": "הכנס אימייל איש קשר ראשי",
         "relationship": "יחס",
+        "contactRelationship": "יחס",
         "selectRelationship": "בחר יחס",
         "relationships": {
           "spouse": "בן/בת זוג",
@@ -248,7 +264,8 @@
           "sibling": "אח/אחות",
           "otherFamily": "קשר משפחתי אחר"
         },
-        "sessionConfig": "פרטים כללים",
+        "sessionConfig": "פרטים כללים (אופציונלי)",
+        "enableSessionConfig": "הוספת פרטים כללים",
         "language": "שפה",
         "languages": {
           "english": "אנגלית",
@@ -290,7 +307,8 @@
         },
         "specialTopics": "תחומים נוספים",
         "specialTopicsPlaceholder": "הוסף תחומים נוספים...",
-        "accessibilityRequirements": "דרישות נגישות",
+        "accessibilityRequirements": "דרישות נגישות (אופציונלי)",
+        "enableAccessibility": "הוספת דרישות נגישות",
         "accessibilityNeeds": "דרישות נגישות",
         "accessibilityPlaceholder": "מכשירי שמיעה, נגישות לכסא גלגלים, גופן גדול, וכו'...",
         "specialRequirements": "דרישות מיוחדות",
@@ -404,6 +422,7 @@
         "exportStory": "ייצא סיפור",
         "minRead": "דק' קריאה"
       },
+      "generatedStory": "הסיפור נוצר",
       "lifeStories": {
         "title": "סיפורי חיים מלאים",
         "subtitle": "ניהול וסקירת סיפורי חיים מלאים",
@@ -547,7 +566,9 @@
       "reject": "דחייה",
       "rejectionReasonPrompt": "אנא ספק את טענת הדחייה",
       "rejectionReasonPlaceholder": "הוספת סיבת הדחייה...",
+      "rejectionExplanation": "טיוטות דחויות לא ישמשו ביצירת סיפורי חיים מלאים, ויופיעו בפאנל ניהול",
       "regenerate": "צור מחדש",
+      "regenerated": "נוצר מחדש",
       "regenerateDraft": "צור מחדש",
       "regeneratePrompt": "ניתן להזין הוראות ספציפיות",
       "regeneratePlaceholder": "הוסף הערות או משוב לשיפור הטיוטה...",

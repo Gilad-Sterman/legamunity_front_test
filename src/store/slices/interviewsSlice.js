@@ -93,7 +93,7 @@ export const deleteNormalizedInterview = createAsyncThunk(
 );
 
 export const uploadInterviewFile = createAsyncThunk(
-  'interviews/uploadInterviewFile',
+  'interviews/:id/upload',
   async ({ interviewId, file }, { rejectWithValue }) => {
     try {
       const result = await interviewService.uploadInterviewFile(interviewId, file);

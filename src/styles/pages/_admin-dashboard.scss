@@ -71,6 +71,34 @@
     border-bottom: 2px solid $background-light;
   }
 
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-small $spacing-medium;
+    background-color: $background-light;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    color: $text-color;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: $spacing-medium;
+    text-decoration: none;
+    
+    &:hover {
+      background-color: $primary-light;
+      border-color: $primary-color;
+      color: $primary-color;
+      transform: translateX(-2px);
+    }
+    
+    &:active {
+      transform: translateX(-1px);
+    }
+  }
+
   &__kpi-grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
