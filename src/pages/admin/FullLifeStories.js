@@ -353,7 +353,7 @@ const FullLifeStories = () => {
     }
   };
 
-  const handleRegenerate = async (storyId) => {
+  const handleRegenerate = async (storyId, regenerateNotes) => {
     // Start regeneration processing modal
     setRegenerationProcessing(storyId);
     setRegenerationStep(0);
@@ -362,10 +362,10 @@ const FullLifeStories = () => {
     try {
       // Simulate processing steps
       const steps = [
-        { text: t('admin.lifeStories.regeneration.analyzingNotes', 'Analyzing notes and feedback...'), duration: 1500 },
-        { text: t('admin.lifeStories.regeneration.aiProcessing', 'AI processing and content generation...'), duration: 3000 },
-        { text: t('admin.lifeStories.regeneration.enhancingContent', 'Enhancing content structure...'), duration: 2000 },
-        { text: t('admin.lifeStories.regeneration.finalizingDraft', 'Finalizing new version...'), duration: 1000 }
+        { text: t('admin.lifeStories.regeneration.analyzingNotes', 'Analyzing notes and feedback...'), duration: 100 },
+        { text: t('admin.lifeStories.regeneration.aiProcessing', 'AI processing and content generation...'), duration: 100 },
+        { text: t('admin.lifeStories.regeneration.enhancingContent', 'Enhancing content structure...'), duration: 100 },
+        { text: t('admin.lifeStories.regeneration.finalizingDraft', 'Finalizing new version...'), duration: 100 }
       ];
 
       // Process each step with delay
@@ -383,7 +383,8 @@ const FullLifeStories = () => {
         },
         body: JSON.stringify({
           regenerationType: 'notes_based',
-          includeAllNotes: true
+          includeAllNotes: true,
+          notes: regenerateNotes
         })
       });
 
@@ -794,7 +795,7 @@ const FullLifeStories = () => {
                   {shouldShowRegenerate(story) && (
                     <button
                       className="btn btn--warning btn--sm"
-                      onClick={() => handleRegenerate(story.id)}
+                      onClick={() => handleRegenerate(story.id, story.notes)}
                       disabled={actionLoading[story.id] === 'regenerating'}
                     >
                       {actionLoading[story.id] === 'regenerating' ? (
