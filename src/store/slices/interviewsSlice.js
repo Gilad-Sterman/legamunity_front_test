@@ -92,6 +92,7 @@ export const deleteNormalizedInterview = createAsyncThunk(
   }
 );
 
+// Async thunk for uploading interview file - goes to interviews/:id/upload, but from the sessionsSupabase file in the backend routes folder 
 export const uploadInterviewFile = createAsyncThunk(
   'interviews/:id/upload',
   async ({ interviewId, file }, { rejectWithValue }) => {

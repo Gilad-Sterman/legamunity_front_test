@@ -8,7 +8,7 @@
 const API_BASE_URL = '/api/sessions-supabase';
 
 class InterviewService {
-  
+
   /**
    * Get all interviews for a specific session
    */
@@ -149,7 +149,7 @@ class InterviewService {
   async uploadInterviewFile(interviewId, file, token = null) {
     try {
       const authToken = token || localStorage.getItem('authToken') || localStorage.getItem('token');
-      
+
       const formData = new FormData();
       formData.append('file', file);
 
@@ -219,7 +219,7 @@ class InterviewService {
   async getInterviews(params = {}, token = null) {
     try {
       const queryParams = new URLSearchParams();
-      
+
       if (params.page) queryParams.append('page', params.page);
       if (params.limit) queryParams.append('limit', params.limit);
       if (params.status && params.status !== 'all') queryParams.append('status', params.status);
