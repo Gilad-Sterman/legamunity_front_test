@@ -7,7 +7,6 @@ import {
   XCircle,
   RefreshCw,
   FileText,
-  User,
   MessageSquare,
   Save,
   Edit3,
@@ -18,15 +17,17 @@ import {
   Wand2,
   FileSearch,
   Sparkles,
-  Loader
+  Loader,
+  Clock
 } from 'lucide-react';
 import { addNoteToDraft, updateDraftStageSupabase } from '../../../store/slices/draftsSlice';
+import ReactMarkdown from 'react-markdown';
 
 const DraftViewModal = ({
   isOpen,
   onClose,
   draft,
-  interview,
+  // interview,
   session,
   onRegenerate,
   onDraftUpdated, // New prop to refresh parent state
@@ -254,27 +255,46 @@ const DraftViewModal = ({
   const renderSections = () => {
     if (!draft.content?.sections) return null;
 
-    // Handle both object and array formats
+    // Handle different section formats
     if (Array.isArray(draft.content.sections)) {
+      // Legacy array format
       return draft.content.sections.map((section, index) => (
-        <div key={index} className="draft-subsection">
-          <h6>{section.title}</h6>
-          <div className="draft-section-content">
+        <div key={index} className="section-card">
+          <h4 className="section-title">{section.title}</h4>
+          <div className="section-content">
             {section.content}
           </div>
         </div>
       ));
-    } else {
-      // Handle object format (Hebrew sections from AI)
-      return Object.entries(draft.content.sections).map(([sectionTitle, sectionContent]) => (
-        <div key={sectionTitle} className="section-card">
-          <h4>{sectionTitle}</h4>
-          <div className="section-content hebrew-content">
-            <pre>{sectionContent}</pre>
+    } else if (typeof draft.content.sections === 'object') {
+      // New object format (could be from Hebrew AI or new markdown structure)
+      return Object.entries(draft.content.sections).map(([sectionTitle, sectionContent]) => {
+        // Check if content is a string or has nested structure
+        const isHebrewContent = typeof sectionContent === 'string' &&
+          (sectionContent.match(/[\u0590-\u05FF]/) || // Hebrew unicode range
+            sectionTitle.match(/[\u0590-\u05FF]/)); // Hebrew in title
+
+        return (
+          <div key={sectionTitle} className="section-card">
+            <h4 className="section-title">{sectionTitle}</h4>
+            <div className={`section-content ${isHebrewContent ? 'hebrew-content' : ''}`}>
+              {typeof sectionContent === 'string' ? (
+                <ReactMarkdown>{sectionContent}</ReactMarkdown>
+              ) : (
+                // Handle nested content structure if present
+                <div>
+                  {sectionContent.content && (
+                    <ReactMarkdown>{sectionContent.content}</ReactMarkdown>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ));
+        );
+      });
     }
+
+    return null;
   };
 
   const getStatusColor = (status) => {
@@ -299,7 +319,7 @@ const DraftViewModal = ({
   const hasNewNotes = localDraft?.content?.notes && localDraft.content.notes.length > 0;
 
   const canApprove = !isFinalized;
-  const canReject = !isFinalized;
+  const canReject = false;
   // Can regenerate if: has notes AND not finalized AND (not regenerated OR notes added since regeneration)
   const canRegenerate = hasNewNotes && !isFinalized && (!hasBeenRegenerated || notesAddedSinceRegeneration);
   const canEditNotes = !isFinalized;
@@ -396,16 +416,6 @@ const DraftViewModal = ({
                   {t('admin.drafts.reject', 'Reject')}
                 </button>
               )}
-              {hasNewNotes && canRegenerate && (
-                <button
-                  className="btn btn--warning btn--sm"
-                  onClick={() => setShowRegenerateForm(true)}
-                  disabled={loading}
-                >
-                  <RefreshCw size={14} />
-                  {t('admin.drafts.regenerate', 'Regenerate')}
-                </button>
-              )}
               <button className="btn btn--ghost" onClick={onClose}>
                 <X size={20} />
               </button>
@@ -458,19 +468,18 @@ const DraftViewModal = ({
               )}
 
               {/* Notes Section */}
-              <div className="sidebar-section sidebar-section--notes">
+              {!isFinalized && <div className="sidebar-section sidebar-section--notes">
                 <div className="section-header">
                   <h4>
                     <MessageSquare size={16} />
-                    {t('admin.drafts.notes', 'Notes')}
+                    {t('admin.drafts.notes', 'Instructions for regeneration')}
                   </h4>
                   {canEditNotes && (
                     <button
                       className="btn btn--ghost btn--sm"
                       onClick={() => setIsEditingNotes(!isEditingNotes)}
                     >
-                      <Edit3 size={14} />
-                      {isEditingNotes ? t('common.cancel', 'Cancel') : t('admin.drafts.addNote', 'Add Note')}
+                      {isEditingNotes ? <X size={14} /> : <Edit3 size={14} />}
                     </button>
                   )}
                 </div>
@@ -482,7 +491,7 @@ const DraftViewModal = ({
                       className="notes-textarea"
                       value={newNoteContent}
                       onChange={(e) => setNewNoteContent(e.target.value)}
-                      placeholder={t('admin.drafts.notesPlaceholder', 'Add notes about this draft...')}
+                      placeholder={t('admin.drafts.notesPlaceholder', 'Add instructions for regeneration...')}
                       rows={4}
                     />
                     <div className="notes-actions">
@@ -532,8 +541,8 @@ const DraftViewModal = ({
                       </div>
                     ))
                   ) : (
-                    <div className="no-notes">
-                      <small>{t('admin.drafts.noNotes', 'No notes added yet')}</small>
+                    <div className="no-notes" onClick={() => setIsEditingNotes(true)}>
+                      <small>{t('admin.drafts.noNotes', 'No instructions added yet')}</small>
                     </div>
                   )}
                 </div>
@@ -545,11 +554,22 @@ const DraftViewModal = ({
                   </div>
                 )}
                 {canEditNotes && (!localDraft?.content?.notes || localDraft.content.notes.length === 0) && !isEditingNotes && (
-                  <div className="notes-info">
-                    <small>{t('admin.drafts.addNotesToRegenerate', 'Add notes to enable draft regeneration')}</small>
+                  <div className="notes-info" onClick={() => setIsEditingNotes(!isEditingNotes)}>
+                    <small>{t('admin.drafts.addNotesToRegenerate', 'Add instructions to enable draft regeneration')}</small>
                   </div>
                 )}
-              </div>
+              </div>}
+
+              {hasNewNotes && canRegenerate && (
+                <button
+                  className="btn btn--sm btn-regenerate"
+                  onClick={handleRegenerate}
+                  disabled={loading}
+                >
+                  <RefreshCw size={14} />
+                  {t('admin.drafts.regenerate', 'Regenerate')}
+                </button>
+              )}
 
               {/* Draft Info */}
               <div className="sidebar-section">
@@ -588,47 +608,51 @@ const DraftViewModal = ({
                     <label>{t('admin.drafts.wordCount', 'Word Count')}</label>
                     <span>{draft?.content?.metadata?.wordCount || 0}</span>
                   </div>
-                  <div className="info-item">
-                    <label>{t('admin.drafts.readingTime', 'Reading Time')}</label>
-                    <span>{draft?.content?.metadata?.estimatedReadingTime || 'N/A'}</span>
-                  </div>
                   {/* <div className="info-item">
-                  <label>{t('admin.drafts.aiModel', 'AI Model')}</label>
-                  <span>{draft?.content?.metadata?.aiModel || 'N/A'}</span>
-                </div> */}
+                    <label>{t('admin.drafts.readingTime', 'Reading Time')}</label>
+                    <span>
+                      {draft?.content?.metadata?.estimatedReadingTime ||
+                        (draft?.content?.metadata?.readingTime &&
+                          `${draft.content.metadata.readingTime} ${t('admin.drafts.minutes', 'minutes')}`) ||
+                        'N/A'}
+                    </span>
+                  </div> */}
+                  {draft?.content?.metadata?.aiModel && (
+                    <div className="info-item">
+                      <label>{t('admin.drafts.aiModel', 'AI Model')}</label>
+                      <span>{draft.content.metadata.aiModel}</span>
+                    </div>
+                  )}
+                  {draft?.content?.metadata?.processedAt && (
+                    <div className="info-item">
+                      <label>{t('admin.drafts.processedAt', 'Processed At')}</label>
+                      <span>
+                        <Clock size={14} className="mr-1" />
+                        {new Date(draft.content.metadata.processedAt).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Session Context */}
-              {/* {session && (
-              <div className="sidebar-section">
-                <h4>
-                  <User size={16} />
-                  {t('admin.sessions.sessionInfo', 'Session Info')}
-                </h4>
-                <div className="info-list">
-                  <div className="info-item">
-                    <label>{t('admin.sessions.clientName', 'Client')}</label>
-                    <span>{session.client_name}</span>
-                  </div>
-                  <div className="info-item">
-                    <label>{t('admin.sessions.interviewDate', 'Interview Date')}</label>
-                    <span>{interview?.created_at ? new Date(interview.created_at).toLocaleDateString() : 'N/A'}</span>
-                  </div>
-                </div>
-              </div>
-            )} */}
             </div>
 
             {/* Main Content */}
             <div className="draft-modal__main">
               {draft?.content && (
                 <div className="draft-content">
-                  {draft.content.summary && (
+                  {/* Display fullMarkdown if available, otherwise fall back to summary */}
+                  {draft.content.fullMarkdown ? (
+                    <div className="content-section">
+                      <h3>{t('admin.sessions.fullContent', 'Full Content')}</h3>
+                      <div className="content-text">
+                        <ReactMarkdown>{draft.content.fullMarkdown}</ReactMarkdown>
+                      </div>
+                    </div>
+                  ) : draft.content.summary && (
                     <div className="content-section">
                       <h3>{t('admin.sessions.summary', 'Summary')}</h3>
                       <div className="content-text hebrew-content">
-                        <pre>{draft.content.summary}</pre>
+                        <ReactMarkdown>{draft.content.summary}</ReactMarkdown>
                       </div>
                     </div>
                   )}
@@ -644,6 +668,7 @@ const DraftViewModal = ({
                     </div>
                   )}
 
+                  {/* Display sections */}
                   {draft.content.sections && (
                     <div className="content-section">
                       <div className="section-header expandable-header">
@@ -665,11 +690,10 @@ const DraftViewModal = ({
                           )}
                         </button>
                       </div>
-                      {sectionsExpanded && (
-                        <div className="sections-grid">
-                          {renderSections()}
-                        </div>
-                      )}
+
+                      {sectionsExpanded && <div className={`sections-grid`}>
+                        {renderSections()}
+                      </div>}
                     </div>
                   )}
 
@@ -699,7 +723,9 @@ const DraftViewModal = ({
                           {draft.content.followUps.map((question, index) => (
                             <div key={index} className="follow-up-item">
                               <span className="follow-up-number">{index + 1}.</span>
-                              <span className="follow-up-text hebrew-content">{question}</span>
+                              <div className="follow-up-text hebrew-content">
+                                <ReactMarkdown>{question}</ReactMarkdown>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -707,65 +733,96 @@ const DraftViewModal = ({
                     </div>
                   )}
 
-                  {draft.content.toVerify && Object.keys(draft.content.toVerify).some(key =>
-                    Array.isArray(draft.content.toVerify[key]) && draft.content.toVerify[key].length > 0
-                  ) && (
-                      <div className="content-section">
-                        <h3>{t('admin.drafts.toVerify', 'Information to Verify')}</h3>
-                        <div className="to-verify-table">
-                          <div className="table-grid">
-                            {draft.content.toVerify.people && draft.content.toVerify.people.length > 0 && (
-                              <div className="table-column">
-                                <h4>{t('admin.drafts.people', 'People')}</h4>
-                                <ul className="verify-list">
-                                  {draft.content.toVerify.people.map((person, index) => (
-                                    <li key={index} className="hebrew-content">
-                                      {typeof person === 'string' ? person : `${person.name} - ${person.context}`}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            {draft.content.toVerify.places && draft.content.toVerify.places.length > 0 && (
-                              <div className="table-column">
-                                <h4>{t('admin.drafts.places', 'Places')}</h4>
-                                <ul className="verify-list">
-                                  {draft.content.toVerify.places.map((place, index) => (
-                                    <li key={index} className="hebrew-content">
-                                      {typeof place === 'string' ? place : `${place.name} - ${place.location || place.context}`}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            {draft.content.toVerify.organizations && draft.content.toVerify.organizations.length > 0 && (
-                              <div className="table-column">
-                                <h4>{t('admin.drafts.organizations', 'Organizations')}</h4>
-                                <ul className="verify-list">
-                                  {draft.content.toVerify.organizations.map((org, index) => (
-                                    <li key={index} className="hebrew-content">
-                                      {typeof org === 'string' ? org : `${org.name} - ${org.context}`}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            {draft.content.toVerify.dates && draft.content.toVerify.dates.length > 0 && (
-                              <div className="table-column">
-                                <h4>{t('admin.drafts.dates', 'Dates')}</h4>
-                                <ul className="verify-list">
-                                  {draft.content.toVerify.dates.map((date, index) => (
-                                    <li key={index} className="hebrew-content">
-                                      {typeof date === 'string' ? date : `${date.date} - ${date.context}`}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
+                  {draft.content.toVerify && (() => {
+                    // Normalize keys to lowercase for case-insensitive comparison
+                    const toVerify = {};
+                    Object.entries(draft.content.toVerify).forEach(([key, value]) => {
+                      const normalizedKey = key.toLowerCase();
+                      toVerify[normalizedKey] = value;
+                    });
+
+                    // Check if any verification categories have content
+                    const hasVerificationData = Object.values(toVerify).some(
+                      value => Array.isArray(value) && value.length > 0
+                    );
+
+                    if (hasVerificationData) {
+                      return (
+                        <div className="content-section">
+                          <h3>{t('admin.drafts.toVerify', 'Information to Verify')}</h3>
+                          <div className="to-verify-table">
+                            <div className="table-grid">
+                              {/* People */}
+                              {(toVerify.people || toVerify.persons) &&
+                                (toVerify.people?.length > 0 || toVerify.persons?.length > 0) && (
+                                  <div className="table-column">
+                                    <h4>{t('admin.drafts.people', 'People')}</h4>
+                                    <ul className="verify-list">
+                                      {(toVerify.people || toVerify.persons).map((person, index) => (
+                                        <li key={index} className="hebrew-content">
+                                          {typeof person === 'string' ? person :
+                                            `${person.name || person.person || person.value} ${person.context ? `- ${person.context}` : ''}`}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                              {/* Places */}
+                              {(toVerify.places || toVerify.locations) &&
+                                (toVerify.places?.length > 0 || toVerify.locations?.length > 0) && (
+                                  <div className="table-column">
+                                    <h4>{t('admin.drafts.places', 'Places')}</h4>
+                                    <ul className="verify-list">
+                                      {(toVerify.places || toVerify.locations).map((place, index) => (
+                                        <li key={index} className="hebrew-content">
+                                          {typeof place === 'string' ? place :
+                                            `${place.name || place.place || place.value} ${place.context || place.location ?
+                                              `- ${place.context || place.location}` : ''}`}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                              {/* Organizations */}
+                              {(toVerify.organizations || toVerify.organization || toVerify.orgs) &&
+                                (toVerify.organizations?.length > 0 || toVerify.organization?.length > 0 || toVerify.orgs?.length > 0) && (
+                                  <div className="table-column">
+                                    <h4>{t('admin.drafts.organizations', 'Organizations')}</h4>
+                                    <ul className="verify-list">
+                                      {(toVerify.organizations || toVerify.organization || toVerify.orgs).map((org, index) => (
+                                        <li key={index} className="hebrew-content">
+                                          {typeof org === 'string' ? org :
+                                            `${org.name || org.organization || org.value} ${org.context ? `- ${org.context}` : ''}`}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                              {/* Dates */}
+                              {(toVerify.dates || toVerify.date || toVerify.events) &&
+                                (toVerify.dates?.length > 0 || toVerify.date?.length > 0 || toVerify.events?.length > 0) && (
+                                  <div className="table-column">
+                                    <h4>{t('admin.drafts.dates', 'Dates')}</h4>
+                                    <ul className="verify-list">
+                                      {(toVerify.dates || toVerify.date || toVerify.events).map((date, index) => (
+                                        <li key={index} className="hebrew-content">
+                                          {typeof date === 'string' ? date :
+                                            `${date.date || date.event || date.value} ${date.context ? `- ${date.context}` : ''}`}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               )}
             </div>
@@ -823,7 +880,7 @@ const DraftViewModal = ({
           )}
 
           {/* Regenerate Form */}
-          {showRegenerateForm && (
+          {/* {showRegenerateForm && (
             <div className="form-overlay">
               <div className="form-modal">
                 <div className="form-header">
@@ -870,7 +927,7 @@ const DraftViewModal = ({
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </>

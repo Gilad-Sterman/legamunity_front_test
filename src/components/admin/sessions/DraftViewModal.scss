@@ -1,5 +1,23 @@
 @import '../../../styles/abstracts/variables';
 
+
+@keyframes btnHighlight {
+  0% {
+    background-position: 0% 50%;
+    scale: 1;
+  }
+
+  50% {
+    background-position: 100% 50%;
+    scale: 1.01;
+  }
+
+  100% {
+    background-position: 0% 50%;
+    scale: 1;
+  }
+}
+
 /* Regeneration Processing Overlay */
 .draft-modal__regeneration-overlay {
   position: fixed;
@@ -89,9 +107,12 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.7;
   }
@@ -186,16 +207,16 @@
     flex-direction: column;
     text-align: center;
   }
-  
+
   .step-info {
     text-align: center;
   }
-  
+
   .regeneration-steps-timeline {
     flex-wrap: wrap;
     gap: 1rem;
   }
-  
+
   .timeline-step {
     min-width: 80px;
   }
@@ -293,12 +314,12 @@
         background: #dc3545;
         color: white;
       }
-      
+
       &--success {
         background: #28a745;
         color: white;
       }
-      
+
       &--warning {
         background: #ffc107;
         color: white;
@@ -324,6 +345,15 @@
     border-right: 1px solid $border-color;
     overflow-y: auto;
     flex-shrink: 0;
+
+    .btn-regenerate {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: linear-gradient(to right, $primary-color, $primary-dark);
+      background-size: 200% 100%;
+      color: white;
+      animation: btnHighlight 2s ease-in-out infinite;
+      margin-inline-start: 2rem;
+    }
   }
 
   // Main Content Area
@@ -408,6 +438,7 @@
     border-radius: $border-radius;
     padding: $spacing-medium;
     border: 2px solid transparent;
+    margin: $spacing-medium;
 
     &--approved {
       background-color: rgba($success-color, 0.1);
@@ -587,6 +618,7 @@
     display: flex;
     gap: $spacing-small;
     justify-content: flex-end;
+    margin-bottom: $spacing-medium;
   }
 }
 
@@ -637,6 +669,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -687,14 +720,17 @@
   border: 1px solid $border-color;
   border-radius: $border-radius;
   padding: 1.5rem;
+  margin-bottom: $spacing-medium;
 
-  h4 {
+  h4.section-title {
     margin: 0 0 1rem 0;
     font-size: 1.1rem;
     font-weight: 600;
-    color: $text-color;
-    border-bottom: 1px solid $border-color;
-    padding-bottom: 0.5rem;
+    color: $primary-color;
+    border-bottom: 2px solid rgba($primary-color, 0.3);
+    padding-bottom: 0.75rem;
+    display: block;
+    width: 100%;
   }
 
   .section-content {
@@ -705,6 +741,51 @@
       font-family: inherit;
       font-size: 0.95rem;
       line-height: 1.6;
+    }
+
+    /* Markdown content styling */
+    p {
+      margin-bottom: $spacing-small;
+      line-height: 1.6;
+    }
+
+    ul,
+    ol {
+      margin-left: $spacing-medium;
+      margin-bottom: $spacing-small;
+      padding-left: $spacing-medium;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin-top: $spacing-medium;
+      margin-bottom: $spacing-small;
+      color: $text-dark;
+      font-weight: 600;
+    }
+
+    blockquote {
+      border-left: 3px solid $primary-color;
+      padding-left: $spacing-small;
+      margin: $spacing-small 0;
+      color: $text-muted;
+      font-style: italic;
+    }
+
+    code {
+      background: rgba($primary-color, 0.1);
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
     }
   }
 }
@@ -758,6 +839,30 @@
     flex: 1;
     font-size: $font-size-base;
     line-height: 1.6;
+
+    p {
+      margin: 0 0 $spacing-small;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    ul,
+    ol {
+      margin-left: $spacing-small;
+      padding-left: $spacing-small;
+    }
+
+    a {
+      color: $primary-color;
+      text-decoration: underline;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
     color: $text-color;
   }
 }
@@ -1109,13 +1214,13 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: $spacing-medium;
-  
+
   h3 {
     margin-bottom: 0;
     border-bottom: none;
     padding-bottom: 0;
   }
-  
+
   .expand-toggle {
     display: flex;
     align-items: center;
@@ -1128,12 +1233,12 @@
     cursor: pointer;
     padding: $spacing-small;
     border-radius: $border-radius-sm;
-    
+
     &:hover {
       color: $primary-color;
       background: rgba($primary-color, 0.1);
     }
-    
+
     svg {
       transition: transform 0.2s ease;
     }

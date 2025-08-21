@@ -1,4 +1,22 @@
 // Sessions Page Styles
+
+@keyframes btnHighlight {
+  0% {
+    background-position: 0% 50%;
+    scale: 1;
+  }
+
+  50% {
+    background-position: 100% 50%;
+    scale: 1.01;
+  }
+
+  100% {
+    background-position: 0% 50%;
+    scale: 1;
+  }
+}
+
 .sessions-page {
   position: relative;
 
@@ -49,7 +67,9 @@
     }
   }
 
-  &__status, &__priority, &__interview-status {
+  &__status,
+  &__priority,
+  &__interview-status {
     display: flex;
     align-items: center;
     gap: $spacing-xs;
@@ -252,7 +272,7 @@
     display: flex;
     align-items: center;
     gap: $spacing-small;
-    min-width: 200px;
+    width: 400px;
 
     &-icon {
       color: $text-muted;
@@ -347,6 +367,16 @@
     font-weight: 600;
     color: $text-dark;
   }
+
+  .btn-schedule {
+    background: linear-gradient(to right, $primary-color, $primary-dark);
+    background-size: 200% 100%;
+    color: white;
+
+    &:hover {
+      background: linear-gradient(to right, $primary-color, $primary-dark, $primary-color);
+    }
+  }
 }
 
 // Client Info
@@ -387,6 +417,24 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: $spacing-xs;
+
+    .btn--danger {
+      color: $danger-color;
+      background-color: transparent;
+      border: 1px solid $danger-color;
+      border-radius: $border-radius-sm;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+
+      &:hover {
+        background-color: $danger-color;
+        color: white;
+      }
+    }
   }
 
   &__info {
@@ -410,7 +458,7 @@
     padding: $spacing-xs $spacing-small;
     font-weight: 600;
   }
-  
+
   &__name {
     font-weight: 600;
     color: $text-dark;
@@ -460,7 +508,7 @@
 
   &__actions {
     display: flex;
-    gap: $spacing-xs;
+    gap: $spacing-lg;
     align-items: center;
   }
 
@@ -600,8 +648,7 @@
   &__edit-form {
     display: flex;
     flex-direction: column;
-    gap: $spacing-small;
-    margin-bottom: $spacing-small;
+    gap: $spacing-xs;
   }
 
   &__name-input {
@@ -715,17 +762,24 @@
 // Story Generate Section
 .story-generate {
   margin-bottom: $spacing-medium;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-small;
+  align-items: center;
 
   &__btn {
     display: flex;
     align-items: center;
     font-weight: 500;
-    transition: all 0.2s ease;
-    background-color: $primary-color;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: linear-gradient(to right, $primary-color, $primary-dark);
+    background-size: 200% 100%;
     color: white;
+    animation: btnHighlight 2s ease-in-out infinite;
 
     &:hover:not(:disabled) {
       transform: translateY(-1px);
+      background: linear-gradient(to right, $primary-color, $primary-dark);
       box-shadow: $box-shadow-md;
     }
 
@@ -772,11 +826,25 @@
 }
 
 .story-current {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   background: white;
   border: 1px solid $border-color;
   border-radius: $border-radius-sm;
   padding: $spacing-medium;
   box-shadow: $box-shadow-sm;
+
+  .btn-see-full-details {
+    text-decoration: none;
+    background-color: $background-light;
+    color: $primary-color;
+
+    &:hover {
+      background-color: rgb(245, 215, 220);
+    }
+  }
 
   &__info {
     margin-bottom: $spacing-medium;
@@ -928,10 +996,11 @@
 // Session Details Actions
 .session-details__actions {
   display: flex;
+  justify-content: space-between;
   gap: $spacing-small;
-  margin-top: $spacing-large;
-  padding-top: $spacing-medium;
-  border-top: 1px solid $border-color;
+  margin-bottom: $spacing-large;
+  padding-bottom: $spacing-medium;
+  border-bottom: 1px solid $border-color;
 
   @media (max-width: $breakpoint-sm) {
     flex-direction: column;
@@ -1041,10 +1110,11 @@
 }
 
 // File and Draft View Modals
-.file-details, .draft-details {
+.file-details,
+.draft-details {
   &__info {
     margin-bottom: $spacing-large;
-    
+
     h4 {
       margin: 0 0 $spacing-medium 0;
       font-size: $font-size-md;
@@ -1055,9 +1125,10 @@
     }
   }
 
-  &__transcription, &__content {
+  &__transcription,
+  &__content {
     margin-top: $spacing-large;
-    
+
     h4 {
       margin: 0 0 $spacing-medium 0;
       font-size: $font-size-md;
@@ -1069,14 +1140,16 @@
   }
 }
 
-.file-info-grid, .draft-info-grid {
+.file-info-grid,
+.draft-info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: $spacing-medium;
   margin-top: $spacing-medium;
 }
 
-.file-info-item, .draft-info-item {
+.file-info-item,
+.draft-info-item {
   display: flex;
   flex-direction: column;
   gap: $spacing-xs;
@@ -1192,15 +1265,42 @@
   margin-bottom: $spacing-medium;
 
   h4 {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
     margin: 0;
   }
 }
 
 .interview {
+  background-color: #f4f6f9;
+
+  &.completed {
+    background-color: $background-light;
+  }
+
   &__edit {
     display: flex;
-    flex-direction: column;
-    gap: $spacing-xs;
+    gap: $spacing-large;
+    align-items: center;
+  }
+
+  .btn-edit-interview {
+    display: flex;
+    align-items: center;
+    color: $text-muted;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+
+    &:hover {
+      color: $primary-color;
+      background: transparent;
+    }
   }
 
   &__name-input {
@@ -1219,6 +1319,7 @@
 
   &__edit-actions {
     display: flex;
+    align-items: center;
     gap: $spacing-xs;
   }
 
@@ -1268,7 +1369,7 @@
       color: $text-dark;
     }
   }
-  
+
 
   .schedule-details {
     display: flex;

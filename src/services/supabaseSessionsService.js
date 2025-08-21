@@ -387,6 +387,10 @@ class SupabaseSessionsService {
       const formData = new FormData();
       formData.append('file', file);
       
+      // Create AbortController for timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes timeout
+      
       const response = await fetch(`${API_BASE_URL}/sessions-supabase/interviews/${interviewId}/upload`, {
         method: 'POST',
         headers: {
@@ -394,8 +398,10 @@ class SupabaseSessionsService {
           // Don't set Content-Type header - let browser set it with boundary for FormData
         },
         body: formData,
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (!response.ok) {
@@ -408,6 +414,12 @@ class SupabaseSessionsService {
         message: data.message
       };
     } catch (error) {
+      if (error.name === 'AbortError') {
+        return {
+          success: false,
+          error: 'Request timed out after 5 minutes. Please try again or contact support if the issue persists.'
+        };
+      }
       return {
         success: false,
         error: error.message

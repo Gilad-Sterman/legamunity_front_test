@@ -21,10 +21,14 @@ import {
   ChevronUp,
   MessageSquare,
   User,
-  AlertCircle,
   Trash2,
-  AudioWaveform,
-  AudioLines
+  AudioLines,
+  Minimize,
+  Book,
+  BookA,
+  BookCheck,
+  BookOpen,
+  ExternalLink
 } from 'lucide-react';
 import {
   fetchSessions,
@@ -46,11 +50,12 @@ import StoryViewModal from '../../components/admin/sessions/StoryViewModal';
 import StoryHistoryModal from '../../components/admin/sessions/StoryHistoryModal';
 import DraftViewModal from '../../components/admin/sessions/DraftViewModal';
 import '../../components/admin/sessions/DraftViewModal.scss';
+import { useNavigate } from 'react-router-dom';
 
 const Sessions = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const {
     sessions,
@@ -65,7 +70,7 @@ const Sessions = () => {
 
   // Removed interviews slice state - using sessions API for all interview operations
 
-  const [expandedSessions, setExpandedSessions] = useState({});
+  const [expandedSession, setExpandedSession] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingInterview, setEditingInterview] = useState(null);
   const [editInterviewName, setEditInterviewName] = useState('');
@@ -74,7 +79,6 @@ const Sessions = () => {
   const [showFileUploadModal, setShowFileUploadModal] = useState(null);
   const [showFileViewModal, setShowFileViewModal] = useState(null);
   const [showDraftViewModal, setShowDraftViewModal] = useState(null);
-  // const [showMigrationPanel, setShowMigrationPanel] = useState(null);
   const [generatingStory, setGeneratingStory] = useState(null); // Track which session is generating story
   const [showStoryHistoryModal, setShowStoryHistoryModal] = useState(null); // Show previous generations
   const [showStoryViewModal, setShowStoryViewModal] = useState(null); // Show story content
@@ -255,10 +259,10 @@ const Sessions = () => {
   };
 
   // Handle viewing story history
-  const handleViewStoryHistory = (sessionId) => {
-    fetchSessionStories(sessionId);
-    setShowStoryHistoryModal(sessionId);
-  };
+  // const handleViewStoryHistory = (sessionId) => {
+  //   fetchSessionStories(sessionId);
+  //   setShowStoryHistoryModal(sessionId);
+  // };
 
   // Close story modals
   const handleCloseStoryView = () => {
@@ -363,11 +367,11 @@ const Sessions = () => {
     return () => clearTimeout(timeoutId);
   };
 
-  // Handle status filter change (changed from stage to status)
-  const handleStatusFilter = (status) => {
-    setSelectedStatus(status);
-    dispatch(setFilters({ status }));
-  };
+  // Handle status filter change (changed from stage to status) - not included in phase 1
+  // const handleStatusFilter = (status) => {
+  //   setSelectedStatus(status);
+  //   dispatch(setFilters({ status }));
+  // };
 
   // Handle interview status filter change
   const handleInterviewStatusFilter = (status) => {
@@ -375,11 +379,11 @@ const Sessions = () => {
     dispatch(setFilters({ status: `interview_${status}` }));
   };
 
-  // Handle priority filter change
-  const handlePriorityFilter = (priority_level) => {
-    setSelectedPriority(priority_level);
-    dispatch(setFilters({ priority_level }));
-  };
+  // Handle priority filter change - not included in phase 1
+  // const handlePriorityFilter = (priority_level) => {
+  //   setSelectedPriority(priority_level);
+  //   dispatch(setFilters({ priority_level }));
+  // };
 
   // Handle pagination
   const handlePageChange = (newPage) => {
@@ -388,13 +392,11 @@ const Sessions = () => {
 
   // Toggle session expansion
   const toggleSessionExpansion = (sessionId) => {
-    const newExpanded = { ...expandedSessions };
-    if (newExpanded[sessionId]) {
-      delete newExpanded[sessionId];
+    if (expandedSession === sessionId) {
+      setExpandedSession(null);
     } else {
-      newExpanded[sessionId] = true;
+      setExpandedSession(sessionId);
     }
-    setExpandedSessions(newExpanded);
   };
 
   // Handle interview editing
@@ -463,7 +465,7 @@ const Sessions = () => {
 
     const newInterviewData = {
       type: 'life_story',
-      name: `${t('admin.sessions.newInterview', 'New Interview')} ${nextInterviewNumber}`,
+      name: `${t('admin.sessions.newInterview', 'New Interview')}`,
       notes: '',
       status: hasSchedule ? 'scheduled' : 'pending',
       duration: hasSchedule ? (scheduling.duration || 90) : 90,
@@ -527,30 +529,30 @@ const Sessions = () => {
     }
   };
 
-  // Handle scheduling modal
-  const handleShowScheduling = (sessionId) => {
-    const session = sessions.find(s => s.id === sessionId);
-    if (session?.preferences?.interview_scheduling?.enabled) {
-      // Pre-fill form with existing schedule
-      setScheduleForm({
-        dayOfWeek: session.preferences.interview_scheduling.day_of_week || '',
-        startTime: session.preferences.interview_scheduling.start_time || '',
-        duration: session.preferences.interview_scheduling.duration || 60,
-        location: session.preferences.interview_scheduling.location || 'online',
-        notes: session.preferences.interview_scheduling.notes || ''
-      });
-    } else {
-      // Reset form for new schedule
-      setScheduleForm({
-        dayOfWeek: '',
-        startTime: '',
-        duration: 60,
-        location: 'online',
-        notes: ''
-      });
-    }
-    setShowSchedulingModal(sessionId);
-  };
+  // Handle scheduling modal - not included in phase 1
+  // const handleShowScheduling = (sessionId) => {
+  //   const session = sessions.find(s => s.id === sessionId);
+  //   if (session?.preferences?.interview_scheduling?.enabled) {
+  //     // Pre-fill form with existing schedule
+  //     setScheduleForm({
+  //       dayOfWeek: session.preferences.interview_scheduling.day_of_week || '',
+  //       startTime: session.preferences.interview_scheduling.start_time || '',
+  //       duration: session.preferences.interview_scheduling.duration || 60,
+  //       location: session.preferences.interview_scheduling.location || 'online',
+  //       notes: session.preferences.interview_scheduling.notes || ''
+  //     });
+  //   } else {
+  //     // Reset form for new schedule
+  //     setScheduleForm({
+  //       dayOfWeek: '',
+  //       startTime: '',
+  //       duration: 60,
+  //       location: 'online',
+  //       notes: ''
+  //     });
+  //   }
+  //   setShowSchedulingModal(sessionId);
+  // };
 
   const handleCloseScheduling = () => {
     setShowSchedulingModal(null);
@@ -652,52 +654,52 @@ const Sessions = () => {
     setShowDraftViewModal(null);
   };
 
-  // Draft management handlers
-  const handleApproveDraft = async (draftId) => {
-    try {
-      // TODO: Implement draft approval API call
-      console.log('Approving draft:', draftId);
-      // await dispatch(approveDraft({ draftId })).unwrap();
+  // Draft management handlers - moved to drafts view modal
+  // const handleApproveDraft = async (draftId) => {
+  //   try {
+  //     // TODO: Implement draft approval API call
+  //     console.log('Approving draft:', draftId);
+  //     // await dispatch(approveDraft({ draftId })).unwrap();
 
-      // Refresh sessions data
-      await dispatch(fetchSessions({
-        page: pagination.currentPage,
-        limit: pagination.limit,
-        search: filters.search,
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder,
-        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
-      }));
+  //     // Refresh sessions data
+  //     await dispatch(fetchSessions({
+  //       page: pagination.currentPage,
+  //       limit: pagination.limit,
+  //       search: filters.search,
+  //       sortBy: filters.sortBy,
+  //       sortOrder: filters.sortOrder,
+  //       status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+  //     }));
 
-      setShowDraftViewModal(null);
-    } catch (error) {
-      console.error('Failed to approve draft:', error);
-      alert(t('admin.drafts.approveError', 'Failed to approve draft'));
-    }
-  };
+  //     setShowDraftViewModal(null);
+  //   } catch (error) {
+  //     console.error('Failed to approve draft:', error);
+  //     alert(t('admin.drafts.approveError', 'Failed to approve draft'));
+  //   }
+  // };
 
-  const handleRejectDraft = async (draftId, reason) => {
-    try {
-      // TODO: Implement draft rejection API call
-      console.log('Rejecting draft:', draftId, 'Reason:', reason);
-      // await dispatch(rejectDraft({ draftId, reason })).unwrap();
+  // const handleRejectDraft = async (draftId, reason) => {
+  //   try {
+  //     // TODO: Implement draft rejection API call
+  //     console.log('Rejecting draft:', draftId, 'Reason:', reason);
+  //     // await dispatch(rejectDraft({ draftId, reason })).unwrap();
 
-      // Refresh sessions data
-      await dispatch(fetchSessions({
-        page: pagination.currentPage,
-        limit: pagination.limit,
-        search: filters.search,
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder,
-        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
-      }));
+  //     // Refresh sessions data
+  //     await dispatch(fetchSessions({
+  //       page: pagination.currentPage,
+  //       limit: pagination.limit,
+  //       search: filters.search,
+  //       sortBy: filters.sortBy,
+  //       sortOrder: filters.sortOrder,
+  //       status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+  //     }));
 
-      setShowDraftViewModal(null);
-    } catch (error) {
-      console.error('Failed to reject draft:', error);
-      alert(t('admin.drafts.rejectError', 'Failed to reject draft'));
-    }
-  };
+  //     setShowDraftViewModal(null);
+  //   } catch (error) {
+  //     console.error('Failed to reject draft:', error);
+  //     alert(t('admin.drafts.rejectError', 'Failed to reject draft'));
+  //   }
+  // };
 
   const handleRegenerateDraft = async (draftId, instructions) => {
     try {
@@ -800,6 +802,12 @@ const Sessions = () => {
     }
   };
 
+  const handleSeeFullDetails = (story) => {
+    // Navigate to full life stories page with the story ID as a parameter
+    navigate(`/admin/full-life-stories?storyId=${story.id}&sessionId=${story.session_id}`);
+    // onClose(); // Close the modal
+  };
+
   // Handle file upload success for normalized interviews
   const handleFileUploadSuccess = async (updatedInterview) => {
     try {
@@ -822,17 +830,17 @@ const Sessions = () => {
     }
   };
 
-  // Get status badge class (changed from stage to status)
-  const getStatusClass = (status) => {
-    const statusClasses = {
-      'scheduled': 'session-badge session-badge--scheduled',
-      'active': 'session-badge session-badge--active', // Changed from 'in-progress' to 'active'
-      'pending_review': 'session-badge session-badge--pending',
-      'completed': 'session-badge session-badge--completed',
-      'cancelled': 'session-badge session-badge--cancelled'
-    };
-    return statusClasses[status] || 'session-badge';
-  };
+  // Get status badge class (changed from stage to status) - not used 
+  // const getStatusClass = (status) => {
+  //   const statusClasses = {
+  //     'scheduled': 'session-badge session-badge--scheduled',
+  //     'active': 'session-badge session-badge--active', // Changed from 'in-progress' to 'active'
+  //     'pending_review': 'session-badge session-badge--pending',
+  //     'completed': 'session-badge session-badge--completed',
+  //     'cancelled': 'session-badge session-badge--cancelled'
+  //   };
+  //   return statusClasses[status] || 'session-badge';
+  // };
 
   const getTranslatedStatus = (status) => {
     switch (status?.toLowerCase()) {
@@ -855,39 +863,39 @@ const Sessions = () => {
     }
   };
 
-  // Get priority badge class
-  const getPriorityClass = (priority_level) => {
-    const priorityClasses = {
-      'standard': 'priority-badge priority-badge--standard',
-      'urgent': 'priority-badge priority-badge--urgent',
-      'memorial': 'priority-badge priority-badge--memorial'
-    };
-    return priorityClasses[priority_level] || 'priority-badge';
-  };
+  // Get priority badge class - not used
+  // const getPriorityClass = (priority_level) => {
+  //   const priorityClasses = {
+  //     'standard': 'priority-badge priority-badge--standard',
+  //     'urgent': 'priority-badge priority-badge--urgent',
+  //     'memorial': 'priority-badge priority-badge--memorial'
+  //   };
+  //   return priorityClasses[priority_level] || 'priority-badge';
+  // };
 
-  const getTranslatedPriority = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case 'standard':
-        return t('admin.sessions.priorities.standard');
-      case 'urgent':
-        return t('admin.sessions.priorities.urgent');
-      case 'memorial':
-        return t('admin.sessions.priorities.memorial');
-      default:
-        return priority || 'N/A';
-    }
-  };
+  // const getTranslatedPriority = (priority) => {
+  //   switch (priority?.toLowerCase()) {
+  //     case 'standard':
+  //       return t('admin.sessions.priorities.standard');
+  //     case 'urgent':
+  //       return t('admin.sessions.priorities.urgent');
+  //     case 'memorial':
+  //       return t('admin.sessions.priorities.memorial');
+  //     default:
+  //       return priority || 'N/A';
+  //   }
+  // };
 
-  // Format date
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  // Format date - not used
+  // const formatDate = (dateString) => {
+  //   return new Date(dateString).toLocaleDateString('en-US', {
+  //     year: 'numeric',
+  //     month: 'short',
+  //     day: 'numeric',
+  //     hour: '2-digit',
+  //     minute: '2-digit'
+  //   });
+  // };
 
   // Clear error when component unmounts
   useEffect(() => {
@@ -998,7 +1006,7 @@ const Sessions = () => {
               </div>
             ) : (
               filteredSessions.map((session) => (
-                <div key={session.id} className="session-card">
+                <div key={session.id} className="session-card" id={session.id}>
                   <div className="session-card__header" onClick={() => toggleSessionExpansion(session.id)}>
                     <div className="session-card__main">
                       <div className="session-card__client">
@@ -1032,7 +1040,7 @@ const Sessions = () => {
 
                     <div className="session-card__actions">
                       <button className="session-card__expand">
-                        {expandedSessions[session.id] ?
+                        {expandedSession === session.id ?
                           <ChevronUp size={20} /> :
                           <ChevronDown size={20} />
                         }
@@ -1041,8 +1049,20 @@ const Sessions = () => {
                   </div>
 
                   {/* Expanded Content */}
-                  {expandedSessions[session.id] && (
+                  {expandedSession === session.id && (
                     <div className="session-card__details">
+
+                      {/* Actions */}
+                      <div className="session-details__actions">
+                        <button className="btn btn--secondary btn--sm">
+                          <Edit size={16} />
+                          {t('admin.sessions.edit', 'Edit')}
+                        </button>
+                        <button className="btn btn--danger btn--sm" onClick={() => handleDeleteSession(session.id)}>
+                          <Trash2 size={16} />
+                          {t('admin.sessions.delete', 'Delete')}
+                        </button>
+                      </div>
 
                       {/* Client Information */}
                       <div className="session-details__section">
@@ -1131,7 +1151,7 @@ const Sessions = () => {
                         <div className="session-details__section-header">
                           <h4>{t('admin.sessions.interviews', 'Interviews')}</h4>
                           <button
-                            className="btn btn--secondary btn--sm"
+                            className="btn btn--secondary btn--sm btn-schedule"
                             // onClick={() => handleShowScheduling(session.id)}
                             title={t('common.notIncludedInPhase1', 'Not Included in Phase 1')}
                           >
@@ -1145,7 +1165,7 @@ const Sessions = () => {
 
                         <div className="session-interviews">
                           {getSessionInterviews(session).map((interview, index) => (
-                            <div key={interview.id} className="interview">
+                            <div key={interview.id} className={`interview ${interview.status === 'completed' ? 'completed' : ''}`}>
                               <div className="interview__header">
                                 <div className="interview__info">
                                   {editingInterview?.sessionId === session.id && editingInterview?.interviewId === interview.id ? (
@@ -1197,6 +1217,13 @@ const Sessions = () => {
                                       <div className="interview__index">
                                         {index + 1}
                                       </div>
+                                      <button
+                                        className="btn btn--secondary btn--xs btn-edit-interview"
+                                        onClick={() => handleEditInterview(session.id, interview)}
+                                        title={t('common.edit', 'Edit')}
+                                      >
+                                        <Edit size={12} />
+                                      </button>
                                       <div className="interview__name-container">
                                         <span className="interview__name">
                                           {interview.content?.name || interview.name || interview.notes || `Interview ${interview.id}`}
@@ -1225,18 +1252,10 @@ const Sessions = () => {
                                     </button>
                                   )}
                                   <button
-                                    className="btn btn--secondary btn--xs"
-                                    onClick={() => handleEditInterview(session.id, interview)}
-                                  >
-                                    <Edit size={12} />
-                                    {t('common.edit', 'Edit')}
-                                  </button>
-                                  <button
                                     className="btn btn--danger btn--xs"
                                     onClick={() => handleDeleteInterview(session.id, interview.id)}
                                   >
                                     <Trash size={12} />
-                                    {t('common.delete', 'Delete')}
                                   </button>
                                 </div>
                               </div>
@@ -1385,7 +1404,7 @@ const Sessions = () => {
                       <div className="session-details__section session-details__section--story">
                         <div className="session-details__section-header">
                           <h4 className="section-title">
-                            <FileText size={18} />
+                            <BookOpen size={18} />
                             {t('admin.sessions.sessionDrafts.fullLifeStory', 'Full Life Story')}
                           </h4>
                         </div>
@@ -1394,7 +1413,7 @@ const Sessions = () => {
                           {/* Generate Button - Show based on approved drafts and data changes */}
                           {hasApprovedDrafts(session) && (
                             <div className="story-generate">
-                              <button
+                              {shouldAllowStoryGeneration(session) && <button
                                 className="btn btn--success story-generate__btn"
                                 onClick={() => handleGenerateFullStory(session.id)}
                                 disabled={generatingStory === session.id || !shouldAllowStoryGeneration(session)}
@@ -1406,14 +1425,14 @@ const Sessions = () => {
                                   </>
                                 ) : (
                                   <>
-                                    <FileText size={16} />
+                                    <BookCheck size={16} />
                                     {t('admin.sessions.sessionDrafts.generateFullStory', 'Generate Full Life Story')}
                                   </>
                                 )}
-                              </button>
+                              </button>}
                               <p className="story-generate__description">
                                 {shouldAllowStoryGeneration(session) ? (
-                                  t('admin.sessions.sessionDrafts.generateDescription', 'Generate a comprehensive life story from all approved interview drafts')
+                                  t('admin.sessions.sessionDrafts.generateDescription1', 'Generate a comprehensive life story based on ') + session.drafts.filter(draft => draft.stage === 'approved').length + t('admin.sessions.sessionDrafts.generateDescription2', ' approved interview drafts out of ') + session.interviews.length + t('admin.sessions.sessionDrafts.generateDescription3', ' total interviews')
                                 ) : (
                                   t('admin.sessions.sessionDrafts.noChangesDetected', 'No changes detected since last generation. Complete more interviews or approve additional drafts to generate a new version.')
                                 )}
@@ -1470,12 +1489,19 @@ const Sessions = () => {
                                       </div>
                                     </div>
                                     <div className="story-current__actions">
-                                      <button
+                                      {/* <button
                                         className="btn btn--primary btn--sm"
                                         onClick={() => handleViewStory(currentStory)}
                                       >
                                         <Eye size={14} />
                                         {t('admin.sessions.sessionDrafts.viewStory', 'View Story')}
+                                      </button> */}
+                                      <button
+                                        className="btn btn--primary btn--sm btn-see-full-details"
+                                        onClick={() => handleSeeFullDetails(currentStory)}
+                                      >
+                                        <ExternalLink size={16} />
+                                        {t('admin.sessions.seeFullDetails', 'See Full Details')}
                                       </button>
 
                                       {/* {stories && stories.length > 1 && (
@@ -1511,17 +1537,10 @@ const Sessions = () => {
                         </div>
                       </div>
 
-                      {/* Actions */}
-                      <div className="session-details__actions">
-                        <button className="btn btn--secondary btn--sm">
-                          <Edit size={16} />
-                          {t('admin.sessions.edit', 'Edit')}
-                        </button>
-                        <button className="btn btn--danger btn--sm" onClick={() => handleDeleteSession(session.id)}>
-                          <Trash2 size={16} />
-                          {t('admin.sessions.delete', 'Delete')}
-                        </button>
-                      </div>
+                      {/* {minimizeButton} */}
+                      <button className="btn btn--sm" title={t('admin.sessions.minimize', 'Minimize')} onClick={() => toggleSessionExpansion(session.id)}>
+                        <ChevronUp size={20} />
+                      </button>
                     </div>
                   )}
                 </div>

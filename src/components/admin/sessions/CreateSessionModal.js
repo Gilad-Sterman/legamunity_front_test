@@ -404,7 +404,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
         interviews: [
           {
             id: `interview_1_${Date.now()}`,
-            name: t('admin.sessions.form.interview1', 'Interview 1'),
+            name: t('admin.sessions.form.newInterview', 'New Interview'),
             type: 'personal_background',
             status: hasSchedule ? 'scheduled' : 'pending',
             duration: 90,
@@ -413,7 +413,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
           },
           {
             id: `interview_2_${Date.now() + 1}`,
-            name: t('admin.sessions.form.interview2', 'Interview 2'),
+            name: t('admin.sessions.form.newInterview', 'New Interview'),
             type: 'career_achievements',
             status: hasSchedule ? 'scheduled' : 'pending',
             duration: 90,
@@ -422,7 +422,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
           },
           {
             id: `interview_3_${Date.now() + 2}`,
-            name: t('admin.sessions.form.interview3', 'Interview 3'),
+            name: t('admin.sessions.form.newInterview', 'New Interview'),
             type: 'relationships_family',
             status: hasSchedule ? 'scheduled' : 'pending',
             duration: 90,
@@ -431,7 +431,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
           },
           {
             id: `interview_4_${Date.now() + 3}`,
-            name: t('admin.sessions.form.interview4', 'Interview 4'),
+            name: t('admin.sessions.form.newInterview', 'New Interview'),
             type: 'life_events_milestones',
             status: hasSchedule ? 'scheduled' : 'pending',
             duration: 90,
@@ -440,7 +440,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
           },
           {
             id: `interview_5_${Date.now() + 4}`,
-            name: t('admin.sessions.form.interview5', 'Interview 5'),
+            name: t('admin.sessions.form.newInterview', 'New Interview'),
             type: 'wisdom_reflection',
             status: hasSchedule ? 'scheduled' : 'pending',
             duration: 90,
