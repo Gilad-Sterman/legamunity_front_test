@@ -31,6 +31,13 @@
   justify-content: center;
   z-index: 10000;
   backdrop-filter: blur(4px);
+
+  .regeneration-message {
+    color: #1f2937;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-block: 1rem;
+  }
 }
 
 .draft-modal__regeneration-content {
@@ -97,7 +104,7 @@
   justify-content: center;
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #3b83f6c7, #6483d8df);
   border-radius: 50%;
   color: white;
 }

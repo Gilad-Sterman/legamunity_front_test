@@ -579,6 +579,7 @@
         "first_draft": "טיוטה ראשונית",
         "under_review": " תחת ביקורת",
         "pending_approval": "ממתין לאישור",
+        "regenerated": "נוצר מחדש",
         "approved": "מאושר",
         "rejected": "נדחה"
       },
@@ -592,7 +593,14 @@
       "regenerateDraft": "צור מחדש",
       "regeneratePrompt": "ניתן להזין הוראות ספציפיות",
       "regeneratePlaceholder": "הוסף הערות או משוב לשיפור הטיוטה...",
-      "approvalInfo": "מידע אישור",
+      "regeneration": {
+        "title": "יצירה מחדש",
+        "analyzing": "ניתוח הנחיות",
+        "processing": "עיבוד AI",
+        "enhancing": "הוספת תוכן",
+        "finalizing": "סיום"
+      },
+      "regenerationMsg": "תהליך זה עשוי להימשך כמה דקות, נא לא לסגור חלון זה",
       "rejectionInfo": "מידע דחייה",
       "wordCount": "מספר מילים",
       "readingTime": "זמן קריאה",

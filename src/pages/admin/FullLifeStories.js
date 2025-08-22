@@ -694,18 +694,14 @@ const FullLifeStories = () => {
                   <div className="life-story-card__header-left">
                     <h3 className="life-story-card__title">{story.title}</h3>
                     <div className="life-story-card__meta-compact">
-                      <span className="meta-item">
+                      {/* <span className="meta-item">
                         <User size={14} />
                         {story.participantName}
-                      </span>
-                      <span className="meta-item">
-                        <Hash size={14} />
-                        {t('admin.lifeStories.version', 'Version')} {story.version}
-                      </span>
-                      <span className="meta-item">
+                      </span> */}
+                      {/* <span className="meta-item">
                         <Calendar size={14} />
                         {formatDate(story.createdAt).split(',')[0]}
-                      </span>
+                      </span> */}
                     </div>
                   </div>
                   <div className="life-story-card__header-right">
@@ -731,6 +727,10 @@ const FullLifeStories = () => {
                         <span className="meta-item">
                           <Calendar size={14} />
                           {formatDate(story.createdAt)}
+                        </span>
+                        <span className="meta-item">
+                          <Hash size={14} />
+                          {t('admin.lifeStories.version', 'Version')} {story.version}
                         </span>
                         <span className="meta-item">
                           <BookOpen size={14} />
@@ -864,7 +864,7 @@ const FullLifeStories = () => {
                                 </div>
                               )}
 
-                              <div className="add-note">
+                              {story.status !== 'approved' && <div className="add-note">
                                 <textarea
                                   value={notesText}
                                   onChange={(e) => setNotesText(e.target.value)}
@@ -889,7 +889,7 @@ const FullLifeStories = () => {
                                   </button>
                                 </div>
 
-                              </div>
+                              </div>}
                             </div>
                             {shouldShowRegenerate(story) && (
                               <button

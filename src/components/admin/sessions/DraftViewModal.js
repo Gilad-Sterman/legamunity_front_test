@@ -31,6 +31,7 @@ const DraftViewModal = ({
   session,
   onRegenerate,
   onDraftUpdated, // New prop to refresh parent state
+  onRegenerationError,
   loading = false
 }) => {
   const { t } = useTranslation();
@@ -42,7 +43,6 @@ const DraftViewModal = ({
   const [localDraft, setLocalDraft] = useState(null);
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [regenerateReason, setRegenerateReason] = useState('');
-  const [showRegenerateForm, setShowRegenerateForm] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionForm, setShowRejectionForm] = useState(false);
   const [hasBeenRegenerated, setHasBeenRegenerated] = useState(false);
@@ -69,7 +69,7 @@ const DraftViewModal = ({
       setLocalDraft(draft);
       setNewNoteContent('');
       setIsEditingNotes(false);
-      setShowRegenerateForm(false);
+      // setShowRegenerateForm(false);
       setShowRejectionForm(false);
       setRegenerateReason('');
       setRejectionReason('');
@@ -96,7 +96,7 @@ const DraftViewModal = ({
     }
   }, [draft]);
 
-  // Regeneration progress animation
+  // Effect for regeneration steps
   useEffect(() => {
     let progressInterval;
     let stepTimeout;
@@ -105,15 +105,15 @@ const DraftViewModal = ({
       const currentStepData = regenerationSteps[regenerationStep];
       if (!currentStepData) return;
 
-      // Animate progress within current step
+      // Set up progress interval for current step
       progressInterval = setInterval(() => {
         setRegenerationProgress(prev => {
-          const increment = 100 / (currentStepData.duration / 100);
-          return Math.min(prev + increment, 100);
+          const newProgress = prev + 1;
+          return newProgress <= 100 ? newProgress : 100;
         });
-      }, 100);
+      }, currentStepData.duration / 100);
 
-      // Move to next step after duration
+      // Set up timeout for next step
       stepTimeout = setTimeout(() => {
         if (regenerationStep < regenerationSteps.length - 1) {
           setRegenerationStep(prev => prev + 1);
@@ -122,11 +122,45 @@ const DraftViewModal = ({
       }, currentStepData.duration);
     }
 
+    // Cleanup
     return () => {
       if (progressInterval) clearInterval(progressInterval);
       if (stepTimeout) clearTimeout(stepTimeout);
     };
   }, [isRegenerating, regenerationStep, regenerationSteps]);
+
+  // Effect to handle component unmounting or draft changes
+  // This ensures regeneration state is reset if the component unmounts during regeneration
+  useEffect(() => {
+    return () => {
+      // Reset regeneration state on unmount
+      if (isRegenerating) {
+        console.log('Resetting regeneration state on unmount or draft change');
+        setIsRegenerating(false);
+      }
+    };
+  }, [isRegenerating, draft?.id]);
+  
+  // Effect to force reset regeneration state after a timeout
+  // This is a safety mechanism to ensure the modal doesn't stay open indefinitely
+  useEffect(() => {
+    let safetyTimeout;
+    
+    if (isRegenerating) {
+      // Set a safety timeout to force close the regeneration modal after 30 seconds
+      // This ensures the modal doesn't stay open indefinitely if something goes wrong
+      safetyTimeout = setTimeout(() => {
+        console.log('Safety timeout triggered - forcing regeneration modal to close');
+        setIsRegenerating(false);
+      }, 30000); // 30 seconds timeout
+    }
+    
+    return () => {
+      if (safetyTimeout) clearTimeout(safetyTimeout);
+    };
+  }, [isRegenerating]);
+
+  // Removed duplicate regeneration effect
 
   // Calculate overall regeneration progress
   const getOverallRegenerationProgress = () => {
@@ -243,9 +277,43 @@ const DraftViewModal = ({
       setIsRegenerating(true);
       setRegenerationStep(0);
       setRegenerationProgress(0);
-      onRegenerate(draft.id, regenerateReason);
+      
+      try {
+        // Call onRegenerate and handle the promise result
+        const regeneratePromise = onRegenerate(draft.id, regenerateReason);
+        
+        // If onRegenerate returns a promise, handle it
+        if (regeneratePromise && typeof regeneratePromise.then === 'function') {
+          regeneratePromise
+            .then(() => {
+              // Success case is handled by parent component updating the draft
+              console.log('Regeneration completed successfully');
+            })
+            .catch(error => {
+              // On error, reset regeneration state
+              console.error('Caught regeneration error in DraftViewModal:', error);
+              setIsRegenerating(false);
+              
+              // Call the error callback if provided
+              if (onRegenerationError) {
+                onRegenerationError(error);
+              }
+            });
+        } else {
+          // If no promise is returned, assume it's synchronous and succeeded
+          console.warn('onRegenerate did not return a promise');
+        }
+      } catch (error) {
+        // Catch any synchronous errors
+        console.error('Error in handleRegenerate:', error);
+        setIsRegenerating(false);
+        
+        if (onRegenerationError) {
+          onRegenerationError(error);
+        }
+      }
     }
-    setShowRegenerateForm(false);
+    
     setRegenerateReason('');
     // Mark that regeneration has occurred and reset notes flag
     setHasBeenRegenerated(true);
@@ -379,6 +447,8 @@ const DraftViewModal = ({
                 </div>
               ))}
             </div>
+
+            <span className="regeneration-message">{t('admin.drafts.regenerationMsg', 'This process can take a few minutes. Please do not close the modal or navigate away from this page.')}</span>
           </div>
         </div>
       )}
@@ -579,7 +649,6 @@ const DraftViewModal = ({
                 </h4>
                 <div className="info-list">
                   <div className="info-item">
-                    <label>{t('admin.sessions.draftVersion', 'Version')}: {draft?.version || 1}</label>
                     <span>
                       {draft?.content?.metadata?.regenerationType && (
                         <span className="regenerated-badge">
@@ -587,23 +656,18 @@ const DraftViewModal = ({
                         </span>
                       )}
                     </span>
+                    <label>{t('admin.sessions.draftVersion', 'Version')}: {draft?.content?.metadata?.regenerationCount + 1 || 1}</label>
                   </div>
-                  {/* {draft?.content?.metadata?.regeneratedFrom && (
-                  <div className="info-item">
-                    <label>{t('admin.drafts.regeneratedFrom', 'Regenerated From')}</label>
-                    <span>Version {draft.content.metadata.regeneratedFrom}</span>
-                  </div>
-                )} */}
-                  {draft?.content?.metadata?.adminInstructions && (
+                  {/* {draft?.content?.metadata?.adminInstructions && (
                     <div className="info-item">
                       <label>{t('admin.drafts.regenerationInstructions', 'Regeneration Instructions')}</label>
                       <span className="regeneration-instructions">{draft.content.metadata.adminInstructions}</span>
                     </div>
-                  )}
-                  <div className="info-item">
-                    <label>{t('admin.sessions.createdAt', 'Created At')}</label>
-                    <span>{draft?.createdAt ? new Date(draft.createdAt).toLocaleString() : 'N/A'}</span>
-                  </div>
+                  )} */}
+                  {/* <div className="info-item">
+                    <label>{t('admin.sessions.regenerationTime', 'Regeneration Time')}</label>
+                    <span>{draft?.content?.metadata?.regenerationTime ? new Date(draft.content.metadata.regenerationTime).toLocaleString() : 'N/A'}</span>
+                  </div> */}
                   <div className="info-item">
                     <label>{t('admin.drafts.wordCount', 'Word Count')}</label>
                     <span>{draft?.content?.metadata?.wordCount || 0}</span>
