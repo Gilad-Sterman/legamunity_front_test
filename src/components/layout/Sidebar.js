@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, Users, Calendar, Mic, LogOut, User, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, Mic, LogOut, User, TrendingUp, Settings } from 'lucide-react';
 import IconNav from '../common/IconNav';
 import { logout } from '../../store/slices/authSliceSupabase';
 import IconButton from '../common/IconButton';
@@ -30,10 +30,7 @@ const Sidebar = () => {
 
   // Secondary admin tools
   const adminToolsNavigation = [
-    { name: t('sidebar.users'), href: '/admin/users', icon: Users },
-    // { name: t('sidebar.conflicts'), href: '/admin/conflicts', icon: AlertTriangle },
-    // { name: t('sidebar.analytics'), href: '/admin/analytics', icon: BarChart3 },
-    { name: t('sidebar.projectProgress'), href: '/admin/progress', icon: TrendingUp },
+    { name: t('sidebar.settings'), href: '/admin/settings', icon: Settings },
   ];
 
   return (
@@ -53,8 +50,8 @@ const Sidebar = () => {
         <nav className="sidebar-nav">
           {isAdmin ? (
             <>
-              <IconNav items={adminNavigation} title={t('sidebar.admin')} className="admin-section" />
-              <IconNav items={adminToolsNavigation} title="Tools" className="admin-tools-section" />
+              <IconNav items={adminNavigation} title={t('sidebar.admin', 'Admin')} className="admin-section" />
+              <IconNav items={adminToolsNavigation} title={t('sidebar.tools', 'Tools')} className="admin-tools-section" />
             </>
           ) : (
             <div className="access-denied">

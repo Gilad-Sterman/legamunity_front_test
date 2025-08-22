@@ -23,9 +23,6 @@ import {
   User,
   Trash2,
   AudioLines,
-  Minimize,
-  Book,
-  BookA,
   BookCheck,
   BookOpen,
   ExternalLink
@@ -76,7 +73,7 @@ const Sessions = () => {
   const [editInterviewName, setEditInterviewName] = useState('');
   const [editInterviewIsFriend, setEditInterviewIsFriend] = useState(false);
   const [showSchedulingModal, setShowSchedulingModal] = useState(null);
-  const [showFileUploadModal, setShowFileUploadModal] = useState(null);
+  const [showFileUploadModal, setShowFileUploadModal] = useState({interviewId: null, sessionData: null});
   const [showFileViewModal, setShowFileViewModal] = useState(null);
   const [showDraftViewModal, setShowDraftViewModal] = useState(null);
   const [generatingStory, setGeneratingStory] = useState(null); // Track which session is generating story
@@ -612,12 +609,19 @@ const Sessions = () => {
   };
 
   // Handle file upload modal
-  const handleShowFileUpload = (interviewId) => {
-    setShowFileUploadModal(interviewId);
+  const handleShowFileUpload = (interviewId, session) => {
+    const sessionData = {
+      id: session.id,
+      clientName: session.client_name,
+      client_name: session.client_name,
+      notes: session.notes,
+      preferred_language: session.preferences?.preferred_language
+    };
+    setShowFileUploadModal({interviewId, sessionData});
   };
 
   const handleCloseFileUpload = () => {
-    setShowFileUploadModal(null);
+    setShowFileUploadModal({interviewId: null, sessionData: null});
   };
 
   const handleShowFileView = (interview) => {
@@ -812,7 +816,7 @@ const Sessions = () => {
   const handleFileUploadSuccess = async (updatedInterview) => {
     try {
       // Close the file upload modal first
-      setShowFileUploadModal(null);
+      setShowFileUploadModal({interviewId: null, sessionData: null});
 
       // Refresh sessions data to show updated completion percentage and metrics
       await dispatch(fetchSessions({
@@ -1245,7 +1249,7 @@ const Sessions = () => {
                                   {!(interview.file_upload || interview.content?.file_upload) && (
                                     <button
                                       className="btn btn--secondary btn--xs"
-                                      onClick={() => handleShowFileUpload(interview.id)}
+                                      onClick={() => handleShowFileUpload(interview.id, session)}
                                     >
                                       <Upload size={12} />
                                       {t('admin.sessions.uploadFile', 'Upload File')}
@@ -1745,11 +1749,12 @@ const Sessions = () => {
       )}
 
       {/* File Upload Modal */}
-      {showFileUploadModal && (
+      {showFileUploadModal.interviewId && (
         <div className="modal-overlay" onClick={handleCloseFileUpload}>
           <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
             <FileUpload
-              interviewId={showFileUploadModal}
+              interviewId={showFileUploadModal.interviewId}
+              sessionData={showFileUploadModal.sessionData}
               onClose={handleCloseFileUpload}
               onSuccess={handleFileUploadSuccess}
             />

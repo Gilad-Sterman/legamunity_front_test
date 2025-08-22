@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Upload, X, FileText, Music, AlertCircle, CheckCircle, Loader, Brain, Wand2, FileSearch, Sparkles } from 'lucide-react';
 import { uploadInterviewFile } from '../../../store/slices/interviewsSlice';
 
-const FileUpload = ({ interviewId, onClose, onSuccess }) => {
+const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { uploadLoading } = useSelector(state => state.interviews);
@@ -196,9 +196,16 @@ const FileUpload = ({ interviewId, onClose, onSuccess }) => {
       setUploadStatus(null);
       setUploadMessage('');
       
+      // Include session data in the upload request
       const result = await dispatch(uploadInterviewFile({
         interviewId,
-        file: selectedFile
+        file: selectedFile,
+        sessionData: {
+          clientName: sessionData?.clientName || sessionData?.client_name || '',
+          sessionId: sessionData?.id || '',
+          notes: sessionData?.notes || '',
+          preferred_language: sessionData?.preferred_language || 'en'
+        }
       })).unwrap();
 
       setUploadStatus('success');

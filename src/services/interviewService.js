@@ -145,13 +145,23 @@ class InterviewService {
 
   /**
    * Upload file for interview
+   * @param {string} interviewId - ID of the interview
+   * @param {File} file - File to upload
+   * @param {Object} sessionData - Additional session data to include with the upload
+   * @param {string} token - Auth token (optional)
    */
-  async uploadInterviewFile(interviewId, file, token = null) {
+  async uploadInterviewFile(interviewId, file, sessionData = null, token = null) {
     try {
       const authToken = token || localStorage.getItem('authToken') || localStorage.getItem('token');
 
       const formData = new FormData();
       formData.append('file', file);
+      
+      // Add session data if provided
+      if (sessionData) {
+        // Convert session data to JSON string and append to form data
+        formData.append('sessionData', JSON.stringify(sessionData));
+      }
 
       const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/upload`, {
         method: 'POST',
