@@ -104,6 +104,8 @@
       "title": "ניהול פרויקטים",
       "createNew": "צור פרויקט חדש",
       "createSession": "צור פרויקט",
+      "loadingDraft": "טוען טיוטה...",
+      "fetchingDraftData": "מביא נתוני טיוטה...",
       "sessionInfo": "מידע פרויקט",
       "clientName": "שם לקוח",
       "interviewDate": "תאריך ראיון",

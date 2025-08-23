@@ -377,7 +377,7 @@ class SupabaseSessionsService {
   }
 
   /**
-   * Upload interview file with AI processing
+   * Upload interview file with AI processing (synchronous - waits for completion)
    */
   async uploadInterviewFile(interviewId, file) {
     try {
@@ -418,6 +418,63 @@ class SupabaseSessionsService {
         return {
           success: false,
           error: 'Request timed out after 5 minutes. Please try again or contact support if the issue persists.'
+        };
+      }
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Upload interview file with async AI processing (returns immediately after upload)
+   */
+  async uploadInterviewFileAsync(interviewId, file, sessionData) {
+    try {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Add session data if provided
+      if (sessionData) {
+        formData.append('sessionData', JSON.stringify(sessionData));
+      }
+      
+      // Create AbortController for timeout handling (shorter timeout for async)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 1 minute timeout for upload only
+      
+      const response = await fetch(`${API_BASE_URL}/sessions-supabase/interviews/${interviewId}/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'X-Async-Processing': 'true', // Signal backend to process asynchronously
+          // Don't set Content-Type header - let browser set it with boundary for FormData
+        },
+        body: formData,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to upload file');
+      }
+
+      return {
+        success: true,
+        data: data.data,
+        message: data.message
+      };
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        return {
+          success: false,
+          error: 'Upload timed out after 1 minute. Please try again or contact support if the issue persists.'
         };
       }
       return {

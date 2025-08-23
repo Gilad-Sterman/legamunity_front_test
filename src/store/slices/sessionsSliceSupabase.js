@@ -217,7 +217,7 @@ export const updateInterview = createAsyncThunk(
 //   }
 // );
 
-// Async thunk for uploading interview file with AI processing
+// Async thunk for uploading interview file with AI processing (synchronous)
 export const uploadInterviewFile = createAsyncThunk(
   'sessionsSupabase/uploadInterviewFile',
   async ({ interviewId, file }, { rejectWithValue }) => {
@@ -235,6 +235,29 @@ export const uploadInterviewFile = createAsyncThunk(
         transcription: result.data.transcription,
         draft: result.data.draft,
         processingComplete: result.data.processingComplete,
+        message: result.message
+      };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk for uploading interview file with async AI processing
+export const uploadInterviewFileAsync = createAsyncThunk(
+  'sessionsSupabase/uploadInterviewFileAsync',
+  async ({ interviewId, file, sessionData }, { rejectWithValue }) => {
+    try {
+      const result = await supabaseSessionsService.uploadInterviewFileAsync(interviewId, file, sessionData);
+
+      if (!result.success) {
+        return rejectWithValue(result.error);
+      }
+
+      return {
+        interviewId,
+        interview: result.data.interview,
+        fileMetadata: result.data.fileMetadata,
         message: result.message
       };
     } catch (error) {
@@ -561,7 +584,7 @@ const sessionsSliceSupabase = createSlice({
         // state.stats = null; // Commented out to preserve previous stats
       })
 
-      // Upload interview file
+      // Upload interview file (synchronous)
       .addCase(uploadInterviewFile.pending, (state) => {
         state.uploadLoading = true;
         state.error = null;
@@ -570,28 +593,7 @@ const sessionsSliceSupabase = createSlice({
         state.uploadLoading = false;
         const { interviewId, interview } = action.payload;
 
-        // Find and update the interview in all sessions
-        state.sessions.forEach((session, sessionIndex) => {
-          const interviews = session.preferences?.interviews || [];
-          const interviewIndex = interviews.findIndex(int => int.id === interviewId);
-
-          if (interviewIndex !== -1) {
-            state.sessions[sessionIndex] = {
-              ...session,
-              preferences: {
-                ...session.preferences,
-                interviews: [
-                  ...interviews.slice(0, interviewIndex),
-                  interview, // Updated interview with file upload, transcription, draft, and completed status
-                  ...interviews.slice(interviewIndex + 1)
-                ]
-              },
-              updated_at: new Date().toISOString()
-            };
-          }
-        });
-
-        // Also update currentSession if it contains the interview
+        // Update currentSession if it contains the interview
         if (state.currentSession) {
           const interviews = state.currentSession.preferences?.interviews || [];
           const interviewIndex = interviews.findIndex(int => int.id === interviewId);
@@ -609,12 +611,61 @@ const sessionsSliceSupabase = createSlice({
               },
               updated_at: new Date().toISOString()
             };
+
+            // Also update in sessions array if it exists
+            const sessionIndex = state.sessions.findIndex(s => s.id === state.currentSession.id);
+            if (sessionIndex !== -1) {
+              state.sessions[sessionIndex] = state.currentSession;
+            }
           }
         }
 
         state.error = null;
       })
       .addCase(uploadInterviewFile.rejected, (state, action) => {
+        state.uploadLoading = false;
+        state.error = action.payload;
+      })
+
+      // Upload interview file (async)
+      .addCase(uploadInterviewFileAsync.pending, (state) => {
+        state.uploadLoading = true;
+        state.error = null;
+      })
+      .addCase(uploadInterviewFileAsync.fulfilled, (state, action) => {
+        state.uploadLoading = false;
+        const { interviewId, interview } = action.payload;
+
+        // Update currentSession if it contains the interview
+        if (state.currentSession) {
+          const interviews = state.currentSession.preferences?.interviews || [];
+          const interviewIndex = interviews.findIndex(int => int.id === interviewId);
+
+          if (interviewIndex !== -1) {
+            state.currentSession = {
+              ...state.currentSession,
+              preferences: {
+                ...state.currentSession.preferences,
+                interviews: [
+                  ...interviews.slice(0, interviewIndex),
+                  interview, // Updated interview with file upload and transcribing status
+                  ...interviews.slice(interviewIndex + 1)
+                ]
+              },
+              updated_at: new Date().toISOString()
+            };
+
+            // Also update in sessions array if it exists
+            const sessionIndex = state.sessions.findIndex(s => s.id === state.currentSession.id);
+            if (sessionIndex !== -1) {
+              state.sessions[sessionIndex] = state.currentSession;
+            }
+          }
+        }
+
+        state.error = null;
+      })
+      .addCase(uploadInterviewFileAsync.rejected, (state, action) => {
         state.uploadLoading = false;
         state.error = action.payload;
       })

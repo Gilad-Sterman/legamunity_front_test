@@ -40,6 +40,7 @@ import {
   deleteInterview,
   regenerateDraft
 } from '../../store/slices/sessionsSliceSupabase';
+import { fetchDraftsBySession } from '../../store/slices/draftsSlice';
 // Removed interviews slice imports - using sessions API for all interview operations
 import CreateSessionModal from '../../components/admin/sessions/CreateSessionModal';
 import FileUpload from '../../components/admin/interviews/FileUpload';
@@ -643,16 +644,63 @@ const Sessions = () => {
     setShowFileViewModal(null);
   };
 
-  const handleShowDraftView = (interview) => {
-    // Create a normalized interview object for the modal
-    const draftData = interview.ai_draft || interview.content?.ai_draft;
+  const handleShowDraftView = async (interview) => {
+    try {
+      // Find the session for this interview
+      const session = sessions.find(s => s.interviews?.some(i => i.id === interview.id));
+      if (!session) {
+        console.error('Session not found for interview:', interview.id);
+        return;
+      }
 
-    const modalData = {
-      ...interview,
-      ai_draft: draftData
-    };
-
-    setShowDraftViewModal(modalData);
+      // Show loading state while fetching draft
+      setShowDraftViewModal({ loading: true, interview });
+      
+      // Fetch the actual draft records from the database
+      const result = await dispatch(fetchDraftsBySession(session.id)).unwrap();
+      
+      if (result.success && result.data && result.data.length > 0) {
+        // Find the draft that corresponds to this specific interview
+        const interviewDraft = result.data.find(draft => 
+          draft.content?.interview_id === interview.id
+        );
+        
+        if (interviewDraft) {
+          const modalData = {
+            ...interview,
+            ai_draft: interviewDraft, // Use the actual draft record with id, stage, etc.
+            sourceInterviewId: interview.id // Preserve the original interview ID for regeneration
+          };
+          
+          setShowDraftViewModal(modalData);
+        } else {
+          // Fallback to the AI content if no matching draft found
+          const draftData = interview.ai_draft || interview.content?.ai_draft;
+          const modalData = {
+            ...interview,
+            ai_draft: draftData
+          };
+          setShowDraftViewModal(modalData);
+        }
+      } else {
+        // Fallback to the AI content if no draft record found
+        const draftData = interview.ai_draft || interview.content?.ai_draft;
+        const modalData = {
+          ...interview,
+          ai_draft: draftData
+        };
+        setShowDraftViewModal(modalData);
+      }
+    } catch (error) {
+      console.error('Failed to fetch draft data:', error);
+      // Fallback to the AI content on error
+      const draftData = interview.ai_draft || interview.content?.ai_draft;
+      const modalData = {
+        ...interview,
+        ai_draft: draftData
+      };
+      setShowDraftViewModal(modalData);
+    }
   };
 
   const handleCloseDraftView = () => {
@@ -716,16 +764,21 @@ const Sessions = () => {
           throw new Error('Interview information not available');
         }
 
+        // Use the preserved source interview ID for regeneration
+        const sourceInterviewId = currentInterview.sourceInterviewId || currentInterview.id;
+        
         // Find the session that contains this interview
-        const currentSession = sessions.find(s => s.interviews?.some(i => i.id === currentInterview.id));
+        const currentSession = sessions.find(s => s.interviews?.some(i => i.id === sourceInterviewId));
         if (!currentSession) {
           throw new Error('Session information not available');
         }
 
         // Extract notes from the current draft being viewed
-        // The showDraftViewModal contains the interview, but we need to find the specific draft
-        const currentDraft = currentSession.interviews
-          .find(i => i.id === currentInterview.id)?.ai_draft;
+        // Use the source interview ID to find the correct interview
+        const sourceInterview = currentSession.interviews
+          .find(i => i.id === sourceInterviewId);
+        
+        const currentDraft = sourceInterview?.ai_draft;
 
         const notes = currentDraft?.content?.notes || [];
 
@@ -753,18 +806,14 @@ const Sessions = () => {
         const updatedSession = updatedSessions.sessions?.find(s => s.id === currentSession.id);
         const updatedInterview = updatedSession?.interviews?.find(i => i.id === currentInterview.id);
 
-        // Regeneration completed successfully
-
-        if (updatedInterview) {
-          // Force update modal with the refreshed interview data
-          setShowDraftViewModal(null); // Clear first
-          setTimeout(() => {
-            setShowDraftViewModal(updatedInterview); // Then set with new data
-          }, 100);
-        } else {
-          console.warn('Could not find updated interview after regeneration');
-          setShowDraftViewModal(currentInterview);
-        }
+        // Regeneration API call completed successfully
+        // DO NOT update the modal here - let WebSocket completion handle it
+        // The DraftViewModal will handle refreshing via onDraftUpdated callback
+        
+        console.log('✅ Regeneration API call completed - waiting for WebSocket completion');
+        
+        // Keep the current modal open to show regeneration progress
+        // The WebSocket completion event will trigger onDraftUpdated() which will close and refresh
         
         // Resolve the promise on success
         resolve(regenerateResult);
@@ -1212,7 +1261,7 @@ const Sessions = () => {
                                     </>
                                   ) : (
                                     <>
-                                      <div className="interview__index">
+                                      <div className="interview__index" onClick={() => console.log(interview)}>
                                         {index + 1}
                                       </div>
                                       <button
@@ -1813,11 +1862,36 @@ const Sessions = () => {
         onRegenerate={handleRegenerateDraft}
         onRegenerationError={(error) => {
           console.error('Regeneration error handled in parent:', error);
-          // No need to show alert here as it's already shown in handleRegenerateDraft catch block
         }}
         onDraftUpdated={() => {
           // Refresh sessions data after draft actions
           dispatch(fetchSessions({ page: pagination.current, limit: pagination.pageSize }));
+          // Close the modal to force refresh when reopened
+          setShowDraftViewModal(null);
+        }}
+        onRefreshData={async () => {
+          // Refresh draft data without closing modal (for notes updates)
+          if (showDraftViewModal?.id) {
+            try {
+              const session = sessions.find(s => s.interviews?.some(i => i.id === showDraftViewModal.id));
+              if (session) {
+                const result = await dispatch(fetchDraftsBySession(session.id)).unwrap();
+                if (result.success && result.data && result.data.length > 0) {
+                  const interviewDraft = result.data.find(draft => 
+                    draft.content?.interview_id === showDraftViewModal.id
+                  );
+                  if (interviewDraft) {
+                    setShowDraftViewModal(prev => ({
+                      ...prev,
+                      ai_draft: interviewDraft
+                    }));
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Failed to refresh draft data:', error);
+            }
+          }
         }}
         loading={loading}
 

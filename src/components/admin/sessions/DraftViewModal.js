@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
+import websocketService from '../../../services/websocketService';
 import {
   X,
   CheckCircle,
@@ -32,6 +33,7 @@ const DraftViewModal = ({
   onRegenerate,
   onDraftUpdated, // New prop to refresh parent state
   onRegenerationError,
+  onRefreshData, // New prop to refresh data without closing modal
   loading = false
 }) => {
   const { t } = useTranslation();
@@ -45,11 +47,13 @@ const DraftViewModal = ({
   const [regenerateReason, setRegenerateReason] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionForm, setShowRejectionForm] = useState(false);
+  const [showRegenerateForm, setShowRegenerateForm] = useState(false);
   const [hasBeenRegenerated, setHasBeenRegenerated] = useState(false);
   const [notesAddedSinceRegeneration, setNotesAddedSinceRegeneration] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [regenerationStep, setRegenerationStep] = useState(0);
   const [regenerationProgress, setRegenerationProgress] = useState(0);
+  const [regenerationStage, setRegenerationStage] = useState('');
 
   // State for expandable sections
   const [sectionsExpanded, setSectionsExpanded] = useState(false); // Initially minimized
@@ -96,27 +100,106 @@ const DraftViewModal = ({
     }
   }, [draft]);
 
-  // Effect for regeneration steps
+  // WebSocket listeners for regeneration events
+  useEffect(() => {
+    if (!isOpen || !draft?.id) return;
+
+    // Connect to WebSocket
+    websocketService.connect();
+
+    // Listen for draft regeneration started
+    const handleRegenerationStarted = (data) => {
+      if (data.draftId === draft.id) {
+        console.log('🔄 Regeneration started for draft:', data.draftId);
+        setIsRegenerating(true);
+        setRegenerationStep(0);
+        setRegenerationProgress(0);
+        setRegenerationStage('processing');
+      }
+    };
+
+    // Listen for draft generation complete (includes regeneration)
+    const handleDraftComplete = (data) => {
+      console.log('✅ Draft generation completed event received:', {
+        eventDraftId: data.draftId,
+        currentDraftId: draft.id,
+        sessionId: data.sessionId,
+        currentSessionId: session?.id,
+        isRegeneration: data.isRegeneration,
+        currentlyRegenerating: isRegenerating
+      });
+      
+      // Check if this completion event is for our current draft or session
+      const isDraftMatch = data.draftId === draft.id;
+      const isSessionMatch = data.sessionId === session?.id;
+      
+      if (isDraftMatch || (isSessionMatch && (isRegenerating || data.isRegeneration))) {
+        console.log('✅ Handling draft completion for our draft/session');
+        
+        // Stop regeneration animation
+        setIsRegenerating(false);
+        setRegenerationStage('completed');
+        
+        // Mark that regeneration has occurred and reset notes flag
+        setHasBeenRegenerated(true);
+        setNotesAddedSinceRegeneration(false);
+        
+        // Refresh the draft data to get the new version
+        if (onDraftUpdated) {
+          onDraftUpdated();
+        }
+        
+        // Auto-close regeneration modal after showing completion
+        setTimeout(() => {
+          setRegenerationStage('');
+          // Close the modal completely to show the updated draft
+          onClose();
+        }, 2000);
+      } else {
+        console.log('🔍 Draft completion event not for our draft - ignoring');
+      }
+    };
+
+    // Add WebSocket listeners
+    if (websocketService.socket) {
+      websocketService.socket.on('draft-regeneration-started', handleRegenerationStarted);
+      websocketService.socket.on('draft-generation-complete', handleDraftComplete);
+    }
+
+    // Cleanup on unmount or when modal closes
+    return () => {
+      if (websocketService.socket) {
+        websocketService.socket.off('draft-regeneration-started', handleRegenerationStarted);
+        websocketService.socket.off('draft-generation-complete', handleDraftComplete);
+      }
+    };
+  }, [isOpen, draft?.id, onDraftUpdated, onClose]);
+
+  // Effect for regeneration steps - visual feedback only, doesn't control completion
   useEffect(() => {
     let progressInterval;
     let stepTimeout;
 
-    if (isRegenerating) {
+    if (isRegenerating && regenerationStage === 'processing') {
       const currentStepData = regenerationSteps[regenerationStep];
       if (!currentStepData) return;
 
       // Set up progress interval for current step
       progressInterval = setInterval(() => {
         setRegenerationProgress(prev => {
-          const newProgress = prev + 1;
+          const newProgress = prev + 2; // Slower progress
           return newProgress <= 100 ? newProgress : 100;
         });
-      }, currentStepData.duration / 100);
+      }, currentStepData.duration / 50); // Slower animation
 
-      // Set up timeout for next step
+      // Set up timeout for next step - but cycle through steps continuously
       stepTimeout = setTimeout(() => {
         if (regenerationStep < regenerationSteps.length - 1) {
           setRegenerationStep(prev => prev + 1);
+          setRegenerationProgress(0);
+        } else {
+          // Cycle back to first step to keep animation going
+          setRegenerationStep(0);
           setRegenerationProgress(0);
         }
       }, currentStepData.duration);
@@ -127,7 +210,7 @@ const DraftViewModal = ({
       if (progressInterval) clearInterval(progressInterval);
       if (stepTimeout) clearTimeout(stepTimeout);
     };
-  }, [isRegenerating, regenerationStep, regenerationSteps]);
+  }, [isRegenerating, regenerationStep, regenerationSteps, regenerationStage]);
 
   // Effect to handle component unmounting or draft changes
   // This ensures regeneration state is reset if the component unmounts during regeneration
@@ -169,10 +252,38 @@ const DraftViewModal = ({
     return Math.min(stepProgress + currentStepProgress, 100);
   };
 
-  if (!isOpen || !draft) return null;
+  if (!isOpen) return null;
+
+  // Show loading state while fetching draft data
+  if (!draft || (typeof draft === 'object' && draft.loading)) {
+    return (
+      <div className="draft-modal-overlay">
+        <div className="draft-modal">
+          <div className="draft-modal__header">
+            <div className="draft-modal__title">
+              <FileText size={24} />
+              <h2>{t('admin.sessions.loadingDraft', 'Loading Draft...')}</h2>
+            </div>
+            <button className="btn btn--ghost" onClick={onClose}>
+              <X size={20} />
+            </button>
+          </div>
+          <div className="draft-modal__content">
+            <div className="loading-container">
+              <Loader size={48} className="spinning" />
+              <p>{t('admin.sessions.fetchingDraftData', 'Fetching draft data...')}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSaveNotes = async () => {
-    if (!newNoteContent.trim() || !draft?.id || !session?.id || isSavingNote) return;
+    if (!newNoteContent.trim() || !draft?.id || !session?.id || isSavingNote){
+      console.log('not saving note', newNoteContent.trim(), draft?.id, session?.id, isSavingNote);
+      return;
+    }
 
     setIsSavingNote(true);
 
@@ -201,9 +312,9 @@ const DraftViewModal = ({
         }
       }));
 
-      // Refresh parent state
-      if (onDraftUpdated) {
-        onDraftUpdated();
+      // Refresh data without closing modal when adding notes
+      if (onRefreshData) {
+        onRefreshData();
       }
 
       // Mark that notes have been added since regeneration
@@ -220,7 +331,10 @@ const DraftViewModal = ({
   };
 
   const handleApprove = async () => {
-    if (!draft?.id) return;
+    if (!draft?.id) {
+      console.log('not approving draft', draft?.id);
+      return;
+    }
 
     try {
       await dispatch(updateDraftStageSupabase({
@@ -274,9 +388,11 @@ const DraftViewModal = ({
 
   const handleRegenerate = () => {
     if (onRegenerate) {
+      // Show initial loading state immediately
       setIsRegenerating(true);
       setRegenerationStep(0);
       setRegenerationProgress(0);
+      setRegenerationStage('sending');
       
       try {
         // Call onRegenerate and handle the promise result
@@ -286,13 +402,18 @@ const DraftViewModal = ({
         if (regeneratePromise && typeof regeneratePromise.then === 'function') {
           regeneratePromise
             .then(() => {
-              // Success case is handled by parent component updating the draft
-              console.log('Regeneration completed successfully');
+              // API call succeeded - now waiting for WebSocket events
+              console.log('📤 Regeneration request sent successfully');
+              setRegenerationStage('sent');
+              // WebSocket will handle the rest of the flow
+              // DO NOT reset regeneration state here - wait for WebSocket completion
             })
             .catch(error => {
               // On error, reset regeneration state
-              console.error('Caught regeneration error in DraftViewModal:', error);
+              console.error('❌ Regeneration request failed:', error);
               setIsRegenerating(false);
+              setRegenerationStage('');
+              setRegenerateReason('');
               
               // Call the error callback if provided
               if (onRegenerationError) {
@@ -302,22 +423,30 @@ const DraftViewModal = ({
         } else {
           // If no promise is returned, assume it's synchronous and succeeded
           console.warn('onRegenerate did not return a promise');
+          setRegenerationStage('sent');
         }
       } catch (error) {
         // Catch any synchronous errors
         console.error('Error in handleRegenerate:', error);
         setIsRegenerating(false);
+        setRegenerationStage('');
+        setRegenerateReason('');
         
         if (onRegenerationError) {
           onRegenerationError(error);
         }
       }
+      
+      // Clear the regenerate reason immediately when starting
+      setRegenerateReason('');
     }
     
-    setRegenerateReason('');
-    // Mark that regeneration has occurred and reset notes flag
-    setHasBeenRegenerated(true);
-    setNotesAddedSinceRegeneration(false);
+    // DO NOT reset regeneration state here - this should only happen in WebSocket completion handler
+    // The WebSocket 'draft-generation-complete' event will handle:
+    // - setHasBeenRegenerated(true)
+    // - setNotesAddedSinceRegeneration(false)
+    // - setIsRegenerating(false)
+    // - onClose() after delay
   };
 
   const renderSections = () => {
@@ -375,8 +504,8 @@ const DraftViewModal = ({
     }
   };
 
-  // Get draft status from stage field
-  const draftStatus = draft?.stage;
+  // Get draft status from stage field - handle both draft table format and interview content format
+  const draftStatus = draft?.stage || draft?.status || 'draft';
   const isFinalized = draftStatus === 'approved' || draftStatus === 'rejected';
 
   // Get approval/rejection metadata
@@ -652,11 +781,11 @@ const DraftViewModal = ({
                     <span>
                       {draft?.content?.metadata?.regenerationType && (
                         <span className="regenerated-badge">
-                          {t('admin.drafts.regenerated', '(Regenerated)')}
+                          {t('admin.drafts.regenerated', '🔄 Regenerated')}
                         </span>
                       )}
                     </span>
-                    <label>{t('admin.sessions.draftVersion', 'Version')}: {draft?.content?.metadata?.regenerationCount + 1 || 1}</label>
+                    <label>{t('admin.sessions.draftVersion', 'Version')}: {(draft?.content?.metadata?.regenerationCount || 0) + 1}</label>
                   </div>
                   {/* {draft?.content?.metadata?.adminInstructions && (
                     <div className="info-item">
@@ -974,10 +1103,28 @@ const DraftViewModal = ({
                   <button
                     className="btn btn--warning"
                     onClick={handleRegenerate}
-                    disabled={loading}
+                    disabled={loading || isRegenerating}
                   >
-                    <RefreshCw size={16} />
-                    {t('admin.drafts.regenerateDraft', 'Regenerate Draft')}
+                    {isRegenerating ? (
+                      <>
+                        <Loader className="animate-spin" size={16} />
+                        {regenerationStage === 'sending' ? 
+                          t('admin.drafts.sending', 'Sending request...') :
+                          regenerationStage === 'sent' ? 
+                          t('admin.drafts.sent', 'Request sent, regenerating...') :
+                          regenerationStage === 'processing' ? 
+                          t('admin.drafts.processing', 'AI Processing...') : 
+                          regenerationStage === 'completed' ?
+                          t('admin.drafts.completed', 'Completed!') :
+                          t('admin.drafts.regenerating', 'Regenerating...')
+                        }
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw size={16} />
+                        {t('admin.drafts.regenerateDraft', 'Regenerate Draft')}
+                      </>
+                    )}
                   </button>
                   <button
                     className="btn btn--secondary"

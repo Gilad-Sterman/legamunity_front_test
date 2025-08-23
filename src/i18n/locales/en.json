@@ -95,6 +95,8 @@
       "title": "Client Projects Management",
       "createNew": "Create New Client Project",
       "createSession": "Create Client Project",
+      "loadingDraft": "Loading Draft...",
+      "fetchingDraftData": "Fetching draft data...",
       "creating": "Creating...",
       "search": "Search client projects...",
       "noSessions": "No client projects found",

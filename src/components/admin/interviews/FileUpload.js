@@ -1,20 +1,27 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { Upload, X, FileText, Music, AlertCircle, CheckCircle, Loader, Brain, Wand2, FileSearch, Sparkles } from 'lucide-react';
+import { Upload, X, FileText, Music, AlertCircle, CheckCircle, Loader, Brain, Wand2, FileSearch, Sparkles, Clock } from 'lucide-react';
 import { uploadInterviewFile } from '../../../store/slices/interviewsSlice';
+import { uploadInterviewFileAsync, fetchSessionById } from '../../../store/slices/sessionsSliceSupabase';
+import websocketService from '../../../services/websocketService';
 
 const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { uploadLoading } = useSelector(state => state.interviews);
+  const { uploadLoading: asyncUploadLoading } = useSelector(state => state.sessionsSupabase || {});
   
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState(null); // 'success', 'error', null
   const [uploadMessage, setUploadMessage] = useState('');
+  const [asyncUploadStatus, setAsyncUploadStatus] = useState(null); // 'success', 'error', null
+  const [asyncUploadMessage, setAsyncUploadMessage] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [asyncProcessingStage, setAsyncProcessingStage] = useState(null); // 'uploading', 'transcribing', 'generating_draft', 'completed'
+  const [showAsyncModal, setShowAsyncModal] = useState(false);
   
   const fileInputRef = useRef(null);
 
@@ -25,6 +32,34 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
     { id: 'transcribe', icon: Wand2, duration: 8000 },
     { id: 'process', icon: Brain, duration: 10000 },
     { id: 'finalize', icon: Sparkles, duration: 2000 }
+  ];
+
+  // Async processing stages configuration
+  const asyncStagesConfig = [
+    { 
+      id: 'uploading', 
+      icon: Upload, 
+      title: t('admin.interviews.async.uploading.title', 'Uploading to Cloud'),
+      description: t('admin.interviews.async.uploading.description', 'Securely transferring your file to cloud storage')
+    },
+    { 
+      id: 'transcribing', 
+      icon: Wand2, 
+      title: t('admin.interviews.async.transcribing.title', 'AI Transcription'),
+      description: t('admin.interviews.async.transcribing.description', 'Converting audio to text using advanced AI')
+    },
+    { 
+      id: 'generating_draft', 
+      icon: Brain, 
+      title: t('admin.interviews.async.generating.title', 'Generating Draft Based on Interview'),
+      description: t('admin.interviews.async.generating.description', 'AI is creating your draft based on the interview')
+    },
+    { 
+      id: 'completed', 
+      icon: CheckCircle, 
+      title: t('admin.interviews.async.completed.title', 'Processing Complete'),
+      description: t('admin.interviews.async.completed.description', 'Your interview has been fully processed')
+    }
   ];
 
   // Get localized processing steps
@@ -68,6 +103,81 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   };
 
   const allSupportedTypes = [...supportedTypes.audio, ...supportedTypes.text];
+
+  // WebSocket setup for real-time updates
+  useEffect(() => {
+    // Connect to WebSocket when component mounts
+    websocketService.connect();
+    
+    return () => {
+      // Clean up WebSocket connection when component unmounts
+      if (interviewId) {
+        websocketService.offInterviewStatusUpdate(interviewId);
+      }
+    };
+  }, []);
+
+  // Set up WebSocket listener for interview status updates
+  useEffect(() => {
+    if (interviewId && showAsyncModal) {
+      const handleStatusUpdate = (data) => {
+        const { status, error_message } = data;
+        
+        console.log('📡 FileUpload received status update:', status);
+        
+        switch (status) {
+          case 'uploading':
+            setAsyncProcessingStage('uploading');
+            setAsyncUploadStatus('uploading');
+            break;
+            
+          case 'transcribing':
+            setAsyncProcessingStage('transcribing');
+            setAsyncUploadStatus('processing');
+            break;
+            
+          case 'generating_draft':
+            setAsyncProcessingStage('generating_draft');
+            setAsyncUploadStatus('processing');
+            break;
+            
+          case 'completed':
+            setAsyncProcessingStage('completed');
+            setAsyncUploadStatus('success');
+            setAsyncUploadMessage('Interview processed successfully!');
+            
+            // Refresh session data to show updated interview
+            if (sessionData?.id) {
+              dispatch(fetchSessionById(sessionData.id));
+            }
+            
+            // Close modal after a brief delay to show success message
+            setTimeout(() => {
+              setShowAsyncModal(false);
+              if (onSuccess) onSuccess();
+            }, 2000);
+            break;
+            
+          case 'error':
+            setAsyncProcessingStage('error');
+            setAsyncUploadStatus('error');
+            setAsyncUploadMessage(error_message || 'Processing failed. Please try again.');
+            
+            // Close modal after showing error for a few seconds
+            setTimeout(() => {
+              setShowAsyncModal(false);
+            }, 4000);
+            break;
+        }
+      };
+      
+      websocketService.onInterviewStatusUpdate(interviewId, handleStatusUpdate);
+      
+      return () => {
+        websocketService.offInterviewStatusUpdate(interviewId, handleStatusUpdate);
+      };
+    }
+  }, [interviewId, showAsyncModal, dispatch, sessionData?.id]);
 
   // Progress animation effect
   useEffect(() => {
@@ -188,7 +298,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  // Handle file upload
+  // Handle file upload (synchronous)
   const handleUpload = async () => {
     if (!selectedFile) return;
 
@@ -224,11 +334,52 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
     }
   };
 
+  // Handle async file upload
+  const handleAsyncUpload = async () => {
+    if (!selectedFile) return;
+
+    try {
+      // Show async processing modal and start with uploading stage
+      setShowAsyncModal(true);
+      setAsyncProcessingStage('uploading');
+      setAsyncUploadStatus(null);
+      setAsyncUploadMessage('');
+      
+      // Include session data in the upload request
+      const result = await dispatch(uploadInterviewFileAsync({
+        interviewId,
+        file: selectedFile,
+        sessionData: {
+          clientName: sessionData?.clientName || sessionData?.client_name || '',
+          sessionId: sessionData?.id || '',
+          notes: sessionData?.notes || '',
+          preferred_language: sessionData?.preferred_language || 'en'
+        }
+      })).unwrap();
+
+      // File uploaded successfully, move to transcribing stage
+      setAsyncProcessingStage('transcribing');
+      setAsyncUploadStatus('success');
+      setAsyncUploadMessage(t('admin.interviews.upload.asyncSuccess', 'File uploaded successfully! Processing will continue in the background.'));
+      
+      // WebSocket will handle further status updates automatically
+
+    } catch (error) {
+      setAsyncUploadStatus('error');
+      setAsyncUploadMessage(error || t('admin.interviews.upload.asyncError', 'Failed to upload file. Please try again.'));
+      setShowAsyncModal(false);
+    }
+  };
+
   // Clear selected file
   const clearFile = () => {
     setSelectedFile(null);
     setUploadStatus(null);
     setUploadMessage('');
+    setAsyncUploadStatus(null);
+    setAsyncUploadMessage('');
+    setAsyncProcessingStage(null);
+    setShowAsyncModal(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -236,11 +387,83 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
 
   return (
     <>
+      {/* Async Processing Modal */}
+      {showAsyncModal && (
+        <div className="file-upload__async-modal">
+          <div className="async-modal__content">
+            <div className="async-modal__header">
+              <h3>{t('admin.interviews.async.title', 'Processing Your Interview')}</h3>
+              <button 
+                className="async-modal__close" 
+                onClick={() => setShowAsyncModal(false)}
+                disabled={asyncProcessingStage === 'uploading'}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="async-modal__stages">
+              {asyncStagesConfig.map((stage, index) => {
+                const isActive = asyncProcessingStage === stage.id;
+                const isCompleted = asyncStagesConfig.findIndex(s => s.id === asyncProcessingStage) > index;
+                const isPending = asyncStagesConfig.findIndex(s => s.id === asyncProcessingStage) < index;
+
+                return (
+                  <div 
+                    key={stage.id}
+                    className={`async-stage ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isPending ? 'pending' : ''}`}
+                  >
+                    <div className="async-stage__icon">
+                      {isCompleted ? (
+                        <CheckCircle size={32} className="completed-icon" />
+                      ) : (
+                        React.createElement(stage.icon, {
+                          size: 32,
+                          className: isActive ? "active-icon animate-pulse" : "pending-icon"
+                        })
+                      )}
+                    </div>
+                    <div className="async-stage__content">
+                      <h4 className="async-stage__title">{stage.title}</h4>
+                      <p className="async-stage__description">{stage.description}</p>
+                      {isActive && (
+                        <div className="async-stage__progress">
+                          <div className="progress-dots">
+                            <span className="dot"></span>
+                            <span className="dot"></span>
+                            <span className="dot"></span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {asyncUploadStatus === 'error' && (
+              <div className="async-modal__error">
+                <AlertCircle size={20} />
+                <span>{asyncUploadMessage}</span>
+              </div>
+            )}
+
+            <div className="async-modal__footer">
+              <p className="async-modal__note">
+                {asyncProcessingStage === 'uploading' && t('admin.interviews.async.note.uploading', 'Please keep this window open while uploading...')}
+                {asyncProcessingStage === 'transcribing' && t('admin.interviews.async.note.transcribing', 'You can close this window. We\'ll notify you when transcription is complete.')}
+                {asyncProcessingStage === 'generating_draft' && t('admin.interviews.async.note.generating', 'AI is working on your life story. This may take a few minutes.')}
+                {asyncProcessingStage === 'completed' && t('admin.interviews.async.note.completed', 'Your interview has been successfully processed!')}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Engaging Processing Overlay */}
-      {uploadLoading && (
+      {/* {uploadLoading && (
         <div className="file-upload__processing-overlay">
           <div className="file-upload__processing-content">
-            {/* Overall Progress Bar */}
             <div className="progress-header">
               <h3>{t('admin.interviews.upload.processingFile', 'Processing Your Interview')}</h3>
               <div className="overall-progress">
@@ -254,7 +477,6 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
               </div>
             </div>
 
-            {/* Current Step Display */}
             <div className="current-step">
               <div className="step-icon-container">
                 {React.createElement(getProcessingSteps()[currentStep]?.icon || Loader, {
@@ -276,7 +498,6 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
               </div>
             </div>
 
-            {/* Steps Timeline */}
             <div className="steps-timeline">
               {getProcessingSteps().map((step, index) => (
                 <div 
@@ -290,14 +511,9 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
                 </div>
               ))}
             </div>
-
-            {/* Fun Tips */}
-            {/* <div className="processing-tip">
-              <p className="tip-text">{getProcessingSteps()[currentStep]?.tip}</p>
-            </div> */}
           </div>
         </div>
-      )}
+      )} */}
       <div className="file-upload">
         <div className="file-upload__header">
           <h3>{t('admin.interviews.upload.title', 'Upload Interview File')}</h3>
@@ -362,11 +578,25 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
             </div>
           )}
 
+          {/* Async Upload Status Messages */}
+          {asyncUploadStatus && (
+            <div className={`file-upload__status file-upload__status--${asyncUploadStatus}`}>
+              {asyncUploadStatus === 'success' && <CheckCircle size={20} />}
+              {asyncUploadStatus === 'error' && <AlertCircle size={20} />}
+              <span>{asyncUploadMessage}</span>
+            </div>
+          )}
+
           {/* Upload Progress */}
-          {uploadLoading && (
+          {(uploadLoading || asyncUploadLoading) && (
             <div className="file-upload__progress">
               <Loader size={20} className="file-upload__spinner" />
-              <span>{t('admin.interviews.upload.processing', 'Uploading and processing file...')}</span>
+              <span>
+                {uploadLoading 
+                  ? t('admin.interviews.upload.processing', 'Uploading and processing file...')
+                  : t('admin.interviews.upload.asyncProcessing', 'Uploading file...')
+                }
+              </span>
             </div>
           )}
 
@@ -375,14 +605,16 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
             <button
               className="btn btn--secondary"
               onClick={onClose}
-              disabled={uploadLoading}
+              disabled={uploadLoading || asyncUploadLoading}
             >
               {t('common.cancel', 'Cancel')}
             </button>
-            <button
+            
+            {/* Synchronous Upload Button */}
+            {/* <button
               className="btn btn--primary"
               onClick={handleUpload}
-              disabled={!selectedFile || uploadLoading || uploadStatus === 'success'}
+              disabled={!selectedFile || uploadLoading || asyncUploadLoading || uploadStatus === 'success' || asyncUploadStatus === 'success'}
             >
               {uploadLoading ? (
                 <>
@@ -393,6 +625,26 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
                 <>
                   <Upload size={16} />
                   {t('admin.interviews.upload.upload', 'Upload & Process')}
+                </>
+              )}
+            </button> */}
+
+            {/* Async Upload Button */}
+            <button
+              className="btn btn--primary"
+              onClick={handleAsyncUpload}
+              disabled={!selectedFile || uploadLoading || asyncUploadLoading || uploadStatus === 'success' || asyncUploadStatus === 'success'}
+              title={t('admin.interviews.upload.asyncTooltip', 'Upload file and process in background')}
+            >
+              {asyncUploadLoading ? (
+                <>
+                  <Loader size={16} className="file-upload__spinner" />
+                  {t('admin.interviews.upload.uploading', 'Uploading...')}
+                </>
+              ) : (
+                <>
+                  <Upload size={16} />
+                  {t('admin.interviews.upload.upload', 'Upload')}
                 </>
               )}
             </button>
