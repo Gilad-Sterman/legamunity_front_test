@@ -25,7 +25,8 @@ import {
   AudioLines,
   BookCheck,
   BookOpen,
-  ExternalLink
+  ExternalLink,
+  RefreshCw
 } from 'lucide-react';
 import {
   fetchSessions,
@@ -48,6 +49,7 @@ import StoryViewModal from '../../components/admin/sessions/StoryViewModal';
 import StoryHistoryModal from '../../components/admin/sessions/StoryHistoryModal';
 import DraftViewModal from '../../components/admin/sessions/DraftViewModal';
 import '../../components/admin/sessions/DraftViewModal.scss';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { useNavigate } from 'react-router-dom';
 
 const Sessions = () => {
@@ -74,7 +76,7 @@ const Sessions = () => {
   const [editInterviewName, setEditInterviewName] = useState('');
   const [editInterviewIsFriend, setEditInterviewIsFriend] = useState(false);
   const [showSchedulingModal, setShowSchedulingModal] = useState(null);
-  const [showFileUploadModal, setShowFileUploadModal] = useState({interviewId: null, sessionData: null});
+  const [showFileUploadModal, setShowFileUploadModal] = useState({ interviewId: null, sessionData: null });
   const [showFileViewModal, setShowFileViewModal] = useState(null);
   const [showDraftViewModal, setShowDraftViewModal] = useState(null);
   const [generatingStory, setGeneratingStory] = useState(null); // Track which session is generating story
@@ -179,8 +181,8 @@ const Sessions = () => {
 
       const result = await response.json();
 
-      // Show success message
-      alert(t('admin.sessions.storyGeneratedSuccess', 'Full life story generated successfully!'));
+      // Short delay to ensure modal is visible before closing
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Clear cached story data for this session to force refresh
       setSessionStories(prev => {
@@ -619,11 +621,11 @@ const Sessions = () => {
       preferred_language: session.preferences?.preferred_language,
       interviewName: session.interviews?.find(i => i.id === interviewId)?.content?.name
     };
-    setShowFileUploadModal({interviewId, sessionData});
+    setShowFileUploadModal({ interviewId, sessionData });
   };
 
   const handleCloseFileUpload = () => {
-    setShowFileUploadModal({interviewId: null, sessionData: null});
+    setShowFileUploadModal({ interviewId: null, sessionData: null });
   };
 
   const handleShowFileView = (interview) => {
@@ -655,23 +657,23 @@ const Sessions = () => {
 
       // Show loading state while fetching draft
       setShowDraftViewModal({ loading: true, interview });
-      
+
       // Fetch the actual draft records from the database
       const result = await dispatch(fetchDraftsBySession(session.id)).unwrap();
-      
+
       if (result.success && result.data && result.data.length > 0) {
         // Find the draft that corresponds to this specific interview
-        const interviewDraft = result.data.find(draft => 
+        const interviewDraft = result.data.find(draft =>
           draft.content?.interview_id === interview.id
         );
-        
+
         if (interviewDraft) {
           const modalData = {
             ...interview,
             ai_draft: interviewDraft, // Use the actual draft record with id, stage, etc.
             sourceInterviewId: interview.id // Preserve the original interview ID for regeneration
           };
-          
+
           setShowDraftViewModal(modalData);
         } else {
           // Fallback to the AI content if no matching draft found
@@ -766,7 +768,7 @@ const Sessions = () => {
 
         // Use the preserved source interview ID for regeneration
         const sourceInterviewId = currentInterview.sourceInterviewId || currentInterview.id;
-        
+
         // Find the session that contains this interview
         const currentSession = sessions.find(s => s.interviews?.some(i => i.id === sourceInterviewId));
         if (!currentSession) {
@@ -777,7 +779,7 @@ const Sessions = () => {
         // Use the source interview ID to find the correct interview
         const sourceInterview = currentSession.interviews
           .find(i => i.id === sourceInterviewId);
-        
+
         const currentDraft = sourceInterview?.ai_draft;
 
         const notes = currentDraft?.content?.notes || [];
@@ -809,19 +811,19 @@ const Sessions = () => {
         // Regeneration API call completed successfully
         // DO NOT update the modal here - let WebSocket completion handle it
         // The DraftViewModal will handle refreshing via onDraftUpdated callback
-        
+
         console.log('✅ Regeneration API call completed - waiting for WebSocket completion');
-        
+
         // Keep the current modal open to show regeneration progress
         // The WebSocket completion event will trigger onDraftUpdated() which will close and refresh
-        
+
         // Resolve the promise on success
         resolve(regenerateResult);
 
       } catch (error) {
         console.error('Failed to regenerate draft:', error);
         alert(t('admin.drafts.regenerateError', `Failed to regenerate draft: ${error.message || error}`));
-        
+
         // Reject the promise on error so DraftViewModal can catch it
         reject(error);
       }
@@ -859,7 +861,7 @@ const Sessions = () => {
   const handleFileUploadSuccess = async (updatedInterview) => {
     try {
       // Close the file upload modal first
-      setShowFileUploadModal({interviewId: null, sessionData: null});
+      setShowFileUploadModal({ interviewId: null, sessionData: null });
 
       // Refresh sessions data to show updated completion percentage and metrics
       await dispatch(fetchSessions({
@@ -1467,8 +1469,19 @@ const Sessions = () => {
                               >
                                 {generatingStory === session.id ? (
                                   <>
-                                    <div className="spinner spinner--sm" />
-                                    {t('admin.sessions.sessionDrafts.generatingStory', 'Generating Story...')}
+                                    <div className="regeneration-processing-content">
+                                      <div className="regeneration-processing-header">
+                                        <h3>{t('admin.sessions.storyGeneration.title', 'Generating Life Story')}</h3>
+                                        <p>{t('admin.sessions.storyGeneration.subtitle', 'Creating a comprehensive life story from interviews...')}</p>
+                                        <RefreshCw className="regeneration-processing-icon spin" size={32} />
+                                      </div>
+
+                                      <div className="regeneration-processing-footer">
+                                        <p className="regeneration-processing-note">
+                                          {t('admin.sessions.storyGeneration.note', 'This process may take a few minutes. Please do not close this window.')}
+                                        </p>
+                                      </div>
+                                    </div>
                                   </>
                                 ) : (
                                   <>
@@ -1877,7 +1890,7 @@ const Sessions = () => {
               if (session) {
                 const result = await dispatch(fetchDraftsBySession(session.id)).unwrap();
                 if (result.success && result.data && result.data.length > 0) {
-                  const interviewDraft = result.data.find(draft => 
+                  const interviewDraft = result.data.find(draft =>
                     draft.content?.interview_id === showDraftViewModal.id
                   );
                   if (interviewDraft) {
@@ -1905,12 +1918,33 @@ const Sessions = () => {
       />
 
       {/* Story History Modal */}
-      <StoryHistoryModal
-        isOpen={!!showStoryHistoryModal}
-        onClose={handleCloseStoryHistory}
-        stories={showStoryHistoryModal ? sessionStories[showStoryHistoryModal] : null}
-        onViewStory={handleViewStory}
-      />
+      {showStoryHistoryModal && (
+        <StoryHistoryModal
+          sessionId={showStoryHistoryModal}
+          onClose={() => setShowStoryHistoryModal(null)}
+        />
+      )}
+
+      {/* Story Generation Processing Modal */}
+      {/* {generatingStory && (
+        <div className="regeneration-processing-overlay">
+          <div className="regeneration-processing-modal">
+            <div className="regeneration-processing-content">
+              <div className="regeneration-processing-header">
+                <h3>{t('admin.sessions.storyGeneration.title', 'Generating Life Story')}</h3>
+                <p>{t('admin.sessions.storyGeneration.subtitle', 'Creating a comprehensive life story from interviews...')}</p>
+                <RefreshCw className="regeneration-processing-icon spin" size={32} />
+              </div>
+
+              <div className="regeneration-processing-footer">
+                <p className="regeneration-processing-note">
+                  {t('admin.sessions.storyGeneration.note', 'This process may take a few minutes. Please do not close this window.')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )} */}
     </div>
   );
 };

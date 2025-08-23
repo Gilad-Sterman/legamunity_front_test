@@ -44,7 +44,6 @@ const FullLifeStories = () => {
   const [notesText, setNotesText] = useState('');
   const [actionLoading, setActionLoading] = useState({});
   const [regenerationProcessing, setRegenerationProcessing] = useState(null);
-  const [regenerationStep, setRegenerationStep] = useState(0);
 
   // Load life stories on component mount
   useEffect(() => {
@@ -364,23 +363,9 @@ const FullLifeStories = () => {
   const handleRegenerate = async (storyId, regenerateNotes) => {
     // Start regeneration processing modal
     setRegenerationProcessing(storyId);
-    setRegenerationStep(0);
     setActionLoading(prev => ({ ...prev, [storyId]: 'regenerating' }));
 
     try {
-      // Simulate processing steps
-      const steps = [
-        { text: t('admin.lifeStories.regeneration.analyzingNotes', 'Analyzing notes and feedback...'), duration: 100 },
-        { text: t('admin.lifeStories.regeneration.aiProcessing', 'AI processing and content generation...'), duration: 100 },
-        { text: t('admin.lifeStories.regeneration.enhancingContent', 'Enhancing content structure...'), duration: 100 },
-        { text: t('admin.lifeStories.regeneration.finalizingDraft', 'Finalizing new version...'), duration: 100 }
-      ];
-
-      // Process each step with delay
-      for (let i = 0; i < steps.length; i++) {
-        setRegenerationStep(i);
-        await new Promise(resolve => setTimeout(resolve, steps[i].duration));
-      }
 
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/admin/full-life-stories/${storyId}/regenerate`, {
@@ -403,8 +388,7 @@ const FullLifeStories = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Complete final step
-        setRegenerationStep(steps.length - 1);
+        // Short delay to ensure modal is visible before closing
         await new Promise(resolve => setTimeout(resolve, 500));
 
         // Refresh the life stories list
@@ -418,7 +402,6 @@ const FullLifeStories = () => {
     } finally {
       setActionLoading(prev => ({ ...prev, [storyId]: null }));
       setRegenerationProcessing(null);
-      setRegenerationStep(0);
     }
   };
 
@@ -453,12 +436,6 @@ const FullLifeStories = () => {
     return hasNewUserNotes;
   };
 
-  const getRegenerationSteps = () => [
-    { text: t('admin.lifeStories.regeneration.analyzingNotes', 'Analyzing notes and feedback...'), icon: 'search' },
-    { text: t('admin.lifeStories.regeneration.aiProcessing', 'AI processing and content generation...'), icon: 'brain' },
-    { text: t('admin.lifeStories.regeneration.enhancingContent', 'Enhancing content structure...'), icon: 'edit' },
-    { text: t('admin.lifeStories.regeneration.finalizingDraft', 'Finalizing new version...'), icon: 'check' }
-  ];
 
   const handleAddNote = async (storyId) => {
     if (!notesText.trim()) return;
@@ -958,46 +935,16 @@ const FullLifeStories = () => {
             <div className="regeneration-processing-modal">
               <div className="regeneration-processing-content">
                 <div className="regeneration-processing-header">
-                  <RefreshCw className="regeneration-processing-icon spin" size={32} />
                   <h3>{t('admin.lifeStories.regeneration.title', 'Regenerating Life Story')}</h3>
                   <p>{t('admin.lifeStories.regeneration.subtitle', 'Creating new version with your feedback...')}</p>
+                  <RefreshCw className="regeneration-processing-icon spin" size={32} />
                 </div>
 
-                <div className="regeneration-processing-steps">
-                  {getRegenerationSteps().map((step, index) => {
-                    const isActive = index === regenerationStep;
-                    const isCompleted = index < regenerationStep;
-                    const stepIcon = step.icon === 'search' ? Search :
-                      step.icon === 'brain' ? RefreshCw :
-                        step.icon === 'edit' ? StickyNote : CheckCircle;
-                    const StepIcon = stepIcon;
-
-                    return (
-                      <div key={index} className={`regeneration-step ${isActive ? 'regeneration-step--active' :
-                        isCompleted ? 'regeneration-step--completed' : 'regeneration-step--pending'
-                        }`}>
-                        <div className="regeneration-step-icon">
-                          <StepIcon size={16} className={isActive ? 'spin' : ''} />
-                        </div>
-                        <div className="regeneration-step-content">
-                          <span className="regeneration-step-text">{step.text}</span>
-                          {isActive && (
-                            <div className="regeneration-step-progress">
-                              <div className="regeneration-progress-bar">
-                                <div className="regeneration-progress-fill"></div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        {isCompleted && (
-                          <div className="regeneration-step-check">
-                            <CheckCircle size={14} />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                {/* <div className="regeneration-processing-loader">
+                  <div className="loader-container">
+                    <LoadingSpinner size="medium" />
+                  </div>
+                </div> */}
 
                 <div className="regeneration-processing-footer">
                   <p className="regeneration-processing-note">
