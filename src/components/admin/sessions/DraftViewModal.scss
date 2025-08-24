@@ -1001,6 +1001,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  width: max-content;
 
   &--success {
     background: rgba($success-color, 0.1);

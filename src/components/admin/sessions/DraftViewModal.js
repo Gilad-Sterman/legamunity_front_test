@@ -56,8 +56,8 @@ const DraftViewModal = ({
   const [regenerationStage, setRegenerationStage] = useState('');
 
   // State for expandable sections
-  const [sectionsExpanded, setSectionsExpanded] = useState(false); // Initially minimized
-  const [followUpsExpanded, setFollowUpsExpanded] = useState(true); // Initially expanded
+  const [sectionsExpanded, setSectionsExpanded] = useState(true); // Initially minimized
+  const [followUpsExpanded, setFollowUpsExpanded] = useState(false); // Initially expanded
 
   // Regeneration processing steps
   const regenerationSteps = [
@@ -128,27 +128,27 @@ const DraftViewModal = ({
         isRegeneration: data.isRegeneration,
         currentlyRegenerating: isRegenerating
       });
-      
+
       // Check if this completion event is for our current draft or session
       const isDraftMatch = data.draftId === draft.id;
       const isSessionMatch = data.sessionId === session?.id;
-      
+
       if (isDraftMatch || (isSessionMatch && (isRegenerating || data.isRegeneration))) {
         console.log('✅ Handling draft completion for our draft/session');
-        
+
         // Stop regeneration animation
         setIsRegenerating(false);
         setRegenerationStage('completed');
-        
+
         // Mark that regeneration has occurred and reset notes flag
         setHasBeenRegenerated(true);
         setNotesAddedSinceRegeneration(false);
-        
+
         // Refresh the draft data to get the new version
         if (onDraftUpdated) {
           onDraftUpdated();
         }
-        
+
         // Auto-close regeneration modal after showing completion
         setTimeout(() => {
           setRegenerationStage('');
@@ -223,12 +223,12 @@ const DraftViewModal = ({
       }
     };
   }, [isRegenerating, draft?.id]);
-  
+
   // Effect to force reset regeneration state after a timeout
   // This is a safety mechanism to ensure the modal doesn't stay open indefinitely
   useEffect(() => {
     let safetyTimeout;
-    
+
     if (isRegenerating) {
       // Set a safety timeout to force close the regeneration modal after 30 seconds
       // This ensures the modal doesn't stay open indefinitely if something goes wrong
@@ -237,7 +237,7 @@ const DraftViewModal = ({
         setIsRegenerating(false);
       }, 30000); // 30 seconds timeout
     }
-    
+
     return () => {
       if (safetyTimeout) clearTimeout(safetyTimeout);
     };
@@ -280,7 +280,7 @@ const DraftViewModal = ({
   }
 
   const handleSaveNotes = async () => {
-    if (!newNoteContent.trim() || !draft?.id || !session?.id || isSavingNote){
+    if (!newNoteContent.trim() || !draft?.id || !session?.id || isSavingNote) {
       console.log('not saving note', newNoteContent.trim(), draft?.id, session?.id, isSavingNote);
       return;
     }
@@ -393,11 +393,11 @@ const DraftViewModal = ({
       setRegenerationStep(0);
       setRegenerationProgress(0);
       setRegenerationStage('sending');
-      
+
       try {
         // Call onRegenerate and handle the promise result
         const regeneratePromise = onRegenerate(draft.id, regenerateReason);
-        
+
         // If onRegenerate returns a promise, handle it
         if (regeneratePromise && typeof regeneratePromise.then === 'function') {
           regeneratePromise
@@ -414,7 +414,7 @@ const DraftViewModal = ({
               setIsRegenerating(false);
               setRegenerationStage('');
               setRegenerateReason('');
-              
+
               // Call the error callback if provided
               if (onRegenerationError) {
                 onRegenerationError(error);
@@ -431,16 +431,16 @@ const DraftViewModal = ({
         setIsRegenerating(false);
         setRegenerationStage('');
         setRegenerateReason('');
-        
+
         if (onRegenerationError) {
           onRegenerationError(error);
         }
       }
-      
+
       // Clear the regenerate reason immediately when starting
       setRegenerateReason('');
     }
-    
+
     // DO NOT reset regeneration state here - this should only happen in WebSocket completion handler
     // The WebSocket 'draft-generation-complete' event will handle:
     // - setHasBeenRegenerated(true)
@@ -521,6 +521,8 @@ const DraftViewModal = ({
   const canRegenerate = hasNewNotes && !isFinalized && (!hasBeenRegenerated || notesAddedSinceRegeneration);
   const canEditNotes = !isFinalized;
 
+  console.log('draft', draft);
+
   return (
     <>
       {/* Regeneration Processing Overlay */}
@@ -588,7 +590,7 @@ const DraftViewModal = ({
             <div className="draft-modal__title">
               <FileText size={24} />
               <div>
-                <h2>{draft?.title || t('admin.sessions.draftDetails', 'Draft Details')}</h2>
+                <h2>{draft?.title || t('admin.sessions.draftDetails', 'Draft Details')} - {draft?.content?.title}</h2>
                 <span className={`status-badge status-badge--${getStatusColor(draftStatus)}`}>
                   {t(`admin.drafts.status.${draftStatus}`, draftStatus)}
                 </span>
@@ -836,10 +838,28 @@ const DraftViewModal = ({
                   {/* Display fullMarkdown if available, otherwise fall back to summary */}
                   {draft.content.fullMarkdown ? (
                     <div className="content-section">
-                      <h3>{t('admin.sessions.fullContent', 'Full Content')}</h3>
-                      <div className="content-text">
-                        <ReactMarkdown>{draft.content.fullMarkdown}</ReactMarkdown>
+                      <div className="section-header expandable-header">
+                        <h3>{t('admin.sessions.fullContent', 'Full Content')}</h3>
+                        <button
+                          className="btn btn--ghost btn--sm expand-toggle"
+                          onClick={() => setSectionsExpanded(!sectionsExpanded)}
+                        >
+                          {sectionsExpanded ? (
+                            <>
+                              <ChevronUp size={16} />
+                              {t('admin.drafts.showLess', 'Show Less')}
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown size={16} />
+                              {t('admin.drafts.showMore', 'Show More')}
+                            </>
+                          )}
+                        </button>
                       </div>
+                      {sectionsExpanded && <div className="content-text">
+                        <ReactMarkdown>{draft.content.fullMarkdown}</ReactMarkdown>
+                      </div>}
                     </div>
                   ) : draft.content.summary && (
                     <div className="content-section">
@@ -850,19 +870,8 @@ const DraftViewModal = ({
                     </div>
                   )}
 
-                  {draft.content.keyThemes && Array.isArray(draft.content.keyThemes) && draft.content.keyThemes.length > 0 && (
-                    <div className="content-section">
-                      <h3>{t('admin.sessions.keyThemes', 'Key Themes')}</h3>
-                      <div className="key-themes">
-                        {draft.content.keyThemes.map((theme, index) => (
-                          <span key={index} className="theme-tag">{theme}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   {/* Display sections */}
-                  {draft.content.sections && (
+                  {!draft.content.fullMarkdown && draft.content.sections && (
                     <div className="content-section">
                       <div className="section-header expandable-header">
                         <h3>{t('admin.sessions.sections', 'Sections')}</h3>
@@ -923,6 +932,17 @@ const DraftViewModal = ({
                           ))}
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {draft.content.keyThemes && Array.isArray(draft.content.keyThemes) && draft.content.keyThemes.length > 0 && (
+                    <div className="content-section">
+                      <h3>{t('admin.sessions.keyThemes', 'Key Themes')}</h3>
+                      <div className="key-themes">
+                        {draft.content.keyThemes.map((theme, index) => (
+                          <span key={index} className="theme-tag">{theme}</span>
+                        ))}
+                      </div>
                     </div>
                   )}
 
