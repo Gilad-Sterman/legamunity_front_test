@@ -152,7 +152,6 @@ const FullLifeStories = () => {
 
       const data = await response.json();
 
-      console.log('data', data)
 
       if (data.success) {
         // Transform the data to match our frontend structure
@@ -175,7 +174,6 @@ const FullLifeStories = () => {
           const extractChaptersFromMarkdown = (text) => {
             if (!text || typeof text !== 'string') return [];
 
-            console.log('Extracting chapters from text length:', text.length);
 
             // Use the simplest possible approach that works reliably
             const chapters = [];
@@ -263,11 +261,6 @@ const FullLifeStories = () => {
                     contentSections
                   });
 
-                  console.log(`Found chapter: "${title}" with content length: ${rawContent.length}`);
-                  console.log(`Found ${subtitles.length} subtitles in chapter`);
-                  subtitles.forEach((subtitle, idx) => {
-                    console.log(`  Subtitle ${idx + 1}: "${subtitle}"`);
-                  });
                 } else {
                   // If there's no line break, the entire part is the title
                   chapters.push({
@@ -277,19 +270,13 @@ const FullLifeStories = () => {
                     contentSections: []
                   });
 
-                  console.log(`Found chapter with title only: "${part.trim()}"`);
                 }
               }
 
-              // Log all chapters for debugging
-              chapters.forEach((chapter, index) => {
-                console.log(`Chapter ${index + 1}: "${chapter.title}" - Content length: ${chapter.content.length} - Subtitles: ${chapter.subtitles.length}`);
-              });
             } catch (error) {
               console.error('Error extracting chapters:', error);
             }
 
-            console.log(`Total chapters found: ${chapters.length}`);
             return chapters;
           };
 
@@ -346,21 +333,7 @@ const FullLifeStories = () => {
               // Store extracted chapters in a variable for debugging
               chapters: (() => {
                 if (isNewFormat) {
-                  console.log('Story content sample:', story.content ? story.content.substring(0, 200) + '...' : 'No content');
-                  console.log('Story content type:', typeof story.content);
-                  console.log('Story content length:', story.content ? story.content.length : 0);
-
-                  // Check if content has ## headers
-                  const hasHeaders = story.content && story.content.includes('##');
-                  console.log('Content has ## headers:', hasHeaders);
-
                   const extractedChapters = extractChaptersFromMarkdown(story.content);
-                  console.log('Extracted chapters count:', extractedChapters.length);
-
-                  // Log each chapter
-                  extractedChapters.forEach((chapter, index) => {
-                    console.log(`Chapter ${index + 1}: ${chapter.title} (content length: ${chapter.content ? chapter.content.length : 0})`);
-                  });
 
                   return extractedChapters;
                 } else {
