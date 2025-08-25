@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import websocketService from '../../../services/websocketService';
@@ -19,7 +19,8 @@ import {
   FileSearch,
   Sparkles,
   Loader,
-  Clock
+  Clock,
+  Loader2
 } from 'lucide-react';
 import { addNoteToDraft, updateDraftStageSupabase } from '../../../store/slices/draftsSlice';
 import ReactMarkdown from 'react-markdown';
@@ -67,21 +68,31 @@ const DraftViewModal = ({
     { id: 'finalize', icon: Sparkles, title: t('admin.drafts.regeneration.finalizing', 'Finalizing Draft'), duration: 2000 }
   ];
 
+  // Track if modal was previously open
+  const wasOpen = useRef(false);
+
   // Initialize state when modal opens
   useEffect(() => {
     if (isOpen && draft) {
-      setLocalDraft(draft);
-      setNewNoteContent('');
-      setIsEditingNotes(false);
-      // setShowRegenerateForm(false);
+      // Reset form states
       setShowRejectionForm(false);
-      setRegenerateReason('');
-      setRejectionReason('');
+      setShowRegenerateForm(false);
+      setIsEditingNotes(false);
+      setNewNoteContent('');
+      
       // Check if this draft has been regenerated
       const isRegenerated = !!draft?.content?.metadata?.regenerationType;
       setHasBeenRegenerated(isRegenerated);
-      setNotesAddedSinceRegeneration(false);
+      
+      // Only reset notesAddedSinceRegeneration when the modal first opens
+      // Don't reset it when the draft changes while modal is already open
+      if (!wasOpen.current) {
+        setNotesAddedSinceRegeneration(false);
+      }
     }
+    
+    // Track if modal was previously open
+    wasOpen.current = isOpen;
   }, [isOpen, draft]);
 
   // Update local draft when parent draft changes
@@ -91,14 +102,15 @@ const DraftViewModal = ({
       // Reset regeneration state when new draft is received
       const isRegenerated = !!draft?.content?.metadata?.regenerationType;
       setHasBeenRegenerated(isRegenerated);
-      // Reset notes flag when we get a regenerated draft
-      if (isRegenerated) {
-        setNotesAddedSinceRegeneration(false);
+      
+      // Only reset notes flag when we get a newly regenerated draft
+      // This prevents the flag from being reset when notes are added
+      if (isRegenerated && !notesAddedSinceRegeneration) {
         // Stop regeneration loading when new draft arrives
         setIsRegenerating(false);
       }
     }
-  }, [draft]);
+  }, [draft, notesAddedSinceRegeneration]);
 
   // WebSocket listeners for regeneration events
   useEffect(() => {
@@ -140,20 +152,22 @@ const DraftViewModal = ({
         setIsRegenerating(false);
         setRegenerationStage('completed');
 
-        // Mark that regeneration has occurred and reset notes flag
+        // Mark that regeneration has occurred but don't reset notes flag
+        // This allows the regenerate button to remain visible if notes are added after regeneration
         setHasBeenRegenerated(true);
-        setNotesAddedSinceRegeneration(false);
 
         // Refresh the draft data to get the new version
         if (onDraftUpdated) {
           onDraftUpdated();
         }
 
-        // Auto-close regeneration modal after showing completion
+        // Don't close the modal, just refresh the data and reset regeneration state
         setTimeout(() => {
           setRegenerationStage('');
-          // Close the modal completely to show the updated draft
-          onClose();
+          // Refresh data without closing the modal
+          if (onRefreshData) {
+            onRefreshData();
+          }
         }, 2000);
       } else {
         console.log('🔍 Draft completion event not for our draft - ignoring');
@@ -235,7 +249,7 @@ const DraftViewModal = ({
       safetyTimeout = setTimeout(() => {
         console.log('Safety timeout triggered - forcing regeneration modal to close');
         setIsRegenerating(false);
-      }, 30000); // 30 seconds timeout
+      }, 1000000); // 100 seconds timeout
     }
 
     return () => {
@@ -517,11 +531,19 @@ const DraftViewModal = ({
 
   const canApprove = !isFinalized;
   const canReject = false;
-  // Can regenerate if: has notes AND not finalized AND (not regenerated OR notes added since regeneration)
-  const canRegenerate = hasNewNotes && !isFinalized && (!hasBeenRegenerated || notesAddedSinceRegeneration);
+  // Can regenerate if: has notes AND not finalized AND not currently regenerating
+  // Always allow regeneration if there are notes, regardless of regeneration history
+  const canRegenerate = hasNewNotes && !isFinalized && !isRegenerating;
   const canEditNotes = !isFinalized;
 
-  console.log('draft', draft);
+  console.log('Regenerate button state:', {
+    hasNewNotes,
+    isFinalized,
+    isRegenerating,
+    notesAddedSinceRegeneration,
+    hasBeenRegenerated,
+    canRegenerate
+  });
 
   return (
     <>
@@ -533,18 +555,14 @@ const DraftViewModal = ({
             <div className="regeneration-header">
               <h3>{t('admin.drafts.regeneration.title', 'Regenerating Draft')}</h3>
               <div className="regeneration-overall-progress">
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${getOverallRegenerationProgress()}%` }}
-                  />
+                <div className="loading-circle">
+                  <RefreshCw size={24} />
                 </div>
-                <span className="progress-text">{Math.round(getOverallRegenerationProgress())}%</span>
               </div>
             </div>
 
             {/* Current Step */}
-            <div className="regeneration-current-step">
+            {/* <div className="regeneration-current-step">
               <div className="step-icon-container">
                 {React.createElement(regenerationSteps[regenerationStep]?.icon || Loader, {
                   size: 64,
@@ -562,10 +580,10 @@ const DraftViewModal = ({
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Steps Timeline */}
-            <div className="regeneration-steps-timeline">
+            {/* <div className="regeneration-steps-timeline">
               {regenerationSteps.map((step, index) => (
                 <div
                   key={step.id}
@@ -577,7 +595,7 @@ const DraftViewModal = ({
                   <span className="timeline-step-title">{step.title}</span>
                 </div>
               ))}
-            </div>
+            </div> */}
 
             <span className="regeneration-message">{t('admin.drafts.regenerationMsg', 'This process can take a few minutes. Please do not close the modal or navigate away from this page.')}</span>
           </div>

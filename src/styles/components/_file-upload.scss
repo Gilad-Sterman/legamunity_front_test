@@ -539,6 +539,7 @@
           .progress-dots {
             display: flex;
             gap: $spacing-xs;
+            padding: $spacing-xs;
 
             .dot {
               width: 8px;

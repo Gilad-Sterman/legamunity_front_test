@@ -20,8 +20,8 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   const [asyncUploadMessage, setAsyncUploadMessage] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [asyncProcessingStage, setAsyncProcessingStage] = useState('transcribing'); // 'uploading', 'transcribing', 'generating_draft', 'completed'
-  const [showAsyncModal, setShowAsyncModal] = useState(true);
+  const [asyncProcessingStage, setAsyncProcessingStage] = useState(null); // 'uploading', 'transcribing', 'generating_draft', 'completed'
+  const [showAsyncModal, setShowAsyncModal] = useState(false);
 
   const fileInputRef = useRef(null);
 
