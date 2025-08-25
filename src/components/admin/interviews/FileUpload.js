@@ -314,7 +314,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
           clientName: sessionData?.clientName || sessionData?.client_name || '',
           sessionId: sessionData?.id || '',
           notes: sessionData?.notes || '',
-          preferred_language: sessionData?.preferred_language || 'en'
+          preferred_language: sessionData?.preferred_language || 'auto-detect'
         }
       })).unwrap();
 
@@ -353,7 +353,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
           clientName: sessionData?.clientName || sessionData?.client_name || '',
           sessionId: sessionData?.id || '',
           notes: sessionData?.notes || '',
-          preferred_language: sessionData?.preferred_language || 'en'
+          preferred_language: sessionData?.preferred_language || 'auto-detect'
         }
       })).unwrap();
 

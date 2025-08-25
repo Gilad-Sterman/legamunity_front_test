@@ -618,7 +618,7 @@ const Sessions = () => {
       clientName: session.client_name,
       client_name: session.client_name,
       notes: session.notes,
-      preferred_language: session.preferences?.preferred_language,
+      preferred_language: session.preferences?.preferred_language || 'auto-detect',
       interviewName: session.interviews?.find(i => i.id === interviewId)?.content?.name
     };
     setShowFileUploadModal({ interviewId, sessionData });
@@ -984,23 +984,22 @@ const Sessions = () => {
       <div className="admin-page__content">
         {/* Filters and Search */}
         <div className="sessions-filters">
-          <div className="sessions-filters__search">
-            <Search className="sessions-filters__search-icon" size={20} />
+          <div className="search-bar__input">
+            <Search className="search-bar__icon" size={20} />
             <input
               type="text"
               placeholder={t('admin.sessions.search', 'Search sessions...')}
               value={searchTerm}
               onChange={handleSearch}
-              className="sessions-filters__search-input"
+              className="search-bar__field"
             />
           </div>
 
           <div className="sessions-filters__interview-status">
-            <Filter size={20} />
             <select
               value={selectedStatus.startsWith('interview_') ? selectedStatus.replace('interview_', '') : 'all'}
               onChange={(e) => handleInterviewStatusFilter(e.target.value)}
-              className="sessions-filters__interview-status-select"
+              className="sessions-filters__interview-status-select btn btn--secondary"
             >
               <option value="all">{t('admin.sessions.filters.allInterviewStatuses', 'All Interview Statuses')}</option>
               <option value="scheduled">{getTranslatedStatus('scheduled')}</option>
@@ -1136,11 +1135,6 @@ const Sessions = () => {
                           <div className="client-info__item">
                             <strong>{t('admin.sessions.age', 'Age')}:</strong> {session.client_age || t('common.notProvided', 'Not provided')}
                           </div>
-                          {session.preferences?.preferred_language && (
-                            <div className="client-info__item">
-                              <strong>{t('admin.sessions.language', 'Language')}:</strong> {t(`admin.sessions.languages.${session.preferences.preferred_language}`)}
-                            </div>
-                          )}
                         </div>
                       </div>
 

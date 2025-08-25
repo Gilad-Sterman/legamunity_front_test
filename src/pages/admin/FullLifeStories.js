@@ -963,7 +963,7 @@ const FullLifeStories = () => {
         )}
 
         {/* Statistics Cards */}
-        <div className="stats-grid">
+       {/* <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-card__value">{lifeStories.length}</div>
             <div className="stat-card__label">{t('admin.lifeStories.totalStories', 'Total Stories')}</div>
@@ -982,7 +982,7 @@ const FullLifeStories = () => {
             </div>
             <div className="stat-card__label">{t('admin.lifeStories.avgWordCount', 'Avg Word Count')}</div>
           </div>
-        </div>
+        </div>*/}
 
         {/* Life Stories List */}
         <div className="life-stories-list">

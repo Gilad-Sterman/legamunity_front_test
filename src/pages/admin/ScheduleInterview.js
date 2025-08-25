@@ -143,7 +143,7 @@ const ScheduleInterview = () => {
             email: 'emergency@example.com'
           }
         },
-        preferred_language: 'english',
+        preferred_language: 'auto-detect',
         special_requirements: '',
         accessibility_needs: [],
         

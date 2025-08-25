@@ -11,13 +11,13 @@ const AdminDashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const hasFetchedRef = useRef(false);
-  
+
   // Get stats from Redux store
-  const { 
-    loading, 
+  const {
+    loading,
     stats
   } = useSelector(state => state.sessions);
-  
+
   // Format KPI data from enhanced stats
   const kpis = {
     // Core session metrics
@@ -27,7 +27,7 @@ const AdminDashboard = () => {
 
     //rejected drafts
     rejectedDrafts: stats?.rejectedDrafts?.toString() || '0',
-    
+
     // Life Story metrics
     totalLifeStories: stats?.totalLifeStories?.toString() || '0',
     uniqueSessionLifeStories: stats?.uniqueSessionLifeStories?.toString() || '0',
@@ -35,7 +35,7 @@ const AdminDashboard = () => {
     approvedLifeStories: stats?.approvedLifeStories?.toString() || '0',
     avgWordsPerStory: stats?.avgWordsPerStory?.toString() || '0'
   };
-  
+
   // Load stats on component mount
   useEffect(() => {
     // Only fetch if we haven't fetched before and we're not already loading
@@ -59,76 +59,61 @@ const AdminDashboard = () => {
       {/* Core Session Metrics */}
       <section className="admin-dashboard-page__section">
         <h2 className="admin-dashboard-page__section-title">{t('admin.sections.sessionOverview', 'Session Overview')}</h2>
-        <button className="admin-dashboard-page__button" onClick={() => navigate('/admin/sessions')}>{t('admin.buttons.viewSessions', 'View All Sessions')}</button>
-        <div className="admin-dashboard-page__kpi-grid">
-          <KpiCard 
-            title={t('admin.kpi.totalSessions')} 
-            value={kpis.totalSessions} 
-            icon={Users} 
-            loading={loading}
-            color="blue"
-          />
-          <KpiCard 
-            title={t('admin.kpi.activeSessions')} 
-            value={kpis.activeSessions} 
-            icon={Activity} 
-            loading={loading}
-            color="green"
-          />
-          <KpiCard 
-            title={t('admin.kpi.completedSessions', 'Completed Sessions')} 
-            value={kpis.completedSessions} 
-            icon={CheckCircle} 
-            loading={loading}
-            color="purple"
-          />
+        <div className="admin-dashboard-page__buttons-container">
+          <button className="admin-dashboard-page__button" onClick={() => navigate('/admin/sessions')}>{t('admin.buttons.viewSessions', 'View All Sessions')}</button>
+          <button className="admin-dashboard-page__button" onClick={() => navigate('/admin/full-life-stories')}>{t('admin.buttons.viewLifeStories', 'View All Life Stories')}</button>
         </div>
-      </section>
-
-
-      {/* Life Stories Overview */}
-      <section className="admin-dashboard-page__section">
-        <h2 className="admin-dashboard-page__section-title">{t('admin.sections.lifeStoriesOverview', 'Life Stories Overview')}</h2>
-        <button className="admin-dashboard-page__button" onClick={() => navigate('/admin/full-life-stories')}>{t('admin.buttons.viewLifeStories', 'View All Life Stories')}</button>
         <div className="admin-dashboard-page__kpi-grid">
-          <KpiCard 
-            title={t('admin.kpi.totalLifeStories', 'Total Life Stories')} 
-            value={kpis.totalLifeStories} 
-            icon={BookOpen} 
-            loading={loading}
-            color="purple"
-          />
-          <KpiCard 
-            title={t('admin.kpi.generatedLifeStories', 'Generated Stories')} 
-            value={kpis.generatedLifeStories} 
-            icon={Activity} 
+          <KpiCard
+            title={t('admin.kpi.totalSessions')}
+            value={kpis.totalSessions}
+            icon={Users}
             loading={loading}
             color="blue"
           />
-          <KpiCard 
-            title={t('admin.kpi.approvedLifeStories', 'Approved Stories')} 
-            value={kpis.approvedLifeStories} 
-            icon={Star} 
+          <KpiCard
+            title={t('admin.kpi.completedSessions', 'Completed Sessions')}
+            value={kpis.completedSessions}
+            icon={CheckCircle}
+            loading={loading}
+            color="purple"
+          />
+          <KpiCard
+            title={t('admin.kpi.totalLifeStories', 'Total Life Stories')}
+            value={kpis.totalLifeStories}
+            icon={BookOpen}
+            loading={loading}
+            color="purple"
+          />
+          <KpiCard
+            title={t('admin.kpi.approvedLifeStories', 'Approved Stories')}
+            value={kpis.approvedLifeStories}
+            icon={Star}
             loading={loading}
             color="green"
           />
         </div>
       </section>
 
-      {/* Rejected Drafts */}
-      <section className="admin-dashboard-page__section">
-        <h2 className="admin-dashboard-page__section-title">{t('admin.sections.rejectedDrafts', 'Rejected Drafts')}</h2>
-        <div className="admin-dashboard-page__kpi-grid">
-          <KpiCard 
-            title={t('admin.kpi.rejectedDrafts', 'Rejected Drafts')} 
-            value={kpis.rejectedDrafts} 
-            icon={Star} 
-            loading={loading}
-            color="red"
-          />
+      {/* bottom section */}
+      <section className="admin-dashboard-page__section admin-dashboard-page__section--bottom">
+        {/* recent activity */}
+        <div>
+          <h2 className="admin-dashboard-page__section-title">{t('admin.sections.recentActivity', 'Recent Activity')}</h2>
         </div>
-      </section>
 
+        {/* sytems used */}
+        <div>
+          <h2 className="admin-dashboard-page__section-title">{t('admin.sections.systemsUsed', 'Systems Used')}</h2>
+          <ul>
+            <li>{t('admin.sections.systemsUsed.supabase', 'Supabase')}</li>
+            <li>{t('admin.sections.systemsUsed.n8n', 'N8N')}</li>
+            <li>{t('admin.sections.systemsUsed.react', 'React')}</li>
+            <li>{t('admin.sections.systemsUsed.nodejs', 'Node.js')}</li>
+          </ul>
+        </div>
+
+      </section>
     </div>
   );
 };

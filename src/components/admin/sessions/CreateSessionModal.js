@@ -60,7 +60,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
     session_type: 'life_story',
     status: '',
     priority_level: 'standard',
-    preferred_language: 'english',
+    preferred_language: 'auto-detect',
     story_preferences: {
       focus_areas: [],
       tone_preference: '',
@@ -408,7 +408,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
             name: t('admin.sessions.form.newInterview', 'New Interview'),
             type: 'personal_background',
             status: hasSchedule ? 'scheduled' : 'pending',
-            duration: 90,
+            duration: '',
             file_upload: null,
             notes: ''
           },
@@ -417,7 +417,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
             name: t('admin.sessions.form.newInterview', 'New Interview'),
             type: 'career_achievements',
             status: hasSchedule ? 'scheduled' : 'pending',
-            duration: 90,
+            duration: '',
             file_upload: null,
             notes: ''
           },
@@ -426,7 +426,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
             name: t('admin.sessions.form.newInterview', 'New Interview'),
             type: 'relationships_family',
             status: hasSchedule ? 'scheduled' : 'pending',
-            duration: 90,
+            duration: '',
             file_upload: null,
             notes: ''
           },
@@ -435,7 +435,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
             name: t('admin.sessions.form.newInterview', 'New Interview'),
             type: 'life_events_milestones',
             status: hasSchedule ? 'scheduled' : 'pending',
-            duration: 90,
+            duration: '',
             file_upload: null,
             notes: ''
           },
@@ -444,7 +444,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
             name: t('admin.sessions.form.newInterview', 'New Interview'),
             type: 'wisdom_reflection',
             status: hasSchedule ? 'scheduled' : 'pending',
-            duration: 90,
+            duration: '',
             file_upload: null,
             notes: ''
           }
@@ -723,7 +723,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                         {t('admin.sessions.form.storyPreferences', 'Story Preferences')}
                       </h3>
                       <div className="form-row">
-                        <div className="form-group">
+                        {/* <div className="form-group">
                           <label className="form-label">
                             {t('admin.sessions.form.language', 'Preferred Language')}
                           </label>
@@ -736,7 +736,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                             <option value="Hebrew">{t('admin.sessions.form.languages.hebrew', 'Hebrew')}</option>
                             <option value="Other">{t('admin.sessions.form.languages.other', 'Other')}</option>
                           </select>
-                        </div>
+                        </div> */}
                         <div className="form-group">
                           <label className="form-label">
                             {t('admin.sessions.form.priority', 'Priority Level')}

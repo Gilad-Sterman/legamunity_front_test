@@ -21,6 +21,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -53,30 +54,40 @@
   border-radius: $border-radius;
   border: 1px solid $border-color;
 
-  &__search {
-    position: relative;
+  .search-bar {
     flex: 1;
-    max-width: 400px;
-
-    &-icon {
-      position: absolute;
-      left: $spacing-small;
-      top: 50%;
-      transform: translateY(-50%);
-      color: $text-muted;
+    
+    &__input {
+      position: relative;
+      max-width: 400px;
+      display: flex;
+      align-items: center;
     }
 
-    &-input {
+    &__icon {
+      position: absolute;
+      left: $spacing-sm;
+      color: $text-muted;
+      z-index: 1;
+    }
+
+    &__field {
       width: 100%;
-      padding: $spacing-small $spacing-small $spacing-small $spacing-xlarge;
+      padding: $spacing-sm $spacing-sm $spacing-sm calc(#{$spacing-sm} + 24px);
       border: 1px solid $border-color;
-      border-radius: $border-radius-sm;
-      font-size: $font-size-sm;
+      border-radius: $border-radius;
+      font-size: $font-size-base;
+      background: $background-color;
+      transition: border-color 0.2s ease;
 
       &:focus {
         outline: none;
         border-color: $primary-color;
         box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+      }
+
+      &::placeholder {
+        color: $text-muted;
       }
     }
   }
@@ -389,6 +400,7 @@
 
     &:hover {
       background: linear-gradient(to right, $primary-color, $primary-dark, $primary-color);
+      cursor: not-allowed;
     }
   }
 }

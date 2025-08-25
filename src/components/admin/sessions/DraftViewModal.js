@@ -1021,7 +1021,7 @@ const DraftViewModal = ({
                   )}
 
                   {draft.content.followUps && Array.isArray(draft.content.followUps) && draft.content.followUps.length > 0 && (
-                    <div className="content-section">
+                    <div className="content-section" onClick={() => console.log(draft)}>
                       <div className="section-header expandable-header">
                         <h3>{t('admin.drafts.followUps', 'Follow-up Questions')}</h3>
                         <button
