@@ -375,6 +375,24 @@
       }
     },
     "interviews": {
+      "async": {
+        "uploading": {
+          "title": "Uploading to Cloud",
+          "description": "Securely transferring your file to cloud storage"
+        },
+        "transcribing": {
+          "title": "AI Transcription",
+          "description": "Converting audio to text using advanced AI"
+        },
+        "generating_draft": {
+          "title": "Generating Draft",
+          "description": "Creating a draft of your interview using AI"
+        },
+        "generating_full_story": {
+          "title": "Generating Full Story",
+          "description": "Creating a full story of your interview using AI"
+        }
+      },
       "upload": {
         "title": "Upload Interview",
         "subtitle": "Upload an interview",

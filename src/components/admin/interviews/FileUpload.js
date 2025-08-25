@@ -11,7 +11,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const { uploadLoading } = useSelector(state => state.interviews);
   const { uploadLoading: asyncUploadLoading } = useSelector(state => state.sessionsSupabase || {});
-  
+
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState(null); // 'success', 'error', null
@@ -20,9 +20,9 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   const [asyncUploadMessage, setAsyncUploadMessage] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [asyncProcessingStage, setAsyncProcessingStage] = useState(null); // 'uploading', 'transcribing', 'generating_draft', 'completed'
-  const [showAsyncModal, setShowAsyncModal] = useState(false);
-  
+  const [asyncProcessingStage, setAsyncProcessingStage] = useState('transcribing'); // 'uploading', 'transcribing', 'generating_draft', 'completed'
+  const [showAsyncModal, setShowAsyncModal] = useState(true);
+
   const fileInputRef = useRef(null);
 
   // Processing steps configuration (static to avoid useEffect re-runs)
@@ -36,27 +36,27 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
 
   // Async processing stages configuration
   const asyncStagesConfig = [
-    { 
-      id: 'uploading', 
-      icon: Upload, 
+    {
+      id: 'uploading',
+      icon: Upload,
       title: t('admin.interviews.async.uploading.title', 'Uploading to Cloud'),
       description: t('admin.interviews.async.uploading.description', 'Securely transferring your file to cloud storage')
     },
-    { 
-      id: 'transcribing', 
-      icon: Wand2, 
+    {
+      id: 'transcribing',
+      icon: Wand2,
       title: t('admin.interviews.async.transcribing.title', 'AI Transcription'),
       description: t('admin.interviews.async.transcribing.description', 'Converting audio to text using advanced AI')
     },
-    { 
-      id: 'generating_draft', 
-      icon: Brain, 
+    {
+      id: 'generating_draft',
+      icon: Brain,
       title: t('admin.interviews.async.generating.title', 'Generating Draft Based on Interview'),
       description: t('admin.interviews.async.generating.description', 'AI is creating your draft based on the interview')
     },
-    { 
-      id: 'completed', 
-      icon: CheckCircle, 
+    {
+      id: 'completed',
+      icon: CheckCircle,
       title: t('admin.interviews.async.completed.title', 'Processing Complete'),
       description: t('admin.interviews.async.completed.description', 'Your interview has been fully processed')
     }
@@ -108,7 +108,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   useEffect(() => {
     // Connect to WebSocket when component mounts
     websocketService.connect();
-    
+
     return () => {
       // Clean up WebSocket connection when component unmounts
       if (interviewId) {
@@ -122,47 +122,47 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
     if (interviewId && showAsyncModal) {
       const handleStatusUpdate = (data) => {
         const { status, error_message } = data;
-        
+
         console.log('📡 FileUpload received status update:', status);
-        
+
         switch (status) {
           case 'uploading':
             setAsyncProcessingStage('uploading');
             setAsyncUploadStatus('uploading');
             break;
-            
+
           case 'transcribing':
             setAsyncProcessingStage('transcribing');
             setAsyncUploadStatus('processing');
             break;
-            
+
           case 'generating_draft':
             setAsyncProcessingStage('generating_draft');
             setAsyncUploadStatus('processing');
             break;
-            
+
           case 'completed':
             setAsyncProcessingStage('completed');
             setAsyncUploadStatus('success');
             setAsyncUploadMessage('Interview processed successfully!');
-            
+
             // Refresh session data to show updated interview
             if (sessionData?.id) {
               dispatch(fetchSessionById(sessionData.id));
             }
-            
+
             // Close modal after a brief delay to show success message
             setTimeout(() => {
               setShowAsyncModal(false);
               if (onSuccess) onSuccess();
             }, 2000);
             break;
-            
+
           case 'error':
             setAsyncProcessingStage('error');
             setAsyncUploadStatus('error');
             setAsyncUploadMessage(error_message || 'Processing failed. Please try again.');
-            
+
             // Close modal after showing error for a few seconds
             setTimeout(() => {
               setShowAsyncModal(false);
@@ -170,9 +170,9 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
             break;
         }
       };
-      
+
       websocketService.onInterviewStatusUpdate(interviewId, handleStatusUpdate);
-      
+
       return () => {
         websocketService.offInterviewStatusUpdate(interviewId, handleStatusUpdate);
       };
@@ -242,7 +242,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileSelection(e.dataTransfer.files[0]);
     }
@@ -258,7 +258,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   // Validate and set selected file
   const handleFileSelection = (file) => {
     const fileExtension = file.name.split('.').pop().toLowerCase();
-    
+
     if (!allSupportedTypes.includes(fileExtension)) {
       setUploadStatus('error');
       setUploadMessage(t('admin.interviews.upload.unsupportedType', 'Unsupported file type. Please upload audio or text files only.'));
@@ -280,7 +280,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   // Get file type icon
   const getFileIcon = (file) => {
     if (!file) return <Upload size={48} />;
-    
+
     const extension = file.name.split('.').pop().toLowerCase();
     if (supportedTypes.audio.includes(extension)) {
       return <Music size={48} className="file-upload__file-icon file-upload__file-icon--audio" />;
@@ -305,7 +305,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
     try {
       setUploadStatus(null);
       setUploadMessage('');
-      
+
       // Include session data in the upload request
       const result = await dispatch(uploadInterviewFile({
         interviewId,
@@ -320,7 +320,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
 
       setUploadStatus('success');
       setUploadMessage(t('admin.interviews.upload.success', 'File uploaded and processed successfully!'));
-      
+
       // Call success callback with the updated interview data
       // result contains { interviewId, interview } from the Redux action
       setTimeout(() => {
@@ -344,7 +344,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
       setAsyncProcessingStage('uploading');
       setAsyncUploadStatus(null);
       setAsyncUploadMessage('');
-      
+
       // Include session data in the upload request
       const result = await dispatch(uploadInterviewFileAsync({
         interviewId,
@@ -361,7 +361,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
       setAsyncProcessingStage('transcribing');
       setAsyncUploadStatus('success');
       setAsyncUploadMessage(t('admin.interviews.upload.asyncSuccess', 'File uploaded successfully! Processing will continue in the background.'));
-      
+
       // WebSocket will handle further status updates automatically
 
     } catch (error) {
@@ -393,13 +393,6 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
           <div className="async-modal__content">
             <div className="async-modal__header">
               <h3>{t('admin.interviews.async.title', 'Processing Your Interview')}</h3>
-              <button 
-                className="async-modal__close" 
-                onClick={() => setShowAsyncModal(false)}
-                disabled={asyncProcessingStage === 'uploading'}
-              >
-                <X size={20} />
-              </button>
             </div>
 
             <div className="async-modal__stages">
@@ -409,7 +402,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
                 const isPending = asyncStagesConfig.findIndex(s => s.id === asyncProcessingStage) < index;
 
                 return (
-                  <div 
+                  <div
                     key={stage.id}
                     className={`async-stage ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isPending ? 'pending' : ''}`}
                   >
@@ -422,9 +415,9 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
                           className: isActive ? "active-icon animate-pulse" : "pending-icon"
                         })
                       )}
+                      <h4 className="async-stage__title">{stage.title}</h4>
                     </div>
                     <div className="async-stage__content">
-                      <h4 className="async-stage__title">{stage.title}</h4>
                       <p className="async-stage__description">{stage.description}</p>
                       {isActive && (
                         <div className="async-stage__progress">
@@ -450,10 +443,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
 
             <div className="async-modal__footer">
               <p className="async-modal__note">
-                {asyncProcessingStage === 'uploading' && t('admin.interviews.async.note.uploading', 'Please keep this window open while uploading...')}
-                {asyncProcessingStage === 'transcribing' && t('admin.interviews.async.note.transcribing', 'You can close this window. We\'ll notify you when transcription is complete.')}
-                {asyncProcessingStage === 'generating_draft' && t('admin.interviews.async.note.generating', 'AI is working on your life story. This may take a few minutes.')}
-                {asyncProcessingStage === 'completed' && t('admin.interviews.async.note.completed', 'Your interview has been successfully processed!')}
+                {t('admin.interviews.async.note', 'Please keep this window open for the whole draft generation proccess...')}
               </p>
             </div>
           </div>
@@ -538,7 +528,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
               <p className="file-upload__size-limit">
                 {t('admin.interviews.upload.sizeLimit', 'Maximum file size: 100MB')}
               </p>
-              
+
               <input
                 ref={fileInputRef}
                 type="file"
@@ -556,8 +546,8 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
                   <h4>{selectedFile.name}</h4>
                   <p>{formatFileSize(selectedFile.size)}</p>
                   <p className="file-upload__file-type">
-                    {supportedTypes.audio.includes(selectedFile.name.split('.').pop().toLowerCase()) 
-                      ? t('admin.interviews.upload.audioFile', 'Audio File') 
+                    {supportedTypes.audio.includes(selectedFile.name.split('.').pop().toLowerCase())
+                      ? t('admin.interviews.upload.audioFile', 'Audio File')
                       : t('admin.interviews.upload.textFile', 'Text File')
                     }
                   </p>
@@ -592,7 +582,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
             <div className="file-upload__progress">
               <Loader size={20} className="file-upload__spinner" />
               <span>
-                {uploadLoading 
+                {uploadLoading
                   ? t('admin.interviews.upload.processing', 'Uploading and processing file...')
                   : t('admin.interviews.upload.asyncProcessing', 'Uploading file...')
                 }
@@ -609,7 +599,7 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
             >
               {t('common.cancel', 'Cancel')}
             </button>
-            
+
             {/* Synchronous Upload Button */}
             {/* <button
               className="btn btn--primary"

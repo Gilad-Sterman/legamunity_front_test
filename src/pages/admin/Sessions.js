@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import websocketService from '../../services/websocketService';
+
 // import { useNavigate } from 'react-router-dom';
 import {
   Users,
@@ -182,39 +184,37 @@ const Sessions = () => {
       const result = await response.json();
 
       // Short delay to ensure modal is visible before closing
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // await new Promise(resolve => setTimeout(resolve, 500));
 
       // Clear cached story data for this session to force refresh
-      setSessionStories(prev => {
-        const updated = { ...prev };
-        delete updated[sessionId];
-        return updated;
-      });
+      // setSessionStories(prev => {
+      //   const updated = { ...prev };
+      //   delete updated[sessionId];
+      //   return updated;
+      // });
 
       // Clear loading state for this session
-      setLoadingStories(prev => {
-        const updated = { ...prev };
-        delete updated[sessionId];
-        return updated;
-      });
+      // setLoadingStories(prev => {
+      //   const updated = { ...prev };
+      //   delete updated[sessionId];
+      //   return updated;
+      // });
 
       // Immediately fetch the updated stories for this session
-      fetchSessionStories(sessionId);
+      // fetchSessionStories(sessionId);
 
       // Refresh sessions to show updated data
-      dispatch(fetchSessions({
-        page: pagination.currentPage,
-        limit: pagination.limit,
-        search: filters.search,
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder
-      }));
+      // dispatch(fetchSessions({
+      //   page: pagination.currentPage,
+      //   limit: pagination.limit,
+      //   search: filters.search,
+      //   sortBy: filters.sortBy,
+      //   sortOrder: filters.sortOrder
+      // }));
 
     } catch (error) {
       console.error('Error generating full life story:', error);
       alert(t('admin.sessions.storyGenerationError', 'Failed to generate full life story. Please try again.'));
-    } finally {
-      setGeneratingStory(null);
     }
   };
 
@@ -879,18 +879,6 @@ const Sessions = () => {
     }
   };
 
-  // Get status badge class (changed from stage to status) - not used 
-  // const getStatusClass = (status) => {
-  //   const statusClasses = {
-  //     'scheduled': 'session-badge session-badge--scheduled',
-  //     'active': 'session-badge session-badge--active', // Changed from 'in-progress' to 'active'
-  //     'pending_review': 'session-badge session-badge--pending',
-  //     'completed': 'session-badge session-badge--completed',
-  //     'cancelled': 'session-badge session-badge--cancelled'
-  //   };
-  //   return statusClasses[status] || 'session-badge';
-  // };
-
   const getTranslatedStatus = (status) => {
     switch (status?.toLowerCase()) {
       case 'in progress':
@@ -912,39 +900,61 @@ const Sessions = () => {
     }
   };
 
-  // Get priority badge class - not used
-  // const getPriorityClass = (priority_level) => {
-  //   const priorityClasses = {
-  //     'standard': 'priority-badge priority-badge--standard',
-  //     'urgent': 'priority-badge priority-badge--urgent',
-  //     'memorial': 'priority-badge priority-badge--memorial'
-  //   };
-  //   return priorityClasses[priority_level] || 'priority-badge';
-  // };
+  // WebSocket listeners for regeneration events
+  useEffect(() => {
+    // Connect to WebSocket
+    websocketService.connect();
 
-  // const getTranslatedPriority = (priority) => {
-  //   switch (priority?.toLowerCase()) {
-  //     case 'standard':
-  //       return t('admin.sessions.priorities.standard');
-  //     case 'urgent':
-  //       return t('admin.sessions.priorities.urgent');
-  //     case 'memorial':
-  //       return t('admin.sessions.priorities.memorial');
-  //     default:
-  //       return priority || 'N/A';
-  //   }
-  // };
+    // Listen for draft regeneration started
+    const handleStoryGenerationStarted = (data) => {
+      console.log('🔄 Generation started for story:', data);
+    };
 
-  // Format date - not used
-  // const formatDate = (dateString) => {
-  //   return new Date(dateString).toLocaleDateString('en-US', {
-  //     year: 'numeric',
-  //     month: 'short',
-  //     day: 'numeric',
-  //     hour: '2-digit',
-  //     minute: '2-digit'
-  //   });
-  // };
+    // Listen for draft generation complete (includes regeneration)
+    const handleStoryGenerationComplete = (data) => {
+      console.log('✅ Story Generation completed event received:', data);
+      
+      setSessionStories(prev => {
+        const updated = { ...prev };
+        delete updated[data.sessionId];
+        return updated;
+      });
+
+      // Clear loading state for this session
+      setLoadingStories(prev => {
+        const updated = { ...prev };
+        delete updated[data.sessionId];
+        return updated;
+      });
+
+      // Immediately fetch the updated stories for this session
+      fetchSessionStories(data.sessionId);
+
+      // Refresh sessions to show updated data
+      dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder
+      }));
+      setGeneratingStory(null);
+    };
+
+    // Add WebSocket listeners
+    if (websocketService.socket) {
+      websocketService.socket.on('full-life-story-generation-started', handleStoryGenerationStarted);
+      websocketService.socket.on('full-life-story-generation-complete', handleStoryGenerationComplete);
+    }
+
+    // Cleanup on unmount or when modal closes
+    return () => {
+      if (websocketService.socket) {
+        websocketService.socket.off('full-life-story-generation-started', handleStoryGenerationStarted);
+        websocketService.socket.off('full-life-story-generation-complete', handleStoryGenerationComplete);
+      }
+    };
+  }, []);
 
   // Clear error when component unmounts
   useEffect(() => {

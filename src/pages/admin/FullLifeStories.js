@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
+import websocketService from '../../services/websocketService';
 
 const FullLifeStories = () => {
   const { t } = useTranslation();
@@ -92,6 +93,43 @@ const FullLifeStories = () => {
       }
     }
   }, [lifeStories, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    // Connect to WebSocket
+    websocketService.connect();
+
+    // Listen for draft regeneration started
+    const handleStoryGenerationStarted = (data) => {
+      console.log('🔄 Regeneration started for story:', data);
+    };
+
+    // Listen for draft generation complete (includes regeneration)
+    const handleStoryGenerationComplete = async (data) => {
+      console.log('✅ Story Generation completed event received:', data);
+
+      // Short delay to ensure modal is visible before closing
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Refresh the life stories list
+      await fetchLifeStories();
+      setActionLoading(prev => ({ ...prev, [data.storyId]: null }));
+      setRegenerationProcessing(null);
+    };
+
+    // Add WebSocket listeners
+    if (websocketService.socket) {
+      websocketService.socket.on('full-life-story-generation-started', handleStoryGenerationStarted);
+      websocketService.socket.on('full-life-story-generation-complete', handleStoryGenerationComplete);
+    }
+
+    // Cleanup on unmount or when modal closes
+    return () => {
+      if (websocketService.socket) {
+        websocketService.socket.off('full-life-story-generation-started', handleStoryGenerationStarted);
+        websocketService.socket.off('full-life-story-generation-complete', handleStoryGenerationComplete);
+      }
+    };
+  }, []);
 
   const fetchLifeStories = async () => {
     try {
@@ -387,21 +425,18 @@ const FullLifeStories = () => {
 
       const data = await response.json();
 
-      if (data.success) {
-        // Short delay to ensure modal is visible before closing
-        await new Promise(resolve => setTimeout(resolve, 500));
+      // if (data.success) {
+      //   // Short delay to ensure modal is visible before closing
+      //   await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Refresh the life stories list
-        await fetchLifeStories();
-      } else {
-        throw new Error(data.error || 'Failed to regenerate life story');
-      }
+      //   // Refresh the life stories list
+      //   await fetchLifeStories();
+      // } else {
+      //   throw new Error(data.error || 'Failed to regenerate life story');
+      // }
     } catch (err) {
       console.error('Error regenerating life story:', err);
       setError('Failed to regenerate life story');
-    } finally {
-      setActionLoading(prev => ({ ...prev, [storyId]: null }));
-      setRegenerationProcessing(null);
     }
   };
 

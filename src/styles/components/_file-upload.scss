@@ -415,18 +415,17 @@
     .async-modal__content {
       background-color: white;
       border-radius: $border-radius-lg;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
       padding: 0;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      max-width: 600px;
-      width: 95%;
-      max-height: 90vh;
-      overflow: hidden;
       animation: slideUp 0.4s ease;
     }
 
     .async-modal__header {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       padding: $spacing-large $spacing-xlarge;
       border-bottom: 1px solid $border-color;
@@ -461,38 +460,26 @@
     }
 
     .async-modal__stages {
-      padding: $spacing-xlarge;
-      max-height: 60vh;
-      overflow-y: auto;
+      padding: $spacing-medium;
+      display: flex;
+      flex-direction: row;
+      gap: $spacing-medium;
+      flex-grow: 1;
+      align-items: center;
     }
 
     .async-stage {
       display: flex;
+      flex-direction: column;
       align-items: flex-start;
-      gap: $spacing-large;
-      padding: $spacing-large;
-      margin-bottom: $spacing-medium;
+      gap: $spacing-sm;
+      padding: $spacing-xs;
       border-radius: $border-radius-lg;
       transition: all 0.3s ease;
       position: relative;
 
-      &:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        left: 47px;
-        top: 80px;
-        bottom: -$spacing-medium;
-        width: 2px;
-        background-color: $border-color;
-        transition: background-color 0.3s ease;
-      }
-
-      &.completed::after {
+      &.completed {
         background-color: $success-color;
-      }
-
-      &.active::after {
-        background: linear-gradient(to bottom, $primary-color, $border-color);
       }
 
       &.pending {
@@ -510,10 +497,9 @@
       }
 
       .async-stage__icon {
-        width: 64px;
-        height: 64px;
         border-radius: 50%;
         display: flex;
+        gap: $spacing-md;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;

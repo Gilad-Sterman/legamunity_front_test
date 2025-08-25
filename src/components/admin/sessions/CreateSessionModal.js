@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import './CreateSessionModal.scss';
 import { createSession } from '../../../store/slices/sessionsSliceSupabase';
+import i18n from '../../../i18n';
 
 const CreateSessionModal = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
@@ -1035,7 +1036,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                   onClick={goToPrevStep}
                   disabled={createLoading}
                 >
-                  <ChevronLeft size={16} />
+                  {i18n.language === 'he' ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
                   {t('common.previous', 'Previous')}
                 </button>
               )}
@@ -1048,7 +1049,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                   disabled={createLoading}
                 >
                   {t('common.next', 'Next')}
-                  <ChevronRight size={16} />
+                  {i18n.language === 'he' ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                 </button>
               ) : (
                 <button
