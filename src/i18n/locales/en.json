@@ -436,8 +436,10 @@
       "noStories": "No Life Stories Found",
       "noStoriesDesc": "Life stories will appear here once they are generated from approved drafts.",
       "regenerate": "Regenerate",
+      "exportAsWord": "Export as Word",
       "notes": "Notes",
       "chapters": "Chapters",
+      "subtitles": "Subtitles",
       "participantName": "Participant Name",
       "status": {
         "generated": "Generated",

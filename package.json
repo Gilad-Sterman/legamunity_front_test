@@ -6,6 +6,8 @@
     "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.10.0",
     "cra-template-redux": "2.0.0",
+    "docx": "^9.5.1",
+    "file-saver": "^2.0.5",
     "firebase": "^11.10.0",
     "i18next": "^22.4.15",
     "i18next-browser-languagedetector": "^7.0.1",

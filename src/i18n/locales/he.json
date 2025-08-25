@@ -652,6 +652,7 @@
       "dates": "תאריכים"
     },
     "lifeStories": {
+      "exportAsWord": "ייצא כקובץ Word",
       "title": "סיפורי חיים מלאים",
       "subtitle": "סקירת סיפורי חיים מלאים",
       "searchPlaceholder": "חיפוש לפי שם או כותרת...",

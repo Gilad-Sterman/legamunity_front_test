@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
+import { Document, Paragraph, TextRun, HeadingLevel, Packer } from 'docx';
+import { saveAs } from 'file-saver';
 import { useSearchParams } from 'react-router-dom';
 import {
   Search,
@@ -19,7 +21,7 @@ import {
   Eye,
   Save,
   Mic,
-  File
+  FileText
 } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
@@ -150,6 +152,8 @@ const FullLifeStories = () => {
 
       const data = await response.json();
 
+      console.log('data', data)
+
       if (data.success) {
         // Transform the data to match our frontend structure
         const transformedStories = data.data.map(story => {
@@ -167,18 +171,133 @@ const FullLifeStories = () => {
             (isNewFormat && story.content ? story.content.split(/\s+/).length : 0) ||
             0;
 
-          // Extract chapters from markdown headers if new format
+          // Extract chapters from markdown headers and their content if new format
           const extractChaptersFromMarkdown = (text) => {
             if (!text || typeof text !== 'string') return [];
-            const headerMatches = text.match(/^##\s+(.+)$/gm);
-            return headerMatches ? headerMatches.map(match => ({ title: match.replace(/^##\s+/, '') })) : [];
+
+            console.log('Extracting chapters from text length:', text.length);
+
+            // Use the simplest possible approach that works reliably
+            const chapters = [];
+
+            try {
+              // Replace Windows line endings with Unix line endings for consistency
+              const normalizedText = text.replace(/\r\n/g, '\n');
+
+              // Split the text by ## headers - this gives us an array where:
+              // parts[0] = content before first header (if any)
+              // parts[1] = first chapter title + content
+              // parts[2] = second chapter title + content, etc.
+              const parts = normalizedText.split(/^##\s+/m);
+
+              // Skip the first part (content before any headers)
+              for (let i = 1; i < parts.length; i++) {
+                const part = parts[i];
+
+                // Find the first line break to separate title from content
+                const firstLineBreakIndex = part.indexOf('\n');
+
+                if (firstLineBreakIndex !== -1) {
+                  const title = part.substring(0, firstLineBreakIndex).trim();
+                  const rawContent = part.substring(firstLineBreakIndex + 1).trim();
+
+                  // Process subtitles (### headers) within the chapter content
+                  const subtitles = [];
+                  const contentWithoutSubtitles = rawContent.replace(/^###\s+(.+?)$(\n|$)/gm, (match, subtitleText) => {
+                    subtitles.push(subtitleText.trim());
+                    return '§§§SUBTITLE§§§' + subtitleText.trim() + '§§§SUBTITLE§§§\n'; // Placeholder to identify subtitle positions
+                  });
+
+                  // Split content by subtitle placeholders to get content sections
+                  const contentSections = [];
+                  if (subtitles.length > 0) {
+                    const contentParts = contentWithoutSubtitles.split('§§§SUBTITLE§§§');
+
+                    // First part is content before any subtitle
+                    let currentContent = contentParts[0];
+
+                    // Process each subtitle and its content
+                    for (let j = 1; j < contentParts.length; j += 2) {
+                      if (j + 1 < contentParts.length) {
+                        const subtitle = contentParts[j];
+                        const sectionContent = contentParts[j + 1];
+
+                        // Add previous content if any
+                        if (currentContent.trim()) {
+                          contentSections.push({
+                            type: 'content',
+                            text: currentContent.trim()
+                          });
+                        }
+
+                        // Add subtitle
+                        contentSections.push({
+                          type: 'subtitle',
+                          text: subtitle
+                        });
+
+                        // Set current content to this section's content
+                        currentContent = sectionContent;
+                      }
+                    }
+
+                    // Add the last section's content if any
+                    if (currentContent.trim()) {
+                      contentSections.push({
+                        type: 'content',
+                        text: currentContent.trim()
+                      });
+                    }
+                  } else {
+                    // No subtitles, just add the raw content
+                    contentSections.push({
+                      type: 'content',
+                      text: rawContent
+                    });
+                  }
+
+                  chapters.push({
+                    title,
+                    content: rawContent,
+                    subtitles,
+                    contentSections
+                  });
+
+                  console.log(`Found chapter: "${title}" with content length: ${rawContent.length}`);
+                  console.log(`Found ${subtitles.length} subtitles in chapter`);
+                  subtitles.forEach((subtitle, idx) => {
+                    console.log(`  Subtitle ${idx + 1}: "${subtitle}"`);
+                  });
+                } else {
+                  // If there's no line break, the entire part is the title
+                  chapters.push({
+                    title: part.trim(),
+                    content: '',
+                    subtitles: [],
+                    contentSections: []
+                  });
+
+                  console.log(`Found chapter with title only: "${part.trim()}"`);
+                }
+              }
+
+              // Log all chapters for debugging
+              chapters.forEach((chapter, index) => {
+                console.log(`Chapter ${index + 1}: "${chapter.title}" - Content length: ${chapter.content.length} - Subtitles: ${chapter.subtitles.length}`);
+              });
+            } catch (error) {
+              console.error('Error extracting chapters:', error);
+            }
+
+            console.log(`Total chapters found: ${chapters.length}`);
+            return chapters;
           };
 
           // Extract summary from first paragraph if new format
           const extractSummaryFromMarkdown = (text) => {
             if (!text || typeof text !== 'string') return '';
             const paragraphs = text.split('\n\n').filter(p => p.trim() && !p.startsWith('#'));
-            return paragraphs[0] ? paragraphs[0].substring(0, 200) + '...' : '';
+            return paragraphs[0] ? paragraphs[0].substring(0, 300) + '...' : '';
           };
 
           return {
@@ -224,7 +343,30 @@ const FullLifeStories = () => {
             content: {
               // For new format (string content), extract structured data
               summary: isNewFormat ? extractSummaryFromMarkdown(story.content) : (contentData.summary || contentData.introduction?.summary || story.subtitle || ''),
-              chapters: isNewFormat ? extractChaptersFromMarkdown(story.content) : (contentData.chapters || []),
+              // Store extracted chapters in a variable for debugging
+              chapters: (() => {
+                if (isNewFormat) {
+                  console.log('Story content sample:', story.content ? story.content.substring(0, 200) + '...' : 'No content');
+                  console.log('Story content type:', typeof story.content);
+                  console.log('Story content length:', story.content ? story.content.length : 0);
+
+                  // Check if content has ## headers
+                  const hasHeaders = story.content && story.content.includes('##');
+                  console.log('Content has ## headers:', hasHeaders);
+
+                  const extractedChapters = extractChaptersFromMarkdown(story.content);
+                  console.log('Extracted chapters count:', extractedChapters.length);
+
+                  // Log each chapter
+                  extractedChapters.forEach((chapter, index) => {
+                    console.log(`Chapter ${index + 1}: ${chapter.title} (content length: ${chapter.content ? chapter.content.length : 0})`);
+                  });
+
+                  return extractedChapters;
+                } else {
+                  return contentData.chapters || [];
+                }
+              })(),
               keyMoments: isNewFormat ? [] : (contentData.key_moments || contentData.keyMoments || []),
               timeline: isNewFormat ? [] : (contentData.timeline || []),
               introduction: isNewFormat ? null : (contentData.introduction || null),
@@ -393,8 +535,196 @@ const FullLifeStories = () => {
     } catch (err) {
       console.error('Error rejecting life story:', err);
       setError('Failed to reject life story');
+    }
+  };
+
+  const exportToWord = async (story) => {
+    try {
+      setActionLoading(prev => ({ ...prev, [story.id]: 'exporting' }));
+
+      // Create document sections array to hold all content
+      const sections = [];
+
+      // Main section with title and summary
+      const mainSection = {
+        properties: {},
+        children: [
+          // Title
+          new Paragraph({
+            text: story.title,
+            heading: HeadingLevel.TITLE,
+            spacing: { after: 200 }
+          }),
+
+          // Participant name
+          new Paragraph({
+            children: [
+              new TextRun({ text: t('admin.lifeStories.participantName', 'Participant Name') + ': ', bold: true }),
+              new TextRun(story.participantName)
+            ],
+            spacing: { after: 200 }
+          }),
+
+          // Summary
+          new Paragraph({
+            text: t('admin.lifeStories.summary', 'Summary'),
+            heading: HeadingLevel.HEADING_1,
+            spacing: { after: 200 }
+          }),
+          new Paragraph({
+            text: story.content.summary,
+            spacing: { after: 400 }
+          }),
+        ]
+      };
+
+      sections.push(mainSection);
+
+      // Add chapters
+      if (story.content.chapters && story.content.chapters.length > 0) {
+        story.content.chapters.forEach((chapter, index) => {
+          const chapterChildren = [
+            // Chapter title
+            new Paragraph({
+              text: `${index + 1}. ${chapter.title}`,
+              heading: HeadingLevel.HEADING_1,
+              spacing: { after: 200 }
+            })
+          ];
+
+          // Chapter content
+          if (chapter.contentSections && chapter.contentSections.length > 0) {
+            chapter.contentSections.forEach(section => {
+              if (section.type === 'subtitle') {
+                chapterChildren.push(
+                  new Paragraph({
+                    text: section.text,
+                    heading: HeadingLevel.HEADING_2,
+                    spacing: { after: 200 }
+                  })
+                );
+              } else {
+                chapterChildren.push(
+                  new Paragraph({
+                    text: section.text,
+                    spacing: { after: 200 }
+                  })
+                );
+              }
+            });
+          } else if (chapter.content) {
+            chapterChildren.push(
+              new Paragraph({
+                text: chapter.content,
+                spacing: { after: 200 }
+              })
+            );
+          }
+
+          // Add chapter section
+          sections.push({
+            properties: {},
+            children: chapterChildren
+          });
+        });
+      } else if (story.content.fullText) {
+        // If no chapters, add full text to main section
+        mainSection.children.push(
+          new Paragraph({
+            text: story.content.fullText,
+            spacing: { after: 200 }
+          })
+        );
+      }
+
+      // Add timeline if available
+      if (story.content.timeline && story.content.timeline.length > 0) {
+        const timelineChildren = [
+          new Paragraph({
+            text: t('admin.lifeStories.timeline', 'Timeline'),
+            heading: HeadingLevel.HEADING_1,
+            spacing: { after: 200 }
+          })
+        ];
+
+        story.content.timeline.forEach(item => {
+          timelineChildren.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `${item.year}: `, bold: true }),
+                new TextRun(item.event)
+              ],
+              spacing: { after: 100 }
+            })
+          );
+        });
+
+        // Add timeline section
+        sections.push({
+          properties: {},
+          children: timelineChildren
+        });
+      }
+
+      // Add key moments if available
+      if (story.content.keyMoments && story.content.keyMoments.length > 0) {
+        const keyMomentsChildren = [
+          new Paragraph({
+            text: t('admin.lifeStories.keyMoments', 'Key Moments'),
+            heading: HeadingLevel.HEADING_1,
+            spacing: { after: 200 }
+          })
+        ];
+
+        story.content.keyMoments.forEach(moment => {
+          keyMomentsChildren.push(
+            new Paragraph({
+              text: `• ${moment}`,
+              spacing: { after: 100 }
+            })
+          );
+        });
+
+        // Add key moments section
+        sections.push({
+          properties: {},
+          children: keyMomentsChildren
+        });
+      }
+
+      // Create the document with all sections
+      const doc = new Document({
+        sections: sections
+      });
+
+      // Generate the document
+      const buffer = await Packer.toBlob(doc);
+
+      // Save the document
+      const fileName = `${story.participantName.replace(/\s+/g, '_')}_life_story.docx`;
+      saveAs(buffer, fileName);
+
+      // Show success message
+      dispatch({
+        type: 'SHOW_NOTIFICATION',
+        payload: {
+          type: 'success',
+          message: t('admin.lifeStories.exportSuccess', 'Life story exported successfully'),
+          duration: 3000
+        }
+      });
+    } catch (error) {
+      console.error('Error exporting to Word:', error);
+      dispatch({
+        type: 'SHOW_NOTIFICATION',
+        payload: {
+          type: 'error',
+          message: t('admin.lifeStories.exportError', 'Failed to export life story'),
+          duration: 3000
+        }
+      });
     } finally {
-      setActionLoading(prev => ({ ...prev, [storyId]: null }));
+      setActionLoading(prev => ({ ...prev, [story.id]: null }));
     }
   };
 
@@ -748,22 +1078,6 @@ const FullLifeStories = () => {
                           <BookOpen size={14} />
                           {story.wordCount.toLocaleString()} {t('admin.lifeStories.words', 'Words')}, {story.chapterCount} {t('admin.lifeStories.chapters', 'Chapters')}
                         </span>
-                        <span className="meta-item">
-                          <Mic size={14} />
-                          {story.sessionStats.completedInterviews}/{story.sessionStats.totalInterviews}
-                          <span className={`indicator-status ${story.sessionStats.completedInterviews === story.sessionStats.totalInterviews ? 'complete' : 'incomplete'
-                            }`}>
-                            {story.sessionStats.completedInterviews === story.sessionStats.totalInterviews ? '✓' : '○'}
-                          </span>
-                        </span>
-                        <span className="meta-item">
-                          <File size={14} />
-                          {story.sessionStats.approvedDrafts}/{story.sessionStats.totalDrafts}
-                          <span className={`indicator-status ${story.sessionStats.approvedDrafts > 0 ? 'approved' : 'pending'
-                            }`}>
-                            {story.sessionStats.approvedDrafts > 0 ? '✓' : '○'}
-                          </span>
-                        </span>
                       </div>
 
                       {/* Story summary */}
@@ -771,6 +1085,22 @@ const FullLifeStories = () => {
                         <h4>{t('admin.lifeStories.summary', 'Summary')}</h4>
                         <p>{story.content.summary}</p>
                       </div>
+
+                      {story.status === 'approved' && (
+                        <button
+                          className="btn btn--primary btn--sm"
+                          style={{ marginTop: '1rem' }}
+                          onClick={() => exportToWord(story)}
+                          disabled={actionLoading[story.id] === 'exporting'}
+                        >
+                          {actionLoading[story.id] === 'exporting' ? (
+                            <RefreshCw size={16} className="spin" />
+                          ) : (
+                            <FileText size={16} />
+                          )}
+                          {t('admin.lifeStories.exportAsWord', 'Export as Word')}
+                        </button>
+                      )}
                     </div>
 
                     {/* Content Toggle Button */}
@@ -797,10 +1127,10 @@ const FullLifeStories = () => {
                             <div className="content-panel__header">
                               <h4>{t('admin.lifeStories.fullStory', 'Full Life Story')}</h4>
                             </div>
-                            <div className="content-panel__body">
+                            <div className="content-panel__body" onClick={() => console.log(story)}>
 
                               {/* Full text content */}
-                              {story.content.fullText && (
+                              {!story.content.chapters && story.content.fullText && (
                                 <div className="full-story-content">
                                   <h5>{t('admin.lifeStories.content', 'Content')}</h5>
                                   <div className="story-text" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
@@ -809,14 +1139,63 @@ const FullLifeStories = () => {
                                 </div>
                               )}
 
-                              {/* Show chapters for old format */}
+                              {/* Show chapters with full content */}
                               {story.content.chapters && story.content.chapters.length > 0 && (
                                 <div className="chapters-preview">
                                   <h5>{t('admin.lifeStories.chapters', 'Chapters')}</h5>
                                   {story.content.chapters.map((chapter, index) => (
-                                    <div key={index} className="chapter-preview">
-                                      <h6>{chapter.title}</h6>
-                                      {chapter.content && <p>{chapter.content.substring(0, 200)}...</p>}
+                                    <div key={index} className="chapter-preview" style={{ marginBottom: '2rem', borderBottom: index < story.content.chapters.length - 1 ? '1px solid #eaeaea' : 'none', paddingBottom: '1.5rem' }}>
+                                      <h6 className="chapter-title" style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '1rem', color: '#333' }}>
+                                        {index + 1}. {chapter.title}
+                                      </h6>
+
+                                      {/* Display content sections and subtitles if available */}
+                                      {chapter.contentSections && chapter.contentSections.length > 0 ? (
+                                        <div className="chapter-sections">
+                                          {chapter.contentSections.map((section, sectionIndex) => (
+                                            <div key={sectionIndex} className={`chapter-section ${section.type}`}>
+                                              {section.type === 'subtitle' ? (
+                                                <h6 className="chapter-subtitle" style={{
+                                                  fontSize: '1.1rem',
+                                                  fontWeight: '600',
+                                                  marginTop: '1.5rem',
+                                                  marginBottom: '0.75rem',
+                                                  color: '#444',
+                                                  borderBottom: '1px solid #eee',
+                                                  paddingBottom: '0.5rem'
+                                                }}>
+                                                  {section.text}
+                                                </h6>
+                                              ) : (
+                                                <div className="chapter-content" style={{
+                                                  whiteSpace: 'pre-wrap',
+                                                  lineHeight: '1.6',
+                                                  fontSize: '1rem',
+                                                  color: '#444',
+                                                  padding: '0.5rem 0',
+                                                  textAlign: 'justify'
+                                                }}>
+                                                  {section.text}
+                                                </div>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : chapter.content ? (
+                                        <div className="chapter-content" style={{
+                                          whiteSpace: 'pre-wrap',
+                                          lineHeight: '1.6',
+                                          fontSize: '1rem',
+                                          color: '#444',
+                                          padding: '0.5rem 0',
+                                          textAlign: 'justify'
+                                        }}>
+                                          {chapter.content}
+                                        </div>
+                                      ) : (
+                                        <p className="no-content" style={{ fontStyle: 'italic', color: '#888' }}>{t('admin.lifeStories.noChapterContent', 'No content available for this chapter')}</p>
+                                      )}
+
                                     </div>
                                   ))}
                                 </div>
@@ -922,6 +1301,20 @@ const FullLifeStories = () => {
 
                         {/* Action Buttons - Moved to the end */}
                         <div className="life-story-card__actions">
+                          {story.status === 'approved' && (
+                            <button
+                              className="btn btn--primary btn--sm"
+                              onClick={() => exportToWord(story)}
+                              disabled={actionLoading[story.id] === 'exporting'}
+                            >
+                              {actionLoading[story.id] === 'exporting' ? (
+                                <RefreshCw size={16} className="spin" />
+                              ) : (
+                                <FileText size={16} />
+                              )}
+                              {t('admin.lifeStories.exportAsWord', 'Export as Word')}
+                            </button>
+                          )}
                           {story.status === 'generated' && (
                             <>
                               <button

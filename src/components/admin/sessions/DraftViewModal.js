@@ -39,6 +39,18 @@ const DraftViewModal = ({
 }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  
+  // Custom close handler to ensure parent component is updated
+  const handleClose = () => {
+    // Always call onDraftUpdated when closing the modal to refresh parent state
+    // This ensures notes count is updated in the interview list
+    if (onDraftUpdated) {
+      onDraftUpdated();
+    }
+    
+    // Call the original onClose function
+    onClose();
+  };
 
   // Local state for notes editing
   const [newNoteContent, setNewNoteContent] = useState('');
@@ -131,18 +143,16 @@ const DraftViewModal = ({
     };
 
     // Listen for draft generation complete (includes regeneration)
-    const handleDraftComplete = (data) => {
-      console.log('✅ Draft generation completed event received:', {
-        eventDraftId: data.draftId,
-        currentDraftId: draft.id,
+    const handleDraftCompletion = (data) => {
+      console.log('📝 Draft completion event received:', {
+        draftId: data.draftId,
         sessionId: data.sessionId,
-        currentSessionId: session?.id,
         isRegeneration: data.isRegeneration,
         currentlyRegenerating: isRegenerating
       });
 
       // Check if this completion event is for our current draft or session
-      const isDraftMatch = data.draftId === draft.id;
+      const isDraftMatch = data.draftId === draft?.id;
       const isSessionMatch = data.sessionId === session?.id;
 
       if (isDraftMatch || (isSessionMatch && (isRegenerating || data.isRegeneration))) {
@@ -155,6 +165,16 @@ const DraftViewModal = ({
         // Mark that regeneration has occurred but don't reset notes flag
         // This allows the regenerate button to remain visible if notes are added after regeneration
         setHasBeenRegenerated(true);
+        
+        // If we have the new draft data in the event, update our local state
+        if (data.draft) {
+          console.log('Updating local draft state with new draft data');
+          setLocalDraft(data.draft);
+          // Also update the draft prop reference if possible
+          if (typeof draft === 'object') {
+            Object.assign(draft, data.draft);
+          }
+        }
 
         // Refresh the draft data to get the new version
         if (onDraftUpdated) {
@@ -177,14 +197,14 @@ const DraftViewModal = ({
     // Add WebSocket listeners
     if (websocketService.socket) {
       websocketService.socket.on('draft-regeneration-started', handleRegenerationStarted);
-      websocketService.socket.on('draft-generation-complete', handleDraftComplete);
+      websocketService.socket.on('draft-generation-complete', handleDraftCompletion);
     }
 
     // Cleanup on unmount or when modal closes
     return () => {
       if (websocketService.socket) {
         websocketService.socket.off('draft-regeneration-started', handleRegenerationStarted);
-        websocketService.socket.off('draft-generation-complete', handleDraftComplete);
+        websocketService.socket.off('draft-generation-complete', handleDraftCompletion);
       }
     };
   }, [isOpen, draft?.id, onDraftUpdated, onClose]);
@@ -240,22 +260,22 @@ const DraftViewModal = ({
 
   // Effect to force reset regeneration state after a timeout
   // This is a safety mechanism to ensure the modal doesn't stay open indefinitely
-  useEffect(() => {
-    let safetyTimeout;
+  // useEffect(() => {
+  //   let safetyTimeout;
 
-    if (isRegenerating) {
-      // Set a safety timeout to force close the regeneration modal after 30 seconds
-      // This ensures the modal doesn't stay open indefinitely if something goes wrong
-      safetyTimeout = setTimeout(() => {
-        console.log('Safety timeout triggered - forcing regeneration modal to close');
-        setIsRegenerating(false);
-      }, 1000000); // 100 seconds timeout
-    }
+  //   if (isRegenerating) {
+  //     // Set a safety timeout to force close the regeneration modal after 30 seconds
+  //     // This ensures the modal doesn't stay open indefinitely if something goes wrong
+  //     safetyTimeout = setTimeout(() => {
+  //       console.log('Safety timeout triggered - forcing regeneration modal to close');
+  //       setIsRegenerating(false);
+  //     }, 1000000); // 100 seconds timeout
+  //   }
 
-    return () => {
-      if (safetyTimeout) clearTimeout(safetyTimeout);
-    };
-  }, [isRegenerating]);
+  //   return () => {
+  //     if (safetyTimeout) clearTimeout(safetyTimeout);
+  //   };
+  // }, [isRegenerating]);
 
   // Removed duplicate regeneration effect
 
@@ -278,7 +298,7 @@ const DraftViewModal = ({
               <FileText size={24} />
               <h2>{t('admin.sessions.loadingDraft', 'Loading Draft...')}</h2>
             </div>
-            <button className="btn btn--ghost" onClick={onClose}>
+            <button className="btn btn--ghost" onClick={handleClose}>
               <X size={20} />
             </button>
           </div>
@@ -294,12 +314,23 @@ const DraftViewModal = ({
   }
 
   const handleSaveNotes = async () => {
-    if (!newNoteContent.trim() || !draft?.id || !session?.id || isSavingNote) {
-      console.log('not saving note', newNoteContent.trim(), draft?.id, session?.id, isSavingNote);
+    if (!newNoteContent.trim()) {
+      return;
+    }
+    
+    // Enhanced error checking for session and draft
+    if (!session?.id || !draft?.id) {
+      console.error('Cannot save note: session or draft is undefined', { session, draft });
+      alert(t('admin.drafts.updateNotesError', 'Cannot save note: missing session or draft data'));
+      return;
+    }
+    
+    if (isSavingNote) {
       return;
     }
 
     setIsSavingNote(true);
+    console.log('Saving note for draft:', draft.id, 'session:', session.id);
 
     try {
       const result = await dispatch(addNoteToDraft({
@@ -345,8 +376,15 @@ const DraftViewModal = ({
   };
 
   const handleApprove = async () => {
-    if (!draft?.id) {
-      console.log('not approving draft', draft?.id);
+    if (isFinalized) {
+      alert(t('admin.drafts.alreadyFinalized', 'This draft has already been finalized'));
+      return;
+    }
+    
+    // Check if session and draft are defined before proceeding
+    if (!session?.id || !draft?.id) {
+      console.error('Cannot approve draft: session or draft is undefined', { session, draft });
+      alert(t('admin.drafts.approveError', 'Cannot approve draft: missing session or draft data'));
       return;
     }
 
@@ -358,12 +396,8 @@ const DraftViewModal = ({
         approvedBy: 'Admin User'
       })).unwrap();
 
-      // Refresh parent state
-      if (onDraftUpdated) {
-        onDraftUpdated();
-      }
-
-      onClose();
+      // Close modal with our custom handler
+      handleClose();
     } catch (error) {
       console.error('Failed to approve draft:', error);
       alert(t('admin.drafts.approveError', 'Failed to approve draft'));
@@ -393,7 +427,7 @@ const DraftViewModal = ({
 
       setShowRejectionForm(false);
       setRejectionReason('');
-      onClose();
+      handleClose();
     } catch (error) {
       console.error('Failed to reject draft:', error);
       alert(t('admin.drafts.rejectError', 'Failed to reject draft'));
@@ -536,14 +570,14 @@ const DraftViewModal = ({
   const canRegenerate = hasNewNotes && !isFinalized && !isRegenerating;
   const canEditNotes = !isFinalized;
 
-  console.log('Regenerate button state:', {
-    hasNewNotes,
-    isFinalized,
-    isRegenerating,
-    notesAddedSinceRegeneration,
-    hasBeenRegenerated,
-    canRegenerate
-  });
+  // console.log('Regenerate button state:', {
+  //   hasNewNotes,
+  //   isFinalized,
+  //   isRegenerating,
+  //   notesAddedSinceRegeneration,
+  //   hasBeenRegenerated,
+  //   canRegenerate
+  // });
 
   return (
     <>
@@ -602,7 +636,7 @@ const DraftViewModal = ({
         </div>
       )}
 
-      <div className="draft-modal-overlay" onClick={onClose}>
+      <div className="draft-modal-overlay" onClick={handleClose}>
         <div className="draft-modal" onClick={(e) => e.stopPropagation()}>
           <div className="draft-modal__header">
             <div className="draft-modal__title">
@@ -635,7 +669,7 @@ const DraftViewModal = ({
                   {t('admin.drafts.reject', 'Reject')}
                 </button>
               )}
-              <button className="btn btn--ghost" onClick={onClose}>
+              <button className="btn btn--ghost" onClick={handleClose}>
                 <X size={20} />
               </button>
             </div>
