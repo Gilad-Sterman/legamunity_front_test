@@ -526,7 +526,9 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
               <h4>{t('admin.interviews.upload.dropzone.title', 'Drop your file here or click to browse')}</h4>
               <p>{t('admin.interviews.upload.dropzone.subtitle', 'Supports audio files (MP3, WAV, M4A) and text files (TXT, PDF, DOC)')}</p>
               <p className="file-upload__size-limit">
-                {t('admin.interviews.upload.sizeLimit', 'Maximum file size: 100MB')}
+                {t('admin.interviews.upload.sizeLimit', 'Maximum file size: 20MB')}
+                <br />
+                {t('admin.interviews.upload.sizeLimitNote', 'Note: Files larger than 20MB should be divided and uploaded separately')}
               </p>
 
               <input

@@ -67,6 +67,10 @@ const DraftViewModal = ({
   const [regenerationStep, setRegenerationStep] = useState(0);
   const [regenerationProgress, setRegenerationProgress] = useState(0);
   const [regenerationStage, setRegenerationStage] = useState('');
+  
+  // Flag to track if we're refreshing data due to notes being added
+  // This prevents the notes flag from being reset during refresh
+  const [isRefreshingAfterNotesAdded, setIsRefreshingAfterNotesAdded] = useState(false);
 
   // State for expandable sections
   const [sectionsExpanded, setSectionsExpanded] = useState(true); // Initially minimized
@@ -82,6 +86,11 @@ const DraftViewModal = ({
 
   // Track if modal was previously open
   const wasOpen = useRef(false);
+  
+  // Use refs to keep track of the latest draft and session data
+  // This ensures we always have the most up-to-date references after regeneration
+  const draftRef = useRef(null);
+  const sessionRef = useRef(null);
 
   // Initialize state when modal opens
   useEffect(() => {
@@ -110,19 +119,34 @@ const DraftViewModal = ({
   // Update local draft when parent draft changes
   useEffect(() => {
     if (draft) {
-      setLocalDraft(draft);
-      // Reset regeneration state when new draft is received
-      const isRegenerated = !!draft?.content?.metadata?.regenerationType;
-      setHasBeenRegenerated(isRegenerated);
+      // Update the draft ref to always have the latest version
+      draftRef.current = draft;
       
-      // Only reset notes flag when we get a newly regenerated draft
-      // This prevents the flag from being reset when notes are added
-      if (isRegenerated && !notesAddedSinceRegeneration) {
-        // Stop regeneration loading when new draft arrives
-        setIsRegenerating(false);
+      // Don't update localDraft if we just added notes and are refreshing
+      // This prevents the notes from disappearing during refresh
+      if (!isRefreshingAfterNotesAdded) {
+        setLocalDraft(draft);
+        
+        // Reset regeneration state when new draft is received
+        const isRegenerated = !!draft?.content?.metadata?.regenerationType;
+        setHasBeenRegenerated(isRegenerated);
+        
+        // Only reset notes flag when we get a newly regenerated draft
+        // This prevents the flag from being reset when notes are added
+        if (isRegenerated && !notesAddedSinceRegeneration) {
+          // Stop regeneration loading when new draft arrives
+          setIsRegenerating(false);
+        }
       }
     }
-  }, [draft, notesAddedSinceRegeneration]);
+  }, [draft, notesAddedSinceRegeneration, isRefreshingAfterNotesAdded]);
+  
+  // Keep session ref updated
+  useEffect(() => {
+    if (session) {
+      sessionRef.current = session;
+    }
+  }, [session]);
 
   // WebSocket listeners for regeneration events
   useEffect(() => {
@@ -170,6 +194,10 @@ const DraftViewModal = ({
         if (data.draft) {
           console.log('Updating local draft state with new draft data');
           setLocalDraft(data.draft);
+          
+          // Update our draft reference to ensure it's always current
+          draftRef.current = data.draft;
+          
           // Also update the draft prop reference if possible
           if (typeof draft === 'object') {
             Object.assign(draft, data.draft);
@@ -184,9 +212,23 @@ const DraftViewModal = ({
         // Don't close the modal, just refresh the data and reset regeneration state
         setTimeout(() => {
           setRegenerationStage('');
+          
+          // Set flag to preserve notesAddedSinceRegeneration during refresh
+          const shouldPreserveNotes = notesAddedSinceRegeneration;
+          if (shouldPreserveNotes) {
+            setIsRefreshingAfterNotesAdded(true);
+          }
+          
           // Refresh data without closing the modal
           if (onRefreshData) {
             onRefreshData();
+          }
+          
+          // Reset the refresh flag after a short delay
+          if (shouldPreserveNotes) {
+            setTimeout(() => {
+              setIsRefreshingAfterNotesAdded(false);
+            }, 500);
           }
         }, 2000);
       } else {
@@ -318,9 +360,14 @@ const DraftViewModal = ({
       return;
     }
     
+    // Use the refs to ensure we have the most up-to-date draft and session data
+    // This is crucial after regeneration when props might be stale
+    const currentDraft = draftRef.current || draft;
+    const currentSession = sessionRef.current || session;
+    
     // Enhanced error checking for session and draft
-    if (!session?.id || !draft?.id) {
-      console.error('Cannot save note: session or draft is undefined', { session, draft });
+    if (!currentSession?.id || !currentDraft?.id) {
+      console.error('Cannot save note: session or draft is undefined', { currentSession, currentDraft });
       alert(t('admin.drafts.updateNotesError', 'Cannot save note: missing session or draft data'));
       return;
     }
@@ -330,12 +377,12 @@ const DraftViewModal = ({
     }
 
     setIsSavingNote(true);
-    console.log('Saving note for draft:', draft.id, 'session:', session.id);
+    console.log('Saving note for draft:', currentDraft.id, 'session:', currentSession.id);
 
     try {
       const result = await dispatch(addNoteToDraft({
-        sessionId: session.id,
-        draftId: draft.id,
+        sessionId: currentSession.id,
+        draftId: currentDraft.id,
         content: newNoteContent.trim(),
         author: 'Admin User' // In production, get from auth state
       })).unwrap();
@@ -357,13 +404,22 @@ const DraftViewModal = ({
         }
       }));
 
+      // Mark that notes have been added since regeneration
+      setNotesAddedSinceRegeneration(true);
+      
+      // Set flag to prevent local draft from being overwritten during refresh
+      setIsRefreshingAfterNotesAdded(true);
+      
       // Refresh data without closing modal when adding notes
       if (onRefreshData) {
         onRefreshData();
       }
-
-      // Mark that notes have been added since regeneration
-      setNotesAddedSinceRegeneration(true);
+      
+      // Reset the refresh flag after a short delay
+      // This allows the parent component to complete its refresh
+      setTimeout(() => {
+        setIsRefreshingAfterNotesAdded(false);
+      }, 500);
 
       setNewNoteContent('');
       setIsEditingNotes(false);
@@ -381,17 +437,22 @@ const DraftViewModal = ({
       return;
     }
     
+    // Use the refs to ensure we have the most up-to-date draft and session data
+    // This is crucial after regeneration when props might be stale
+    const currentDraft = draftRef.current || draft;
+    const currentSession = sessionRef.current || session;
+    
     // Check if session and draft are defined before proceeding
-    if (!session?.id || !draft?.id) {
-      console.error('Cannot approve draft: session or draft is undefined', { session, draft });
+    if (!currentSession?.id || !currentDraft?.id) {
+      console.error('Cannot approve draft: session or draft is undefined', { currentSession, currentDraft });
       alert(t('admin.drafts.approveError', 'Cannot approve draft: missing session or draft data'));
       return;
     }
 
     try {
       await dispatch(updateDraftStageSupabase({
-        sessionId: session.id,
-        draftId: draft.id,
+        sessionId: currentSession.id,
+        draftId: currentDraft.id,
         stage: 'approved',
         approvedBy: 'Admin User'
       })).unwrap();
@@ -409,12 +470,17 @@ const DraftViewModal = ({
       alert(t('admin.drafts.rejectionReasonRequired', 'Please provide a reason for rejection'));
       return;
     }
-    if (!draft?.id) return;
+    
+    // Use the refs to ensure we have the most up-to-date draft and session data
+    const currentDraft = draftRef.current || draft;
+    const currentSession = sessionRef.current || session;
+    
+    if (!currentDraft?.id) return;
 
     try {
       await dispatch(updateDraftStageSupabase({
-        sessionId: session.id,
-        draftId: draft.id,
+        sessionId: currentSession.id,
+        draftId: currentDraft.id,
         stage: 'rejected',
         rejectionReason: rejectionReason,
         rejectedBy: 'Admin User'
@@ -442,9 +508,12 @@ const DraftViewModal = ({
       setRegenerationProgress(0);
       setRegenerationStage('sending');
 
+      // Use the ref to ensure we have the most up-to-date draft
+      const currentDraft = draftRef.current || draft;
+
       try {
         // Call onRegenerate and handle the promise result
-        const regeneratePromise = onRegenerate(draft.id, regenerateReason);
+        const regeneratePromise = onRegenerate(currentDraft.id, regenerateReason);
 
         // If onRegenerate returns a promise, handle it
         if (regeneratePromise && typeof regeneratePromise.then === 'function') {
