@@ -61,6 +61,15 @@
     "projectProgress": "התקדמות הפרויקט"
   },
   "admin": {
+    "systemsUsed": {
+      "title": "מערכות בשימוש",
+      "systems": {
+        "supabase": "אחסון נתונים",
+        "n8n": "ניהול תהליך",
+        "react": "React",
+        "nodejs": "שרת"
+      }
+    },
     "dashboardTitle": "לוח בקרה מנהל",
     "dashboardSubtitle": "סקירה כללית של פעילות המערכת וביצועים",
     "searchPlaceholder": "חיפוש סיפורי חיים...",
