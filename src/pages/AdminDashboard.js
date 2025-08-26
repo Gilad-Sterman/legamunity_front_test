@@ -1,68 +1,67 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { Users, Activity, CheckCircle, BookOpen, Star, BarChart3, Award, LogIn, FileText, Clock, Database, Server, Code } from 'lucide-react';
+import {
+  Users, Activity, CheckCircle, BookOpen, Star,
+  LogIn, FileText, Clock, Database, Server, Code, AlertTriangle,
+  Zap, Upload, Download, Cpu, Workflow, GitBranch
+} from 'lucide-react';
 import KpiCard from '../components/dashboard/KpiCard';
 import { fetchSessionStats } from '../store/slices/sessionsSliceSupabase';
 import { useNavigate } from 'react-router-dom';
-// import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 
 const AdminDashboard = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const hasFetchedRef = useRef(false);
-  
-  // Mock recent activity data based on logs table example
-  const [recentActivity, setRecentActivity] = useState([
-    {
-      id: "ce7d850d-ae3b-497d-a851-a83cd5797634",
-      event_type: "auth",
-      event_action: "login",
-      user_email: "giladsterman1999@gmail.com",
-      created_at: "2025-08-25 19:07:53.962484+00",
-      severity: "info"
-    },
-    {
-      id: "a1b2c3d4-e5f6-4a5b-9c8d-7e6f5a4b3c2d",
-      event_type: "session",
-      event_action: "create",
-      user_email: "admin@legamunity.com",
-      created_at: "2025-08-25 18:45:12.123456+00",
-      severity: "info"
-    },
-    {
-      id: "f9e8d7c6-b5a4-4321-8765-4f3e2d1c0b9a",
-      event_type: "interview",
-      event_action: "complete",
-      user_email: "interviewer@legamunity.com",
-      created_at: "2025-08-25 17:30:45.654321+00",
-      severity: "info"
-    },
-    {
-      id: "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-      event_type: "draft",
-      event_action: "approve",
-      user_email: "editor@legamunity.com",
-      created_at: "2025-08-25 16:15:22.987654+00",
-      severity: "info"
-    },
-    {
-      id: "5f4e3d2c-1b0a-9f8e-7d6c-5b4a3c2d1e0f",
-      event_type: "system",
-      event_action: "error",
-      user_email: "system@legamunity.com",
-      created_at: "2025-08-25 15:05:18.246810+00",
-      severity: "error"
-    }
-  ]);
-  
-  // Systems usage data
+
+  // State for recent activity logs from the API
+  const [recentActivity, setRecentActivity] = useState([]);
+
+  // Systems data with descriptions instead of usage percentages
   const systemsUsage = [
-    { name: "Supabase", icon: Database, usage: 85, description: t('admin.systemsUsed.systems.supabase', 'Database and authentication') },
-    { name: "N8N", icon: Server, usage: 72, description: t('admin.systemsUsed.systems.n8n', 'Workflow automation') },
-    { name: "React", icon: Code, usage: 94, description: t('admin.systemsUsed.systems.react', 'Frontend framework') },
-    { name: "Node.js", icon: Server, usage: 78, description: t('admin.systemsUsed.systems.nodejs', 'Backend server') }
+    {
+      name: "Supabase",
+      icon: Database,
+      logoUrl: "https://seeklogo.com/images/S/supabase-logo-DCC676FFE2-seeklogo.com.png",
+      description: t('admin.systemsUsed.systems.supabase', 'Database and authentication'),
+      details: t('admin.systemsUsed.systems.supabaseDetails', 'Used for storing user data, sessions, interviews and drafts with real-time capabilities'),
+      color: '#3ECF8E'
+    },
+    {
+      name: "N8N",
+      icon: Workflow,
+      logoUrl: "https://avatars.githubusercontent.com/u/45487711",
+      description: t('admin.systemsUsed.systems.n8n', 'Workflow automation'),
+      details: t('admin.systemsUsed.systems.n8nDetails', 'Handles automated email notifications and scheduled tasks for interview reminders'),
+      color: '#FF6D5A'
+    },
+    {
+      name: "React",
+      icon: Code,
+      logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1150px-React-icon.svg.png",
+      description: t('admin.systemsUsed.systems.react', 'Frontend framework'),
+      details: t('admin.systemsUsed.systems.reactDetails', 'Powers our responsive user interface with component-based architecture'),
+      color: '#61DAFB'
+    },
+    {
+      name: "Node.js",
+      icon: Server,
+      logoUrl: "https://nodejs.org/static/images/logo.svg",
+      description: t('admin.systemsUsed.systems.nodejs', 'Backend server'),
+      details: t('admin.systemsUsed.systems.nodejsDetails', 'Runs our API server with Express for handling client requests'),
+      color: '#539E43'
+    },
+    {
+      name: "Cloudinary",
+      icon: Upload,
+      logoUrl: "https://res.cloudinary.com/cloudinary/image/upload/v1538583988/cloudinary_logo_for_white_bg.png",
+      description: t('admin.systemsUsed.systems.cloudinary', 'Media management'),
+      details: t('admin.systemsUsed.systems.cloudinaryDetails', 'Stores and optimizes images and audio files from interviews'),
+      color: '#3448C5'
+    }
   ];
 
   // Get stats from Redux store
@@ -98,7 +97,12 @@ const AdminDashboard = () => {
     }
   }, [dispatch, loading]);
 
-  console.log(stats);
+  // Update recent activity when stats are loaded
+  useEffect(() => {
+    if (stats && stats.recentLogs && Array.isArray(stats.recentLogs)) {
+      setRecentActivity(stats.recentLogs);
+    }
+  }, [stats]);
 
   return (
     <div className="admin-dashboard-page">
@@ -154,73 +158,123 @@ const AdminDashboard = () => {
         <div className="admin-dashboard-page__activity-container">
           <h2 className="admin-dashboard-page__section-title">{t('admin.sections.recentActivity', 'Recent Activity')}</h2>
           <div className="admin-dashboard-page__activity-list">
-            {recentActivity.map(activity => {
+            {recentActivity.length === 0 ? (
+              <div className="admin-dashboard-page__activity-empty">
+                {loading ? (
+                  <div className="admin-dashboard-page__loading-animation">
+                    <div className="admin-dashboard-page__loading-spinner"></div>
+                    {t('admin.activity.loading', 'Loading recent activity...')}
+                  </div>
+                ) : t('admin.activity.noActivity', 'No recent activity found')}
+              </div>
+            ) : recentActivity.map(activity => {
               // Determine icon based on event type
               let Icon;
               let colorClass;
-              
-              switch(activity.event_type) {
+
+              switch (activity.event_type) {
                 case 'auth':
                   Icon = LogIn;
                   colorClass = 'blue';
                   break;
                 case 'session':
                   Icon = Users;
-                  colorClass = 'purple';
-                  break;
-                case 'interview':
-                  Icon = Activity;
                   colorClass = 'green';
                   break;
+                case 'interview':
+                  Icon = activity.event_action === 'created' ? Zap : Activity;
+                  colorClass = 'purple';
+                  break;
                 case 'draft':
-                  Icon = FileText;
+                  Icon = activity.event_action === 'generated' ? Star : FileText;
                   colorClass = 'orange';
                   break;
+                case 'file':
+                  Icon = activity.event_action === 'uploaded' ? Upload : Download;
+                  colorClass = 'blue';
+                  break;
+                case 'error':
+                  Icon = AlertTriangle;
+                  colorClass = 'red';
+                  break;
                 case 'system':
-                  Icon = Server;
-                  colorClass = activity.severity === 'error' ? 'red' : 'gray';
+                  if (activity.event_action === 'startup') {
+                    Icon = Cpu;
+                    colorClass = 'green';
+                  } else if (activity.event_action === 'api_request') {
+                    Icon = GitBranch;
+                    colorClass = 'blue';
+                  } else if (activity.event_action === 'database') {
+                    Icon = Database;
+                    colorClass = 'purple';
+                  } else {
+                    Icon = Server;
+                    colorClass = 'blue';
+                  }
                   break;
                 default:
                   Icon = Clock;
                   colorClass = 'gray';
               }
-              
+
               // Format the activity description
               const getActivityDescription = () => {
+                if (!activity.event_action) return t('admin.activity.unknown', 'Unknown activity');
+
                 const action = activity.event_action.charAt(0).toUpperCase() + activity.event_action.slice(1);
-                switch(activity.event_type) {
+                const user = activity.user_email || t('admin.activity.unknownUser', 'Unknown user');
+                const sessionInfo = activity.session_id ? ` (Session ${activity.session_id.substring(0, 8)}...)` : '';
+
+                switch (activity.event_type) {
                   case 'auth':
-                    return t('admin.activity.auth', '{{action}} by {{user}}', { action, user: activity.user_email });
+                    return t('admin.activity.auth', '{{action}} by {{user}}', { action, user });
                   case 'session':
-                    return t('admin.activity.session', 'Session {{action}} by {{user}}', { action, user: activity.user_email });
+                    return t('admin.activity.session', 'Session {{action}} by {{user}}{{sessionInfo}}', { action, user, sessionInfo });
                   case 'interview':
-                    return t('admin.activity.interview', 'Interview {{action}} by {{user}}', { action, user: activity.user_email });
+                    return t('admin.activity.interview', 'Interview {{action}} by {{user}}{{sessionInfo}}', { action, user, sessionInfo });
                   case 'draft':
-                    return t('admin.activity.draft', 'Draft {{action}} by {{user}}', { action, user: activity.user_email });
+                    return t('admin.activity.draft', 'Draft {{action}} by {{user}}{{sessionInfo}}', { action, user, sessionInfo });
+                  case 'file':
+                    return t('admin.activity.file', 'File {{action}} by {{user}}{{sessionInfo}}', { action, user, sessionInfo });
+                  case 'error':
+                    return t('admin.activity.error', 'Error: {{message}}', { message: activity.error_message || action });
                   case 'system':
                     return t('admin.activity.system', 'System {{action}} reported', { action });
                   default:
-                    return t('admin.activity.unknown', 'Unknown activity');
+                    return t('admin.activity.unknown', 'Activity: {{type}} {{action}}', { type: activity.event_type, action });
                 }
               };
-              
+
               return (
-                <div key={activity.id} className={`admin-dashboard-page__activity-item admin-dashboard-page__activity-item--${colorClass} ${activity.severity === 'error' ? 'admin-dashboard-page__activity-item--error' : ''}`}>
-                  <div className="admin-dashboard-page__activity-icon">
-                    <Icon size={18} />
+                <div key={activity.id} className={`admin-dashboard-page__activity-item ${colorClass}`}>
+                  <div className={`admin-dashboard-page__activity-icon ${colorClass}`}>
+                    {React.createElement(Icon, { size: 16, color: 'currentColor' })}
                   </div>
                   <div className="admin-dashboard-page__activity-content">
                     <div className="admin-dashboard-page__activity-description">
                       {getActivityDescription()}
+                      {activity.user_email && (
+                        <span className="admin-dashboard-page__activity-user">
+                          {activity.user_email.split('@')[0]}
+                        </span>
+                      )}
                     </div>
                     <div className="admin-dashboard-page__activity-time">
-                      {/* {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })} */}
+                      {activity.created_at && formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
+          {recentActivity.length > 0 && (
+            <div className="admin-dashboard-page__activity-footer">
+              <div className="admin-dashboard-page__activity-footer-content">
+                <Clock size={14} />
+                <small>{t('admin.activity.showingRecent', 'Showing {{count}} most recent activities', { count: recentActivity.length })}</small>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="admin-dashboard-page__systems-container">
@@ -229,21 +283,31 @@ const AdminDashboard = () => {
             {systemsUsage.map((system) => (
               <div key={system.name} className="admin-dashboard-page__system-item">
                 <div className="admin-dashboard-page__system-header">
-                  <div className="admin-dashboard-page__system-icon">
-                    {React.createElement(system.icon)}
+                  <div
+                    className="admin-dashboard-page__system-icon"
+                    style={{ backgroundColor: system.color + '15' }} // Light background based on system color
+                  >
+                    {system.logoUrl ? (
+                      <img
+                        src={system.logoUrl}
+                        alt={`${system.name} logo`}
+                        className="admin-dashboard-page__system-logo"
+                      />
+                    ) : React.createElement(system.icon, { color: system.color })}
                   </div>
                   <div className="admin-dashboard-page__system-name">{system.name}</div>
                 </div>
-                <div className="admin-dashboard-page__system-progress-container">
-                  <div 
-                    className="admin-dashboard-page__system-progress-bar" 
-                    style={{ width: `${system.usage}%` }}
-                  ></div>
-                </div>
                 <div className="admin-dashboard-page__system-details">
-                  <div className="admin-dashboard-page__system-usage">{system.usage}%</div>
                   <div className="admin-dashboard-page__system-description">
-                    {t(`admin.systemsUsed.${system.name.toLowerCase()}Description`, system.description)}
+                    <span
+                      className="admin-dashboard-page__system-description-title"
+                      style={{ color: system.color }}
+                    >
+                      {t(`admin.systemsUsed.systems.${system.name.toLowerCase()}`, system.description)}
+                    </span>
+                    <div className="admin-dashboard-page__system-description-details">
+                      {t(`admin.systemsUsed.systems.${system.name.toLowerCase()}Details`, system.details)}
+                    </div>
                   </div>
                 </div>
               </div>

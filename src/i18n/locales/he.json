@@ -61,18 +61,86 @@
     "projectProgress": "התקדמות הפרויקט"
   },
   "admin": {
+    "settings": {
+      "title": "הגדרות מערכת",
+      "subtitle": "ניהול הגדרות מערכת וגישת משתמשים",
+      "tabs": {
+        "users": "משתמשים",
+        "permissions": "הרשאות",
+        "notifications": "התראות",
+        "security": "אבטחה",
+        "email": "תבניות אימייל"
+      },
+      "comingSoon": "בקרוב",
+      "featureImplementation": "תכונה זו תיושם בשלב 2 של הפרויקט.",
+      "users": {
+        "title": "ניהול משתמשים",
+        "addUser": "הוסף משתמש",
+        "name": "שם",
+        "email": "אימייל",
+        "role": "תפקיד",
+        "status": "סטטוס",
+        "lastLogin": "התחברות אחרונה",
+        "actions": "פעולות",
+        "edit": "ערוך",
+        "delete": "מחק",
+        "never": "אף פעם",
+        "note": "הערה: זהו ממשק הדגמה בלבד. פונקציונליות ניהול משתמשים תיושם בשלב 2.",
+        "roles": {
+          "admin": "מנהל",
+          "editor": "עורך",
+          "viewer": "צופה"
+        },
+        "statuses": {
+          "active": "פעיל",
+          "inactive": "לא פעיל",
+          "pending": "ממתין"
+        }
+      }
+    },
     "systemsUsed": {
       "title": "מערכות בשימוש",
       "systems": {
-        "supabase": "אחסון נתונים",
-        "n8n": "ניהול תהליך",
-        "react": "React",
-        "nodejs": "שרת"
+        "supabase": "מסד נתונים ואימות",
+        "supabaseDetails": "משמש לאחסון נתוני משתמשים, פגישות, ראיונות וטיוטות עם יכולות זמן אמת",
+        "n8n": "אוטומציה של תהליכים",
+        "n8nDetails": "מטפל בהודעות דוא\"ל אוטומטיות ומשימות מתוזמנות לתזכורות ראיונות",
+        "react": "ממשק משתמש",
+        "reactDetails": "מפעיל את ממשק המשתמש הרספונסיבי שלנו עם ארכיטקטורה מבוססת רכיבים",
+        "nodejs": "שרת אחורי",
+        "nodejsDetails": "מריץ את שרת ה-API שלנו עם Express לטיפול בבקשות לקוח",
+        "cloudinary": "ניהול מדיה",
+        "cloudinaryDetails": "מאחסן ומייעל תמונות וקבצי אודיו מראיונות"
       }
     },
     "dashboardTitle": "לוח בקרה מנהל",
     "dashboardSubtitle": "סקירה כללית של פעילות המערכת וביצועים",
     "searchPlaceholder": "חיפוש סיפורי חיים...",
+    "activity": {
+      "title": "פעילות אחרונה",
+      "noActivity": "אין פעילות אחרונה",
+      "loading": "טוען פעילות אחרונה...",
+      "showingRecent": "מציג {{count}} פעילויות אחרונות",
+      "unknownUser": "משתמש לא ידוע",
+      "unknown": "פעילות לא ידועה",
+      "auth": "{{action}} עִִי {{user}}",
+      "session": "פרויקט {{action}} {{sessionInfo}}",
+      "interview": "ראיון {{action}} {{sessionInfo}}",
+      "draft": "טיוטה {{action}} {{sessionInfo}}",
+      "file": "קובץ {{action}} {{sessionInfo}}",
+      "error": "שגיאה: {{message}}",
+      "system": "מערכת {{action}} דיווחה",
+      "activityTypes": {
+        "sessionCreated": "פרויקט חדש נוצר",
+        "sessionUpdated": "פרויקט עודכן",
+        "sessionDeleted": "פרויקט נמחק",
+        "interviewScheduled": "ראיון תוזמן",
+        "interviewCompleted": "ראיון הושלם",
+        "draftGenerated": "טיוטה נוצרה",
+        "draftApproved": "טיוטה אושרה",
+        "draftRejected": "טיוטה נדחתה"
+      }
+    },
     "filters": "סינון",
     "buttons": {
       "viewSessions": "הצגת כל הפרויקטים",
@@ -82,7 +150,7 @@
       "sessionOverview": "סקירת פרויקטים",
       "draftManagement": "ניהול טיוטות",
       "interviewProgress": "התקדמות ראיונות",
-      "recentActivity": "פעילות אחרונה (7 ימים אחרונים)",
+      "recentActivity": "פעילות אחרונה",
       "lifeStoriesOverview": "סקירת סיפורי חיים",
       "rejectedDrafts": "טיוטות שנדחו"
     },

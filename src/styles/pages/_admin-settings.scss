@@ -1,0 +1,258 @@
+.admin-settings-page {
+  padding: $spacing-medium;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-large;
+    gap: $spacing-medium;
+
+    &-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background-color: rgba($primary-color, 0.1);
+      border-radius: 50%;
+      color: $primary-color;
+    }
+
+    &-content {
+      flex: 1;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    margin: 0;
+    color: $text-color;
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: $text-muted;
+    margin: $spacing-xs 0 0;
+  }
+
+  &__content {
+    background-color: $background-color;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow-sm;
+    overflow: hidden;
+  }
+
+  &__tabs {
+    display: flex;
+    border-bottom: 1px solid $border-color;
+    background-color: $background-light;
+    overflow-x: auto;
+  }
+
+  &__tab {
+    padding: $spacing-medium;
+    border: none;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    color: $text-muted;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    &:hover {
+      color: $text-color;
+      background-color: rgba($primary-color, 0.05);
+    }
+
+    &--active {
+      color: $primary-color;
+      border-bottom: 2px solid $primary-color;
+      background-color: rgba($primary-color, 0.05);
+    }
+  }
+
+  &__tab-content {
+    padding: $spacing-large;
+  }
+
+  &__section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-medium;
+  }
+
+  &__section-title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &__add-button {
+    padding: $spacing-xs $spacing-medium;
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    border-radius: $border-radius;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+  }
+
+  &__table-container {
+    overflow-x: auto;
+    margin-bottom: $spacing-medium;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    
+    th, td {
+      padding: $spacing-medium;
+      text-align: start;
+      border-bottom: 1px solid $border-color;
+    }
+
+    th {
+      font-weight: 600;
+      color: $text-muted;
+      font-size: $font-size-sm;
+      background-color: $background-light;
+    }
+
+    tr:hover {
+      background-color: rgba($primary-color, 0.02);
+    }
+  }
+
+  &__role-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    
+    &--admin {
+      background-color: rgba($primary-color, 0.1);
+      color: $primary-color;
+    }
+    
+    &--editor {
+      background-color: rgba($info-color, 0.1);
+      color: $info-color;
+    }
+    
+    &--viewer {
+      background-color: rgba($text-muted, 0.1);
+      color: $text-muted;
+    }
+  }
+
+  &__status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    
+    &--active {
+      background-color: rgba($success-color, 0.1);
+      color: $success-color;
+    }
+    
+    &--inactive {
+      background-color: rgba($text-muted, 0.1);
+      color: $text-muted;
+    }
+    
+    &--pending {
+      background-color: rgba($warning-color, 0.1);
+      color: $warning-color;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-xs;
+  }
+
+  &__action-button {
+    padding: 4px 8px;
+    border: none;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &--edit {
+      background-color: rgba($info-color, 0.1);
+      color: $info-color;
+      
+      &:hover {
+        background-color: rgba($info-color, 0.2);
+      }
+    }
+    
+    &--delete {
+      background-color: rgba($danger-color, 0.1);
+      color: $danger-color;
+      
+      &:hover {
+        background-color: rgba($danger-color, 0.2);
+      }
+    }
+  }
+
+  &__note {
+    margin-top: $spacing-large;
+    padding: $spacing-medium;
+    background-color: rgba($info-color, 0.05);
+    border-left: 3px solid $info-color;
+    border-radius: $border-radius-sm;
+    
+    p {
+      margin: 0;
+      color: $text-muted;
+      font-size: $font-size-sm;
+    }
+  }
+
+  &__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-xlarge;
+    text-align: center;
+    
+    &-icon {
+      color: rgba($text-muted, 0.3);
+      margin-bottom: $spacing-medium;
+    }
+    
+    &-title {
+      font-size: $font-size-lg;
+      font-weight: 600;
+      margin: 0 0 $spacing-xs;
+      color: $text-color;
+    }
+    
+    &-text {
+      color: $text-muted;
+      max-width: 400px;
+      margin: 0;
+    }
+  }
+}

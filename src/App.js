@@ -13,6 +13,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ScheduleInterview from './pages/admin/ScheduleInterview';
 import Sessions from './pages/admin/Sessions';
 import FullLifeStories from './pages/admin/FullLifeStories';
+import AdminSettings from './pages/AdminSettings';
 import UserManagement from './pages/admin/UserManagement';
 import Conflicts from './pages/admin/Conflicts';
 import Analytics from './pages/admin/Analytics';
@@ -57,6 +58,7 @@ function App() {
             <Route path="/admin/full-life-stories" element={<FullLifeStories />} />
             
             {/* Admin tools */}
+            <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/conflicts" element={<Conflicts />} />
             <Route path="/admin/analytics" element={<Analytics />} />
