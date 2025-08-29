@@ -659,6 +659,23 @@ const Sessions = () => {
         return;
       }
 
+      // Clear regeneration animation and indicator when user clicks View Draft
+      const draftData = interview.ai_draft || interview.content?.ai_draft;
+      const draftId = draftData?.id;
+      if (draftId) {
+        console.log('🎯 Clearing regeneration animation for draft:', draftId);
+        setRecentlyRegeneratedDrafts(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(draftId);
+          return newSet;
+        });
+        setHighlightAnimatingDrafts(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(draftId);
+          return newSet;
+        });
+      }
+
       // Show loading state while fetching draft
       setShowDraftViewModal({ loading: true, interview });
 
@@ -717,29 +734,14 @@ const Sessions = () => {
   const handleRegenerationComplete = (draftId) => {
     console.log('🎯 Regeneration completed for draft:', draftId);
     
-    // Add to recently regenerated drafts
+    // Add to recently regenerated drafts (persistent until modal is opened)
     setRecentlyRegeneratedDrafts(prev => new Set([...prev, draftId]));
     
-    // Start highlight animation
+    // Start highlight animation (persistent until modal is opened)
     setHighlightAnimatingDrafts(prev => new Set([...prev, draftId]));
     
-    // Remove highlight animation after 3 seconds
-    setTimeout(() => {
-      setHighlightAnimatingDrafts(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(draftId);
-        return newSet;
-      });
-    }, 3000);
-    
-    // Remove from recently regenerated after 10 seconds (so user can still see the indicator)
-    setTimeout(() => {
-      setRecentlyRegeneratedDrafts(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(draftId);
-        return newSet;
-      });
-    }, 10000);
+    // Note: Animation and indicator will persist until user clicks the View Draft button
+    // They will be cleared in handleShowDraftView when the modal is opened
   };
 
   // Draft management handlers - moved to drafts view modal
