@@ -302,6 +302,19 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   const handleUpload = async () => {
     if (!selectedFile) return;
 
+    // Check file size limit (20MB = 20 * 1024 * 1024 bytes)
+    const maxFileSize = 20 * 1024 * 1024; // 20MB in bytes
+    if (selectedFile.size > maxFileSize) {
+      const fileSizeMB = (selectedFile.size / (1024 * 1024)).toFixed(1);
+      setUploadStatus('error');
+      setUploadMessage(
+        t('admin.interviews.upload.fileTooLarge', 
+          `File size (${fileSizeMB}MB) exceeds the 20MB limit. Please split your file into smaller parts and upload them separately.`
+        )
+      );
+      return;
+    }
+
     try {
       setUploadStatus(null);
       setUploadMessage('');
@@ -337,6 +350,19 @@ const FileUpload = ({ interviewId, sessionData, onClose, onSuccess }) => {
   // Handle async file upload
   const handleAsyncUpload = async () => {
     if (!selectedFile) return;
+
+    // Check file size limit (20MB = 20 * 1024 * 1024 bytes)
+    const maxFileSize = 20 * 1024 * 1024; // 20MB in bytes
+    if (selectedFile.size > maxFileSize) {
+      const fileSizeMB = (selectedFile.size / (1024 * 1024)).toFixed(1);
+      setUploadStatus('error');
+      setUploadMessage(
+        t('admin.interviews.upload.fileTooLarge', 
+          `File size (${fileSizeMB}MB) exceeds the 20MB limit. Please split your file into smaller parts and upload them separately.`
+        )
+      );
+      return;
+    }
 
     try {
       // Show async processing modal and start with uploading stage

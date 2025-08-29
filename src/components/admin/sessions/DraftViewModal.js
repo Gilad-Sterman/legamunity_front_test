@@ -35,6 +35,7 @@ const DraftViewModal = ({
   onDraftUpdated, // New prop to refresh parent state
   onRegenerationError,
   onRefreshData, // New prop to refresh data without closing modal
+  onRegenerationComplete, // New prop to handle regeneration completion
   loading = false
 }) => {
   const { t } = useTranslation();
@@ -60,7 +61,7 @@ const DraftViewModal = ({
   const [regenerateReason, setRegenerateReason] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionForm, setShowRejectionForm] = useState(false);
-  const [showRegenerateForm, setShowRegenerateForm] = useState(false);
+  // const [showRegenerateForm, setShowRegenerateForm] = useState(false);
   const [hasBeenRegenerated, setHasBeenRegenerated] = useState(false);
   const [notesAddedSinceRegeneration, setNotesAddedSinceRegeneration] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -97,7 +98,7 @@ const DraftViewModal = ({
     if (isOpen && draft) {
       // Reset form states
       setShowRejectionForm(false);
-      setShowRegenerateForm(false);
+      // setShowRegenerateForm(false);
       setIsEditingNotes(false);
       setNewNoteContent('');
       
@@ -186,8 +187,7 @@ const DraftViewModal = ({
         setIsRegenerating(false);
         setRegenerationStage('completed');
 
-        // Mark that regeneration has occurred but don't reset notes flag
-        // This allows the regenerate button to remain visible if notes are added after regeneration
+        // Mark that regeneration has occurred
         setHasBeenRegenerated(true);
         
         // If we have the new draft data in the event, update our local state
@@ -204,32 +204,22 @@ const DraftViewModal = ({
           }
         }
 
-        // Refresh the draft data to get the new version
-        if (onDraftUpdated) {
-          onDraftUpdated();
-        }
-
-        // Don't close the modal, just refresh the data and reset regeneration state
+        // Close the modal after regeneration and trigger highlight animation
         setTimeout(() => {
-          setRegenerationStage('');
+          console.log('✅ Regeneration complete - closing modal and triggering highlight');
           
-          // Set flag to preserve notesAddedSinceRegeneration during refresh
-          const shouldPreserveNotes = notesAddedSinceRegeneration;
-          if (shouldPreserveNotes) {
-            setIsRefreshingAfterNotesAdded(true);
+          // Notify parent about regeneration completion for highlight animation
+          if (onRegenerationComplete) {
+            onRegenerationComplete(data.draftId || draft?.id);
           }
           
-          // Refresh data without closing the modal
-          if (onRefreshData) {
-            onRefreshData();
+          // Refresh the draft data to get the new version
+          if (onDraftUpdated) {
+            onDraftUpdated();
           }
           
-          // Reset the refresh flag after a short delay
-          if (shouldPreserveNotes) {
-            setTimeout(() => {
-              setIsRefreshingAfterNotesAdded(false);
-            }, 500);
-          }
+          // Close the modal
+          onClose();
         }, 2000);
       } else {
         console.log('🔍 Draft completion event not for our draft - ignoring');

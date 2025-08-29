@@ -96,6 +96,10 @@ const Sessions = () => {
   const [searchTerm, setSearchTerm] = useState(filters.search);
   const [selectedStatus, setSelectedStatus] = useState(filters.status); // Changed from selectedStage to selectedStatus
   const [selectedPriority, setSelectedPriority] = useState(filters.priority_level); // Added priority filter
+  
+  // State for tracking regenerated drafts and highlight animation
+  const [recentlyRegeneratedDrafts, setRecentlyRegeneratedDrafts] = useState(new Set()); // Track which drafts were recently regenerated
+  const [highlightAnimatingDrafts, setHighlightAnimatingDrafts] = useState(new Set()); // Track which drafts are currently animating
 
   // Helper function to get interviews with fallback logic
   const getSessionInterviews = (session) => {
@@ -707,6 +711,35 @@ const Sessions = () => {
 
   const handleCloseDraftView = () => {
     setShowDraftViewModal(null);
+  };
+
+  // Handler for regeneration completion - triggers highlight animation
+  const handleRegenerationComplete = (draftId) => {
+    console.log('🎯 Regeneration completed for draft:', draftId);
+    
+    // Add to recently regenerated drafts
+    setRecentlyRegeneratedDrafts(prev => new Set([...prev, draftId]));
+    
+    // Start highlight animation
+    setHighlightAnimatingDrafts(prev => new Set([...prev, draftId]));
+    
+    // Remove highlight animation after 3 seconds
+    setTimeout(() => {
+      setHighlightAnimatingDrafts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(draftId);
+        return newSet;
+      });
+    }, 3000);
+    
+    // Remove from recently regenerated after 10 seconds (so user can still see the indicator)
+    setTimeout(() => {
+      setRecentlyRegeneratedDrafts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(draftId);
+        return newSet;
+      });
+    }, 10000);
   };
 
   // Draft management handlers - moved to drafts view modal
@@ -1367,15 +1400,29 @@ const Sessions = () => {
                                           statusText = t('admin.sessions.draftGenerated', 'Draft Generated - Pending Review');
                                       }
 
+                                      // Check if this draft was recently regenerated
+                                      const draftId = draft?.id;
+                                      const isRecentlyRegenerated = draftId && recentlyRegeneratedDrafts.has(draftId);
+                                      const isHighlightAnimating = draftId && highlightAnimatingDrafts.has(draftId);
+
                                       return (
                                         <div className="interview__draft-status">
                                           <button
-                                            className={`interview__draft-link interview__draft-link--${statusColor}`}
+                                            className={`interview__draft-link interview__draft-link--${statusColor} ${
+                                              isRecentlyRegenerated ? 'interview__draft-link--regenerated' : ''
+                                            } ${
+                                              isHighlightAnimating ? 'interview__draft-link--highlight-animation' : ''
+                                            }`}
                                             onClick={() => handleShowDraftView(interview)}
                                             title={t('admin.sessions.viewDraft', 'View AI draft')}
                                           >
                                             {statusIcon}
-                                            <span className="interview__draft-text">{statusText}</span>
+                                            <span className="interview__draft-text">
+                                              {statusText}
+                                              {isRecentlyRegenerated && (
+                                                <span className="regenerated-indicator"> ✨</span>
+                                              )}
+                                            </span>
                                           </button>
                                           {notesCount > 0 && (
                                             <span className="interview__notes-count" title={t('admin.sessions.notesCount', `${notesCount} notes`)}>
@@ -1880,6 +1927,7 @@ const Sessions = () => {
         onRegenerationError={(error) => {
           console.error('Regeneration error handled in parent:', error);
         }}
+        onRegenerationComplete={handleRegenerationComplete}
         onDraftUpdated={() => {
           // Refresh sessions data after draft actions
           dispatch(fetchSessions({ page: pagination.current, limit: pagination.pageSize }));
