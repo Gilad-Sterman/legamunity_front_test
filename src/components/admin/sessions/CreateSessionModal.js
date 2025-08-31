@@ -853,19 +853,19 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                 </div>
                 {/* Interview Scheduling Section - Moved from Step 3 */}
                 <div className="form-section">
-                  <div className="form-section__header">
+                  <div className="form-section__header" title={t('common.notIncludedInPhase1', 'Not included in phase 1')}>
                     <h3 className="form-section__title">
                       <Calendar size={20} />
                       {t('admin.sessions.form.interviewScheduling', 'Interview Scheduling (Optional)')}
                     </h3>
-                    <label className="checkbox-item">
+                    {/* <label className="checkbox-item">
                       <input
                         type="checkbox"
                         checked={formData.interview_scheduling.enabled}
                         onChange={(e) => handleNestedFieldChange('interview_scheduling', 'enabled', e.target.checked)}
                       />
                       <span>{t('admin.sessions.form.enableScheduling', 'Set weekly recurring time for all interviews')}</span>
-                    </label>
+                    </label> */}
                   </div>
 
                   {formData.interview_scheduling.enabled && (

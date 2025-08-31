@@ -228,7 +228,7 @@
     }
 
     &__title {
-      margin: 0 0 $spacing-xs 0;
+      // margin: 0 0 $spacing-xs 0;
       font-size: $font-size-md;
       font-weight: 600;
       color: $text-color;
@@ -240,7 +240,11 @@
       flex-wrap: wrap;
       gap: $spacing-md;
       font-size: $font-size-sm;
+      align-items: center;
+      justify-content: space-between;
       color: $text-muted;
+      padding-inline-end: $spacing-md;
+      max-width: 1200px;
 
       .meta-item {
         display: flex;

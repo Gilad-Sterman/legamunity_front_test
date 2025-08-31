@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, Users, Calendar, Mic, LogOut, User, TrendingUp, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, Mic, LogOut, User, TrendingUp, Settings, BookCheck } from 'lucide-react';
 import IconNav from '../common/IconNav';
 import { logout } from '../../store/slices/authSliceSupabase';
 import IconButton from '../common/IconButton';
@@ -24,7 +24,7 @@ const Sidebar = () => {
     { name: t('sidebar.adminDashboard'), href: '/admin/dashboard', icon: LayoutDashboard },
     // { name: t('sidebar.scheduleInterview'), href: '/admin/schedule', icon: CalendarPlus },
     { name: t('sidebar.sessions'), href: '/admin/sessions', icon: Calendar },
-    { name: t('sidebar.fullLifeStories'), href: '/admin/full-life-stories', icon: Mic },
+    { name: t('sidebar.fullLifeStories'), href: '/admin/full-life-stories', icon: BookCheck },
     // { name: t('sidebar.drafts'), href: '/admin/drafts', icon: FileText },
   ];
 

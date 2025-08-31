@@ -868,7 +868,6 @@ const FullLifeStories = () => {
         <div className="admin-page__header-content">
           <div className="admin-page__title-section">
             <h1 className="admin-page__title">
-              <BookOpen size={24} />
               {t('admin.lifeStories.title', 'Full Life Stories')}
             </h1>
             <p className="admin-page__subtitle">
@@ -963,7 +962,7 @@ const FullLifeStories = () => {
         )}
 
         {/* Statistics Cards */}
-       {/* <div className="stats-grid">
+        {/* <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-card__value">{lifeStories.length}</div>
             <div className="stat-card__label">{t('admin.lifeStories.totalStories', 'Total Stories')}</div>
@@ -1007,12 +1006,12 @@ const FullLifeStories = () => {
                   onClick={() => setExpandedStory(expandedStory === story.id ? null : story.id)}
                 >
                   <div className="life-story-card__header-left">
-                    <h3 className="life-story-card__title">{story.title}</h3>
                     <div className="life-story-card__meta-compact">
-                      {/* <span className="meta-item">
+                      <h3 className="life-story-card__title">{story.title}</h3>
+                      <span className="meta-item">
                         <User size={14} />
                         {story.participantName}
-                      </span> */}
+                      </span>
                       {/* <span className="meta-item">
                         <Calendar size={14} />
                         {formatDate(story.createdAt).split(',')[0]}
@@ -1035,10 +1034,6 @@ const FullLifeStories = () => {
                     {/* Detailed Meta Information */}
                     <div className="life-story-card__detailed-meta">
                       <div className="meta-row">
-                        <span className="meta-item">
-                          <User size={14} />
-                          {story.participantName} {story.clientAge && `(${story.clientAge})`}
-                        </span>
                         <span className="meta-item">
                           <Calendar size={14} />
                           {formatDate(story.createdAt)}

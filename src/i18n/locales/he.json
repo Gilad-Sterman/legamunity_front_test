@@ -263,6 +263,8 @@
       "draftApproved": "טיוטה אושרה",
       "draftRejected": "טיוטה נדחתה",
       "draftPendingReview": "ממתינה לבדיקה",
+      "originalFile": "קובץ מקור",
+      "viewOriginalFile": "צפה בקובץ מקור",
       "notesCount": "הערות",
       "showing": "מציג",
       "of": "מתוך",

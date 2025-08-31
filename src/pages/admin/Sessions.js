@@ -28,7 +28,9 @@ import {
   BookCheck,
   BookOpen,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
+  Mic,
+  Play
 } from 'lucide-react';
 import {
   fetchSessions,
@@ -96,7 +98,7 @@ const Sessions = () => {
   const [searchTerm, setSearchTerm] = useState(filters.search);
   const [selectedStatus, setSelectedStatus] = useState(filters.status); // Changed from selectedStage to selectedStatus
   const [selectedPriority, setSelectedPriority] = useState(filters.priority_level); // Added priority filter
-  
+
   // State for tracking regenerated drafts and highlight animation
   const [recentlyRegeneratedDrafts, setRecentlyRegeneratedDrafts] = useState(new Set()); // Track which drafts were recently regenerated
   const [highlightAnimatingDrafts, setHighlightAnimatingDrafts] = useState(new Set()); // Track which drafts are currently animating
@@ -733,13 +735,13 @@ const Sessions = () => {
   // Handler for regeneration completion - triggers highlight animation
   const handleRegenerationComplete = (draftId) => {
     console.log('🎯 Regeneration completed for draft:', draftId);
-    
+
     // Add to recently regenerated drafts (persistent until modal is opened)
     setRecentlyRegeneratedDrafts(prev => new Set([...prev, draftId]));
-    
+
     // Start highlight animation (persistent until modal is opened)
     setHighlightAnimatingDrafts(prev => new Set([...prev, draftId]));
-    
+
     // Note: Animation and indicator will persist until user clicks the View Draft button
     // They will be cleared in handleShowDraftView when the modal is opened
   };
@@ -948,7 +950,7 @@ const Sessions = () => {
     // Listen for draft generation complete (includes regeneration)
     const handleStoryGenerationComplete = (data) => {
       console.log('✅ Story Generation completed event received:', data);
-      
+
       setSessionStories(prev => {
         const updated = { ...prev };
         delete updated[data.sessionId];
@@ -1348,10 +1350,10 @@ const Sessions = () => {
                                 </div>
                               </div>
                               <div className="interview__details">
-                                <div className="interview__meta">
+                                {/* <div className="interview__meta">
                                   <Clock size={14} />
                                   <span>{interview.duration} {t('admin.sessions.minutes', 'min')}</span>
-                                </div>
+                                </div> */}
                                 {interview.wordCount && <div className="interview__meta">
                                   <FileText size={14} />
                                   <span>{interview.wordCount} {t('admin.sessions.words', 'words')}</span>
@@ -1410,11 +1412,9 @@ const Sessions = () => {
                                       return (
                                         <div className="interview__draft-status">
                                           <button
-                                            className={`interview__draft-link interview__draft-link--${statusColor} ${
-                                              isRecentlyRegenerated ? 'interview__draft-link--regenerated' : ''
-                                            } ${
-                                              isHighlightAnimating ? 'interview__draft-link--highlight-animation' : ''
-                                            }`}
+                                            className={`interview__draft-link interview__draft-link--${statusColor} ${isRecentlyRegenerated ? 'interview__draft-link--regenerated' : ''
+                                              } ${isHighlightAnimating ? 'interview__draft-link--highlight-animation' : ''
+                                              }`}
                                             onClick={() => handleShowDraftView(interview)}
                                             title={t('admin.sessions.viewDraft', 'View AI draft')}
                                           >
@@ -1435,6 +1435,21 @@ const Sessions = () => {
                                         </div>
                                       );
                                     })()}
+                                  </div>
+                                )}
+                                {(interview.file_upload?.storageUrl || interview.content?.file_upload?.storageUrl) && (
+                                  <div className="interview__meta">
+                                    <div className="interview__file-original">
+                                      <a
+                                        href={interview.file_upload?.storageUrl || interview.content?.file_upload?.storageUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title={t('admin.sessions.viewOriginalFile', 'View original file')}
+                                      >
+                                        <Mic size={14} className="interview__draft-icon play" />
+                                        <span className="interview__draft-text">{t('admin.sessions.originalFile', 'Original file')}</span>
+                                      </a>
+                                    </div>
                                   </div>
                                 )}
                               </div>

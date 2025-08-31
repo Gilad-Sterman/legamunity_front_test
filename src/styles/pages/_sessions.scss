@@ -108,7 +108,7 @@
       position: absolute;
       left: $spacing-sm;
       color: $text-muted;
-      z-index: 1;
+      // z-index: 1;
     }
 
     &__field {
@@ -705,6 +705,18 @@
     color: $text-dark;
     font-style: italic;
   }
+
+  &__file-original {
+
+    a {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      font-size: $font-size-sm;
+      color: $text-muted;
+    }
+  }
+
 
   // Interview editing form
   &__edit {
