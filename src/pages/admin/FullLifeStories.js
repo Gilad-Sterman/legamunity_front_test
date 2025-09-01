@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { Document, Paragraph, TextRun, HeadingLevel, Packer } from 'docx';
 import { saveAs } from 'file-saver';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search,
   Filter,
@@ -30,6 +30,7 @@ import websocketService from '../../services/websocketService';
 const FullLifeStories = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // State management
@@ -702,6 +703,8 @@ const FullLifeStories = () => {
   };
 
   const handleRegenerate = async (storyId, regenerateNotes) => {
+    const isSure = window.confirm(t('admin.lifeStories.regenerateConfirm', 'Are you sure you want to regenerate this life story? - The previous life story will be deleted, version handling will be implemented in phase 2'));
+    if (!isSure) return;
     // Start regeneration processing modal
     setRegenerationProcessing(storyId);
     setActionLoading(prev => ({ ...prev, [storyId]: 'regenerating' }));
@@ -1008,9 +1011,9 @@ const FullLifeStories = () => {
                   <div className="life-story-card__header-left">
                     <div className="life-story-card__meta-compact">
                       <h3 className="life-story-card__title">{story.title}</h3>
-                      <span className="meta-item">
+                      <span className="meta-item" onClick={() => navigate(`/admin/sessions?sessionId=${story.sessionId}`)}>
                         <User size={14} />
-                        {story.participantName}
+                        {t('admin.lifeStories.participantName', 'Participant Name')}: {story.participantName}
                       </span>
                       {/* <span className="meta-item">
                         <Calendar size={14} />

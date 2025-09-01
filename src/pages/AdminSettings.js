@@ -77,78 +77,18 @@ const AdminSettings = () => {
         </div>
 
         <div className="admin-settings-page__tab-content">
-          {activeTab === 'users' && (
-            <div className="admin-settings-page__users">
-              <div className="admin-settings-page__section-header">
-                <h2 className="admin-settings-page__section-title">{t('admin.settings.users.title', 'User Management')}</h2>
-                <button className="admin-settings-page__add-button">
-                  {t('admin.settings.users.addUser', 'Add User')}
-                </button>
-              </div>
-              
-              <div className="admin-settings-page__table-container">
-                <table className="admin-settings-page__table">
-                  <thead>
-                    <tr>
-                      <th>{t('admin.settings.users.name', 'Name')}</th>
-                      <th>{t('admin.settings.users.email', 'Email')}</th>
-                      <th>{t('admin.settings.users.role', 'Role')}</th>
-                      <th>{t('admin.settings.users.status', 'Status')}</th>
-                      <th>{t('admin.settings.users.lastLogin', 'Last Login')}</th>
-                      <th>{t('admin.settings.users.actions', 'Actions')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockUsers.map((user) => (
-                      <tr key={user.id}>
-                        <td>{user.name}</td>
-                        <td>{user.email}</td>
-                        <td>
-                          <span className={`admin-settings-page__role-badge ${getRoleBadgeClass(user.role)}`}>
-                            {t(`admin.settings.users.roles.${user.role}`, user.role)}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={`admin-settings-page__status-badge ${getStatusBadgeClass(user.status)}`}>
-                            {t(`admin.settings.users.statuses.${user.status}`, user.status)}
-                          </span>
-                        </td>
-                        <td>{formatDate(user.lastLogin)}</td>
-                        <td>
-                          <div className="admin-settings-page__actions">
-                            <button className="admin-settings-page__action-button admin-settings-page__action-button--edit">
-                              {t('admin.settings.users.edit', 'Edit')}
-                            </button>
-                            <button className="admin-settings-page__action-button admin-settings-page__action-button--delete">
-                              {t('admin.settings.users.delete', 'Delete')}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              
-              <div className="admin-settings-page__note">
-                <p>{t('admin.settings.users.note', 'Note: This is a mock interface for demonstration purposes. User management functionality will be implemented in Phase 2.')}</p>
-              </div>
+          <div className="admin-settings-page__placeholder">
+            <div className="admin-settings-page__placeholder-icon">
+              {React.createElement(tabs.find(tab => tab.id === activeTab)?.icon || Settings, { size: 48 })}
             </div>
-          )}
+            <h3 className="admin-settings-page__placeholder-title">
+              {t('admin.settings.comingSoon', 'Coming Soon')}
+            </h3>
+            <p className="admin-settings-page__placeholder-text">
+              {t('admin.settings.featureImplementation', 'This feature will be implemented in Phase 2 of the project.')}
+            </p>
+          </div>
 
-          {activeTab !== 'users' && (
-            <div className="admin-settings-page__placeholder">
-              <div className="admin-settings-page__placeholder-icon">
-                {React.createElement(tabs.find(tab => tab.id === activeTab)?.icon || Settings, { size: 48 })}
-              </div>
-              <h3 className="admin-settings-page__placeholder-title">
-                {t('admin.settings.comingSoon', 'Coming Soon')}
-              </h3>
-              <p className="admin-settings-page__placeholder-text">
-                {t('admin.settings.featureImplementation', 'This feature will be implemented in Phase 2 of the project.')}
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>

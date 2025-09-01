@@ -29,7 +29,7 @@ const DraftViewModal = ({
   isOpen,
   onClose,
   draft,
-  // interview,
+  interview,
   session,
   onRegenerate,
   onDraftUpdated, // New prop to refresh parent state
@@ -76,6 +76,7 @@ const DraftViewModal = ({
   // State for expandable sections
   const [sectionsExpanded, setSectionsExpanded] = useState(true); // Initially minimized
   const [followUpsExpanded, setFollowUpsExpanded] = useState(false); // Initially expanded
+  const [transcriptionExpanded, setTranscriptionExpanded] = useState(true); // Initially minimized
 
   // Regeneration processing steps
   const regenerationSteps = [
@@ -491,6 +492,8 @@ const DraftViewModal = ({
   };
 
   const handleRegenerate = () => {
+    const isSure = window.confirm(t('admin.drafts.regenerateConfirm', 'Are you sure you want to regenerate this draft? - The previous draft will be deleted'));
+    if (!isSure) return;
     if (onRegenerate) {
       // Show initial loading state immediately
       setIsRegenerating(true);
@@ -1011,7 +1014,7 @@ const DraftViewModal = ({
                   )}
 
                   {draft.content.followUps && Array.isArray(draft.content.followUps) && draft.content.followUps.length > 0 && (
-                    <div className="content-section" onClick={() => console.log(draft)}>
+                    <div className="content-section">
                       <div className="section-header expandable-header">
                         <h3>{t('admin.drafts.followUps', 'Follow-up Questions')}</h3>
                         <button
@@ -1147,6 +1150,35 @@ const DraftViewModal = ({
                     }
                     return null;
                   })()}
+
+                  {interview.content.transcription && (
+                    <div className="content-section">
+                      <div className="section-header expandable-header">
+                        <h3>{t('admin.sessions.originalTranscription', 'Original File Transcription')}</h3>
+                        <button
+                          className="btn btn--ghost btn--sm expand-toggle"
+                          onClick={() => setTranscriptionExpanded(!transcriptionExpanded)}
+                        >
+                          {transcriptionExpanded ? (
+                            <>
+                              <ChevronUp size={16} />
+                              {t('admin.drafts.showLess', 'Show Less')}
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown size={16} />
+                              {t('admin.drafts.showMore', 'Show More')}
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      {transcriptionExpanded && (
+                        <div className="transcription-content">
+                          <ReactMarkdown>{interview.content.transcription}</ReactMarkdown>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

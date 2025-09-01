@@ -265,6 +265,7 @@
       "draftPendingReview": "ממתינה לבדיקה",
       "originalFile": "קובץ מקור",
       "viewOriginalFile": "צפה בקובץ מקור",
+      "originalTranscription": "תמלול קובץ מקור",
       "notesCount": "הערות",
       "showing": "מציג",
       "of": "מתוך",
@@ -291,7 +292,7 @@
         "active": "פעיל",
         "inProgress": "בתהליך",
         "pendingReview": "ממתין לבדיקה",
-        "pending": "בהמתנה",
+        "pending": "ממתין לקובץ",
         "cancelled": "בוטל"
       },
       "clientStory": "הפרוייקט של {{clientName}}",
@@ -415,7 +416,7 @@
         "accessibilityPlaceholder": "מכשירי שמיעה, נגישות לכסא גלגלים, גופן גדול, וכו'...",
         "specialRequirements": "דרישות מיוחדות",
         "specialRequirementsPlaceholder": "שיקולי בריאות, צרכים של נוחות, וכו'...",
-        "interviewScheduling": "קביעת לוח זמנים (אופציונלי)",
+        "interviewScheduling": "קביעת לוח זמנים (אופציונלי) - לא נכלל בפיתוח בשלב זה ",
         "enableScheduling": "קביעת זמן שבועי לכל הראינות",
         "selectUser": "בחר לקוח",
         "chooseUser": "בחר לקוח...",
@@ -710,6 +711,7 @@
         "finalizing": "סיום"
       },
       "regenerationMsg": "תהליך זה עשוי להימשך כמה דקות, נא לא לסגור חלון זה",
+      "regenerateConfirm": "האם אתה בטוח שברצונך ליצור מחדש את הטיוטה? - הטיוטה הישנה תימחק",
       "rejectionInfo": "מידע דחייה",
       "wordCount": "מספר מילים",
       "readingTime": "זמן קריאה",
@@ -734,6 +736,7 @@
     },
     "lifeStories": {
       "exportAsWord": "ייצא כקובץ Word",
+      "participantName": "שם לקוח",
       "title": "סיפורי חיים מלאים",
       "subtitle": "סקירת סיפורי חיים מלאים",
       "searchPlaceholder": "חיפוש לפי שם או כותרת...",
@@ -763,6 +766,7 @@
         "finalizingDraft": "סיום",
         "note": "תהליך זה עשוי לקחת כמה דקות. אנא אל תסגור את החלון הזה."
       },
+      "regenerateConfirm": "האם אתה בטוח שברצונך ליצור מחדש את הסיפור? - הסיפור הישן ימחק, ניהול גרסאות ייושם בשלב 2",
       "version": "גרסה",
       "words": "מילים",
       "chapters": "פרקים",

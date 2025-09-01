@@ -1256,7 +1256,7 @@ const Sessions = () => {
                         <div className="session-interviews">
                           {getSessionInterviews(session).map((interview, index) => (
                             <div key={interview.id} className={`interview ${interview.status === 'completed' ? 'completed' : ''}`}>
-                              <div className="interview__header">
+                              <div className="interview__header" onClick={() => console.log(interview)}>
                                 <div className="interview__info">
                                   {editingInterview?.sessionId === session.id && editingInterview?.interviewId === interview.id ? (
                                     <>
@@ -1304,7 +1304,7 @@ const Sessions = () => {
                                     </>
                                   ) : (
                                     <>
-                                      <div className="interview__index" onClick={() => console.log(interview)}>
+                                      <div className="interview__index">
                                         {index + 1}
                                       </div>
                                       <button
@@ -1316,7 +1316,7 @@ const Sessions = () => {
                                       </button>
                                       <div className="interview__name-container">
                                         <span className="interview__name">
-                                          {interview.content?.name || interview.name || interview.notes || `Interview ${interview.id}`}
+                                          {interview.content?.file_upload?.originalName.split('.')[0].length > 20 ? interview.content?.file_upload?.originalName.split('.')[0].slice(0, 20) + '...' : interview.content?.file_upload?.originalName.split('.')[0] || interview.content?.name || interview.name || interview.notes || `Interview ${interview.id}`}
                                         </span>
                                         {(interview.content?.isFriendInterview || interview.isFriendInterview) && (
                                           <span className="interview__friend-badge">
@@ -1919,14 +1919,14 @@ const Sessions = () => {
                     </div>
                   </div>
                 </div>
-                {showFileViewModal.transcription && (
+                {/* {showFileViewModal.transcription && (
                   <div className="file-details__transcription">
                     <h4>{t('admin.sessions.transcription', 'Transcription')}</h4>
                     <div className="transcription-content">
                       <pre>{showFileViewModal.transcription}</pre>
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           </div>

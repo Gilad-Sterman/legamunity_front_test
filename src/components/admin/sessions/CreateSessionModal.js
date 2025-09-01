@@ -130,7 +130,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
-    if (age < 0) {
+    if (age <= 0) {
       age = 1;
     }
     return age;
@@ -856,7 +856,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                   <div className="form-section__header" title={t('common.notIncludedInPhase1', 'Not included in phase 1')}>
                     <h3 className="form-section__title">
                       <Calendar size={20} />
-                      {t('admin.sessions.form.interviewScheduling', 'Interview Scheduling (Optional)')}
+                      {t('admin.sessions.form.interviewScheduling', 'Interview Scheduling (Optional) - not included in phase 1')}
                     </h3>
                     {/* <label className="checkbox-item">
                       <input
@@ -995,7 +995,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                   )}
                 </div>
 
-                <div className="form-section">
+                {/* <div className="form-section">
                   <h3 className="form-section__title">
                     <FileText size={20} />
                     {t('admin.sessions.form.additionalNotes', 'Additional Notes')}
@@ -1013,7 +1013,7 @@ const CreateSessionModal = ({ isOpen, onClose }) => {
                       rows={3}
                     />
                   </div>
-                </div>
+                </div> */}
               </>)}
           </form>
         </div>

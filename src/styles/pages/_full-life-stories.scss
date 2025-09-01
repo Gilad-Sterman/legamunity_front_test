@@ -250,6 +250,14 @@
         display: flex;
         align-items: center;
         gap: $spacing-xs;
+        transition: all 0.2s ease;
+
+        &:hover {
+          cursor: pointer;
+          color: $primary-color;
+
+          transform: translateY(-2px);
+        }
 
         svg {
           flex-shrink: 0;
