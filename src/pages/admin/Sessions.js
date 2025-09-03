@@ -30,7 +30,8 @@ import {
   ExternalLink,
   RefreshCw,
   Mic,
-  Play
+  Play,
+  Check
 } from 'lucide-react';
 import {
   fetchSessions,
@@ -41,6 +42,7 @@ import {
   updateInterview,
   addInterviewToSession,
   updateSessionScheduling,
+  updateSession,
   deleteSession,
   deleteInterview,
   regenerateDraft
@@ -54,12 +56,13 @@ import StoryHistoryModal from '../../components/admin/sessions/StoryHistoryModal
 import DraftViewModal from '../../components/admin/sessions/DraftViewModal';
 import '../../components/admin/sessions/DraftViewModal.scss';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Sessions = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const {
     sessions,
@@ -77,6 +80,8 @@ const Sessions = () => {
   const [expandedSession, setExpandedSession] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingInterview, setEditingInterview] = useState(null);
+  const [editingSession, setEditingSession] = useState(null);
+  const [sessionData, setSessionData] = useState({});
   const [editInterviewName, setEditInterviewName] = useState('');
   const [editInterviewIsFriend, setEditInterviewIsFriend] = useState(false);
   const [showSchedulingModal, setShowSchedulingModal] = useState(null);
@@ -400,9 +405,58 @@ const Sessions = () => {
   const toggleSessionExpansion = (sessionId) => {
     if (expandedSession === sessionId) {
       setExpandedSession(null);
+      setEditingSession(null);
+      setSessionData({});
     } else {
       setExpandedSession(sessionId);
     }
+  };
+
+  // Handle session editing
+  const handleEditSession = (sessionId) => {
+    setEditingSession(sessionId);
+  };
+
+  const handleSessionInputChange = (e) => {
+    const { name, value } = e.target;
+    setSessionData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveSession = async (sessionId) => {
+    if (!sessionData?.client_name && !sessionData?.client_email && !sessionData?.client_age) {
+      setEditingSession(null);
+      setSessionData({});
+      return;
+    }
+
+    try {
+      await dispatch(updateSession({
+        sessionId,
+        updateData: {
+          client_name: sessionData.client_name,
+          client_email: sessionData.client_email,
+          client_age: sessionData.client_age
+        }
+      })).unwrap();
+
+      // Refresh sessions data to show updated interview durations and total duration
+      await dispatch(fetchSessions({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        status: filters.status && !filters.status.startsWith('interview_') ? filters.status : undefined
+      }));
+
+      // Interviews are already included in sessions data - no separate fetch needed
+
+    } catch (error) {
+      console.error('Failed to update session:', error);
+      alert(t('admin.sessions.sessionUpdateError', 'Failed to update session'));
+    }
+    setEditingSession(null);
+    setSessionData({});
   };
 
   // Handle interview editing
@@ -616,6 +670,8 @@ const Sessions = () => {
       alert(t('admin.sessions.scheduleUpdateError', 'Failed to update schedule'));
     }
   };
+
+
 
   // Handle file upload modal
   const handleShowFileUpload = (interviewId, session) => {
@@ -937,6 +993,48 @@ const Sessions = () => {
     }
   };
 
+  // Handle URL parameters for session highlighting
+    useEffect(() => {
+      const sessionId = searchParams.get('sessionId');
+  
+      if (sessionId && sessions.length > 0) {
+        // Find the session by ID or by session ID if sessionId is not found
+        let targetSession = sessions.find(session => session.id === sessionId);
+  
+        // If no session found by ID but sessionId is provided, try to find by sessionId
+        if (!targetSession && sessionId) {
+          targetSession = sessions.find(session => session.id === sessionId);
+        }
+  
+        if (targetSession) {
+          // Expand the session automatically
+          setExpandedSession(targetSession.id);
+  
+          // Scroll to the session after a short delay to ensure DOM is ready
+          setTimeout(() => {
+            const sessionElement = document.querySelector(`[data-session-id="${targetSession.id}"]`);
+            if (sessionElement) {
+              // Scroll with offset to keep header visible
+              sessionElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              });
+              // Add offset to account for header height
+              window.scrollBy(0, -100);
+              // Add a highlight effect
+              sessionElement.classList.add('session-highlighted');
+              setTimeout(() => {
+                sessionElement.classList.remove('session-highlighted');
+              }, 5000);
+            }
+          }, 2000); // Increased timeout to ensure DOM is fully rendered with the new collapsible UI
+  
+          // Clear the URL parameters after handling them
+          setSearchParams({});
+        }
+      }
+    }, [sessions, searchParams, setSearchParams]);
+
   // WebSocket listeners for regeneration events
   useEffect(() => {
     // Connect to WebSocket
@@ -1101,7 +1199,7 @@ const Sessions = () => {
               </div>
             ) : (
               filteredSessions.map((session) => (
-                <div key={session.id} className="session-card" id={session.id}>
+                <div key={session.id} className="session-card" id={session.id} data-session-id={session.id}>
                   <div className="session-card__header" onClick={() => toggleSessionExpansion(session.id)}>
                     <div className="session-card__main">
                       <div className="session-card__client">
@@ -1149,10 +1247,13 @@ const Sessions = () => {
 
                       {/* Actions */}
                       <div className="session-details__actions">
-                        <button className="btn btn--secondary btn--sm">
+                        {editingSession === session.id ? <button className="btn btn--secondary btn--sm" onClick={() => handleSaveSession(session.id)}>
+                          <Check size={16} />
+                          {t('admin.sessions.save', 'Save')}
+                        </button> : <button className="btn btn--secondary btn--sm" onClick={() => handleEditSession(session.id)}>
                           <Edit size={16} />
                           {t('admin.sessions.edit', 'Edit')}
-                        </button>
+                        </button>}
                         <button className="btn btn--danger btn--sm" onClick={() => handleDeleteSession(session.id)}>
                           <Trash2 size={16} />
                           {t('admin.sessions.delete', 'Delete')}
@@ -1160,7 +1261,20 @@ const Sessions = () => {
                       </div>
 
                       {/* Client Information */}
-                      <div className="session-details__section">
+                      {editingSession === session.id ? <div className="session-details__section editing">
+                        <h4>{t('admin.sessions.clientInfo', 'Client Information')}</h4>
+                        <div className="client-info">
+                          <div className="client-info__item">
+                            <label>{t('admin.sessions.form.clientName', 'Client Name')}:</label> <input name="client_name" type="text" value={sessionData?.client_name || session.client_name} onInput={handleSessionInputChange} />
+                          </div>
+                          <div className="client-info__item">
+                            <label>{t('admin.sessions.form.clientEmail', 'Email')}:</label> <input name="client_email" type="email" value={sessionData?.client_email || session.client_email || session.preferences?.client_contact?.email || t('common.notProvided', 'Not provided')} onInput={handleSessionInputChange} />
+                          </div>
+                          <div className="client-info__item">
+                            <label>{t('admin.sessions.age', 'Age')}:</label> <input name="client_age" type="number" value={sessionData?.client_age || session.client_age || t('common.notProvided', 'Not provided')} onInput={handleSessionInputChange} />
+                          </div>
+                        </div>
+                      </div> : <div className="session-details__section">
                         <h4>{t('admin.sessions.clientInfo', 'Client Information')}</h4>
                         <div className="client-info">
                           <div className="client-info__item">
@@ -1173,7 +1287,7 @@ const Sessions = () => {
                             <strong>{t('admin.sessions.age', 'Age')}:</strong> {session.client_age || t('common.notProvided', 'Not provided')}
                           </div>
                         </div>
-                      </div>
+                      </div>}
 
                       {/* Primary Contact - Only show if exists */}
                       {(session.preferences?.primary_contact?.name || session.preferences?.family_contact_details?.primary_contact?.name) && (

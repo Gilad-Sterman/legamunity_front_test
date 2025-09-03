@@ -438,6 +438,10 @@ const FullLifeStories = () => {
 
   // Handle actions
   const handleApprove = async (storyId) => {
+    const sure = window.confirm(t('admin.lifeStories.approveConfirm', 'Are you sure you want to approve this life story?'));
+    if (!sure) {
+      return;
+    }
     setActionLoading(prev => ({ ...prev, [storyId]: 'approving' }));
     try {
       const token = localStorage.getItem('token');

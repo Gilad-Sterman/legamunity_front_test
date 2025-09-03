@@ -67,6 +67,21 @@
   }
 }
 
+@keyframes highlightPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba($primary-color, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 10px rgba($primary-color, 0.1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+  }
+}
+
 .sessions-page {
   position: relative;
 
@@ -232,6 +247,12 @@
   &:hover {
     box-shadow: $box-shadow-md;
     border-color: darken($border-color, 10%);
+  }
+
+  &.session-highlighted {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    animation: highlightPulse 0.6s ease-in-out;
   }
 
   &__header {

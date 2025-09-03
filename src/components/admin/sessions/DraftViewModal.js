@@ -427,6 +427,11 @@ const DraftViewModal = ({
       alert(t('admin.drafts.alreadyFinalized', 'This draft has already been finalized'));
       return;
     }
+
+    const sure = window.confirm(t('admin.drafts.approveConfirm', 'Are you sure you want to approve this draft?'));
+    if (!sure) {
+      return;
+    }
     
     // Use the refs to ensure we have the most up-to-date draft and session data
     // This is crucial after regeneration when props might be stale
