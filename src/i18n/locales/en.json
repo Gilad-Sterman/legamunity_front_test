@@ -436,6 +436,7 @@
       "noStories": "No Life Stories Found",
       "noStoriesDesc": "Life stories will appear here once they are generated from approved drafts.",
       "regenerate": "Regenerate",
+      "regenerated": "Regenerated",
       "exportAsWord": "Export as Word",
       "notes": "Notes",
       "chapters": "Chapters",

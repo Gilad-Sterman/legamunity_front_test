@@ -16,6 +16,44 @@
   }
 }
 
+@keyframes regenerationGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba($success-color, 0.4);
+    border-color: $border-color;
+  }
+  25% {
+    box-shadow: 0 0 0 8px rgba($success-color, 0.2);
+    border-color: $success-color;
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba($success-color, 0.1);
+    border-color: $success-color;
+  }
+  75% {
+    box-shadow: 0 0 0 8px rgba($success-color, 0.2);
+    border-color: $success-color;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba($success-color, 0);
+    border-color: $success-color;
+  }
+}
+
+@keyframes badgePulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .full-life-stories-page {
   .admin-page__title {
     display: flex;
@@ -198,6 +236,16 @@
       border-color: $primary-color;
       box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
       animation: highlightPulse 0.6s ease-in-out;
+    }
+
+    &.story-regenerated {
+      border-color: $success-color;
+      animation: regenerationGlow 3s ease-in-out;
+      
+      .life-story-card__header {
+        background: rgba($success-color, 0.05);
+        border-bottom: 1px solid rgba($success-color, 0.2);
+      }
     }
 
     // Minimized header - always visible
@@ -851,6 +899,24 @@
       background: rgba($info-color, 0.1);
       color: darken($info-color, 20%);
       border: 1px solid $info-color;
+    }
+
+    &--regenerated {
+      background: rgba($success-color, 0.1);
+      color: darken($success-color, 20%);
+      border: 1px solid $success-color;
+      animation: badgePulse 2s ease-in-out infinite;
+      margin-right: $spacing-xs;
+      
+      svg {
+        animation: spin 2s linear infinite;
+      }
+      
+      // RTL support
+      html[dir="rtl"] & {
+        margin-right: 0;
+        margin-left: $spacing-xs;
+      }
     }
   }
 

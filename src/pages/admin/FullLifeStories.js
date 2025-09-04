@@ -48,6 +48,7 @@ const FullLifeStories = () => {
   const [notesText, setNotesText] = useState('');
   const [actionLoading, setActionLoading] = useState({});
   const [regenerationProcessing, setRegenerationProcessing] = useState(null);
+  const [recentlyRegeneratedStories, setRecentlyRegeneratedStories] = useState(new Set());
 
   // Load life stories on component mount
   useEffect(() => {
@@ -110,6 +111,9 @@ const FullLifeStories = () => {
     const handleStoryGenerationComplete = async (data) => {
       console.log('✅ Story Generation completed event received:', data);
 
+      // Mark story as recently regenerated
+      setRecentlyRegeneratedStories(prev => new Set([...prev, data.storyId]));
+
       // Short delay to ensure modal is visible before closing
       await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -117,6 +121,27 @@ const FullLifeStories = () => {
       await fetchLifeStories();
       setActionLoading(prev => ({ ...prev, [data.storyId]: null }));
       setRegenerationProcessing(null);
+
+      // Trigger highlight animation after stories are loaded
+      setTimeout(() => {
+        const storyElement = document.querySelector(`[data-story-id="${data.storyId}"]`);
+        if (storyElement) {
+          storyElement.classList.add('story-regenerated');
+          // Remove animation class after animation completes
+          setTimeout(() => {
+            storyElement.classList.remove('story-regenerated');
+          }, 3000);
+        }
+      }, 100);
+
+      // Remove from recently regenerated set after badge timeout (10 seconds)
+      setTimeout(() => {
+        setRecentlyRegeneratedStories(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(data.storyId);
+          return newSet;
+        });
+      }, 10000);
     };
 
     // Add WebSocket listeners
@@ -1027,6 +1052,12 @@ const FullLifeStories = () => {
                   </div>
                   <div className="life-story-card__header-right">
                     <div className="life-story-card__status">
+                      {recentlyRegeneratedStories.has(story.id) && (
+                        <span className="status-badge status-badge--regenerated">
+                          <RefreshCw size={12} />
+                          {t('admin.lifeStories.regenerated', 'Regenerated')}
+                        </span>
+                      )}
                       {getStatusBadge(story.status)}
                     </div>
                     <button className="btn btn--icon">

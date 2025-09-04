@@ -751,6 +751,8 @@
         "rejected": "Rejected",
         "archived": "Archived"
       },
+      "regenerate": "צור מחדש",
+      "regenerated": "נוצר מחדש",
       "regeneration": {
         "title": "יצירה מחדש של סיפור חיים",
         "subtitle": "יצירת גרסה חדשה של סיפור החיים על בסיס ההערות שהוספת.",
