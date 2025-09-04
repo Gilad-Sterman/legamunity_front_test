@@ -48,7 +48,7 @@ const FullLifeStories = () => {
   const [notesText, setNotesText] = useState('');
   const [actionLoading, setActionLoading] = useState({});
   const [regenerationProcessing, setRegenerationProcessing] = useState(null);
-  const [recentlyRegeneratedStories, setRecentlyRegeneratedStories] = useState(new Set());
+  const [recentlyRegeneratedSessions, setRecentlyRegeneratedSessions] = useState(new Set());
 
   // Load life stories on component mount
   useEffect(() => {
@@ -111,22 +111,31 @@ const FullLifeStories = () => {
     const handleStoryGenerationComplete = async (data) => {
       console.log('✅ Story Generation completed event received:', data);
 
-      // Mark story as recently regenerated
-      setRecentlyRegeneratedStories(prev => new Set([...prev, data.storyId]));
+      // Mark session as recently regenerated
+      setRecentlyRegeneratedSessions(prev => new Set([...prev, data.sessionId]));
 
       // Short delay to ensure modal is visible before closing
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Refresh the life stories list
       await fetchLifeStories();
-      setActionLoading(prev => ({ ...prev, [data.storyId]: null }));
+      setActionLoading(prev => ({ ...prev, [data.sessionId]: null }));
       setRegenerationProcessing(null);
 
-      // Trigger highlight animation after stories are loaded
+      // Trigger highlight animation and auto-expand after stories are loaded
       setTimeout(() => {
-        const storyElement = document.querySelector(`[data-story-id="${data.storyId}"]`);
+        // Find story by sessionId since the story ID changes after regeneration
+        const storyElement = document.querySelector(`[data-session-id="${data.sessionId}"]`);
         if (storyElement) {
+          // Add highlight animation
           storyElement.classList.add('story-regenerated');
+          
+          // Auto-expand the regenerated story
+          const storyId = storyElement.getAttribute('data-story-id');
+          if (storyId) {
+            setExpandedStory(storyId);
+          }
+          
           // Remove animation class after animation completes
           setTimeout(() => {
             storyElement.classList.remove('story-regenerated');
@@ -136,9 +145,9 @@ const FullLifeStories = () => {
 
       // Remove from recently regenerated set after badge timeout (10 seconds)
       setTimeout(() => {
-        setRecentlyRegeneratedStories(prev => {
+        setRecentlyRegeneratedSessions(prev => {
           const newSet = new Set(prev);
-          newSet.delete(data.storyId);
+          newSet.delete(data.sessionId);
           return newSet;
         });
       }, 10000);
@@ -1031,6 +1040,7 @@ const FullLifeStories = () => {
                 key={story.id}
                 className={`life-story-card ${expandedStory === story.id ? 'life-story-card--expanded' : ''}`}
                 data-story-id={story.id}
+                data-session-id={story.sessionId}
               >
                 {/* Story Header - Always visible */}
                 <div
@@ -1052,7 +1062,7 @@ const FullLifeStories = () => {
                   </div>
                   <div className="life-story-card__header-right">
                     <div className="life-story-card__status">
-                      {recentlyRegeneratedStories.has(story.id) && (
+                      {recentlyRegeneratedSessions.has(story.sessionId) && (
                         <span className="status-badge status-badge--regenerated">
                           <RefreshCw size={12} />
                           {t('admin.lifeStories.regenerated', 'Regenerated')}
